@@ -4,7 +4,7 @@
 ![WebGL](https://img.shields.io/badge/WebGL-Three.js-black)
 ![Status](https://img.shields.io/badge/status-Stable-green)
 
-**A laboratory-grade, interactive 3D simulation of Quantum Field Theory (QFT) that reacts to audio analysis in real-time.**
+**A High-Definition, interactive 3D simulation of Quantum Field Theory (QFT) that reacts to audio analysis in real-time.**
 
 This project visualizes the concept of vacuum fluctuations and particle excitations using GPU-accelerated fluid dynamics. 
 It renders up to **200,000 interactive particles** in the browser using custom GLSL shaders, 
