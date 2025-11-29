@@ -72,31 +72,6 @@ simulating the behavior of different quantum fields (Electromagnetic, Strong For
 
 ---
 
-## 💻 Installation & Local Development
-
-This project is built as a **Static Web Page**. It requires no build step (Webpack/Vite) and runs natively in the browser using ES Modules.
-
-1.  **Clone the repository**
-    ```bash
-    git clone https://github.com/yourusername/quantum-manifold.git
-    ```
-
-2.  **Run a local server**
-    Because this project uses ES Modules and accesses the Microphone, it **cannot** be run by simply double-clicking `index.html`. You must serve it over `http://` or `https://`.
-
-    *   **VS Code:** Install "Live Server" extension -> Right click `index.html` -> "Open with Live Server".
-    *   **Python:**
-        ```bash
-        cd quantum-manifold
-        python -m http.server 8000
-        ```
-    *   **Node:**
-        ```bash
-        npx serve
-        ```
-
-3.  **Open in Browser**
-    Navigate to `http://localhost:8000`.
 
 ---
 
