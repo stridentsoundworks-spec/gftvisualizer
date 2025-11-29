@@ -1,1 +1,569 @@
-<html><head><meta content="text/html; charset=UTF-8" http-equiv="content-type"><style type="text/css">ol{margin:0;padding:0}table td,table th{padding:0}.c0{color:#000000;font-weight:400;text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial";font-style:normal}.c1{padding-top:0pt;padding-bottom:0pt;line-height:1.15;orphans:2;widows:2;text-align:left}.c3{background-color:#ffffff;max-width:468pt;padding:72pt 72pt 72pt 72pt}.c2{height:11pt}.title{padding-top:0pt;color:#000000;font-size:26pt;padding-bottom:3pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}.subtitle{padding-top:0pt;color:#666666;font-size:15pt;padding-bottom:16pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}li{color:#000000;font-size:11pt;font-family:"Arial"}p{margin:0;color:#000000;font-size:11pt;font-family:"Arial"}h1{padding-top:20pt;color:#000000;font-size:20pt;padding-bottom:6pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}h2{padding-top:18pt;color:#000000;font-size:16pt;padding-bottom:6pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}h3{padding-top:16pt;color:#434343;font-size:14pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}h4{padding-top:14pt;color:#666666;font-size:12pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}h5{padding-top:12pt;color:#666666;font-size:11pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}h6{padding-top:12pt;color:#666666;font-size:11pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;font-style:italic;orphans:2;widows:2;text-align:left}</style></head><body class="c3 doc-content"><p class="c1"><span class="c0">&lt;!DOCTYPE html&gt;</span></p><p class="c1"><span class="c0">&lt;html lang=&quot;en&quot;&gt;</span></p><p class="c1"><span class="c0">&lt;head&gt;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &lt;meta charset=&quot;UTF-8&quot;&gt;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &lt;title&gt;Quantum Field: Interactive&lt;/title&gt;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &lt;style&gt;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; body {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; margin: 0;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; overflow: hidden;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; background: #000;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; font-family: &#39;Rajdhani&#39;, sans-serif;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; @import url(&#39;https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&amp;display=swap&#39;);</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; canvas { display: block; }</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; /* CRT Scanline Effect */</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; #scanlines {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; position: absolute;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; top: 0; left: 0; width: 100%; height: 100%;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255,0,0,0.06), rgba(0,255,0,0.02), rgba(0,0,255,0.06));</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; background-size: 100% 2px, 3px 100%;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; pointer-events: none;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; z-index: 10;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; opacity: 0.4;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; #overlay {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; position: absolute;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; top: 0; left: 0; width: 100%; height: 100%;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; display: flex;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; flex-direction: column;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; justify-content: center;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; align-items: center;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; background: rgba(0, 0, 0, 0.92);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; z-index: 100;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; backdrop-filter: blur(15px);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; transition: opacity 0.8s ease;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; .hud-panel {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; border: 1px solid rgba(0, 255, 255, 0.4);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; background: rgba(5, 10, 15, 0.9);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; padding: 60px;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; text-align: center;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; position: relative;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; box-shadow: 0 0 60px rgba(0, 150, 255, 0.15);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; border-radius: 4px;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; /* HUD Reticles */</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; .hud-panel::after {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; content: &#39;&#39;; position: absolute; bottom: -5px; right: -5px; width: 20px; height: 20px;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; border-bottom: 2px solid #00ffff; border-right: 2px solid #00ffff;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; .hud-panel::before {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; content: &#39;&#39;; position: absolute; top: -5px; left: -5px; width: 20px; height: 20px;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; border-top: 2px solid #00ffff; border-left: 2px solid #00ffff;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; h1 {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; color: #fff;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; font-weight: 700;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; letter-spacing: 8px;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; font-size: 36px;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; margin: 0 0 15px 0;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; text-shadow: 0 0 25px rgba(0, 255, 255, 0.6);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; text-transform: uppercase;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; p { color: #7a8fa3; font-size: 12px; margin-bottom: 40px; letter-spacing: 3px; text-transform: uppercase; }</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; .btn-group { display: flex; gap: 20px; justify-content: center; }</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; button, .file-upload {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; background: rgba(0, 255, 255, 0.05);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; border: 1px solid rgba(0, 255, 255, 0.5);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; color: #00ffff;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; padding: 14px 35px;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; font-size: 12px;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; font-weight: 700;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; text-transform: uppercase;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; cursor: pointer;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; transition: all 0.2s ease;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; letter-spacing: 2px;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; button:hover, .file-upload:hover {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; background: #00ffff;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; color: #000;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; box-shadow: 0 0 30px #00ffff;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; input[type=&quot;file&quot;] { display: none; }</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; #status-bar {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; position: absolute;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bottom: 30px;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; left: 30px;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; color: rgba(255, 255, 255, 0.4);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; font-size: 11px;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; letter-spacing: 2px;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; border-left: 3px solid #00ffff;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; padding-left: 15px;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; z-index: 20;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; #status-bar span { color: #00ffff; font-weight: bold; }</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; #interaction-hint {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; position: absolute;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; top: 30px;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; width: 100%;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; text-align: center;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; color: rgba(0, 255, 255, 0.3);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; font-size: 10px;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; letter-spacing: 4px;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; pointer-events: none;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; z-index: 9;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &lt;/style&gt;</span></p><p class="c1"><span class="c0">&lt;/head&gt;</span></p><p class="c1"><span class="c0">&lt;body&gt;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&lt;div id=&quot;scanlines&quot;&gt;&lt;/div&gt;</span></p><p class="c1"><span class="c0">&lt;div id=&quot;interaction-hint&quot;&gt;MOUSE INTERACTION: ACTIVE&lt;/div&gt;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&lt;div id=&quot;overlay&quot;&gt;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &lt;div class=&quot;hud-panel&quot;&gt;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &lt;h1&gt;Quantum Labs&lt;/h1&gt;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &lt;p&gt;Interactive Field Simulator v4.0&lt;/p&gt;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &lt;div class=&quot;btn-group&quot;&gt;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &lt;label class=&quot;file-upload&quot;&gt;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Load Audio File</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &lt;input type=&quot;file&quot; id=&quot;file-input&quot; accept=&quot;audio/*&quot;&gt;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &lt;/label&gt;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &lt;button id=&quot;mic-btn&quot;&gt;Initialize Sensors&lt;/button&gt;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &lt;/div&gt;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &lt;/div&gt;</span></p><p class="c1"><span class="c0">&lt;/div&gt;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&lt;div id=&quot;status-bar&quot;&gt;SYSTEM: &lt;span&gt;STANDBY&lt;/span&gt; // AWAITING INPUT&lt;/div&gt;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&lt;script type=&quot;importmap&quot;&gt;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &quot;imports&quot;: {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;three&quot;: &quot;https://unpkg.com/three@0.160.0/build/three.module.js&quot;,</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;three/addons/&quot;: &quot;https://unpkg.com/three@0.160.0/examples/jsm/&quot;,</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;lil-gui&quot;: &quot;https://unpkg.com/lil-gui@0.19.1/dist/lil-gui.esm.min.js&quot;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; }</span></p><p class="c1"><span class="c0">&lt;/script&gt;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&lt;script type=&quot;module&quot;&gt;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; import * as THREE from &#39;three&#39;;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; import { OrbitControls } from &#39;three/addons/controls/OrbitControls.js&#39;;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; import { EffectComposer } from &#39;three/addons/postprocessing/EffectComposer.js&#39;;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; import { RenderPass } from &#39;three/addons/postprocessing/RenderPass.js&#39;;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; import { UnrealBloomPass } from &#39;three/addons/postprocessing/UnrealBloomPass.js&#39;;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; import { AfterimagePass } from &#39;three/addons/postprocessing/AfterimagePass.js&#39;;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; import { OutputPass } from &#39;three/addons/postprocessing/OutputPass.js&#39;;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; import GUI from &#39;lil-gui&#39;;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; // --- CONFIGURATION ---</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const CONFIG = {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; maxParticles: 180000, // Optimized for HD sharpness</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; initialDensity: 0.164,</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; fieldRadius: 45.0</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; };</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const STATE = {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; field: &#39;Photon (EM)&#39;,</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; density: CONFIG.initialDensity,</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; sensitivity: 1.5,</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; trails: 0.643,</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; bloom: 0.309,</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; timeScale: 0.1,</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; pixelRatio: Math.min(window.devicePixelRatio, 2.0)</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; };</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; // --- AUDIO ---</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const AUDIO = {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; ctx: null, analyser: null, source: null, data: null,</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; bands: { bass: 0, mid: 0, high: 0 }, active: false,</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; init() {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if(this.ctx) return;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; this.ctx = new (window.AudioContext || window.webkitAudioContext)();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; this.analyser = this.ctx.createAnalyser();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; this.analyser.fftSize = 2048;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; this.analyser.smoothingTimeConstant = 0.85;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; this.data = new Uint8Array(this.analyser.frequencyBinCount);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; this.active = true;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; },</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; update() {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if(!this.active) return;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; this.analyser.getByteFrequencyData(this.data);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; let b=0, m=0, h=0;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; const len = this.data.length;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; const pBass = Math.floor(len*0.06);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; const pMid = Math.floor(len*0.3);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; for(let i=0; i&lt;len; i++) {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; const v = this.data[i]/255.0;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if(i&lt;pBass) b+=v; else if(i&lt;pMid) m+=v; else h+=v;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; this.bands.bass = b/pBass;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; this.bands.mid = m/(pMid-pBass);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; this.bands.high = h/(len-pMid);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; };</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; // --- SCENE ---</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const scene = new THREE.Scene();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; scene.fog = new THREE.FogExp2(0x000000, 0.008); // Lighter fog for clarity</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 500);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; camera.position.set(0, 10, 70);</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const renderer = new THREE.WebGLRenderer({ powerPreference: &quot;high-performance&quot;, antialias: false });</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; renderer.setSize(window.innerWidth, window.innerHeight);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; renderer.setPixelRatio(STATE.pixelRatio);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; // Tone Mapping is crucial for HD look</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; renderer.toneMapping = THREE.ReinhardToneMapping;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; renderer.toneMappingExposure = 2.0;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; document.body.appendChild(renderer.domElement);</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const controls = new OrbitControls(camera, renderer.domElement);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; controls.enableDamping = true;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; controls.autoRotate = true;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; controls.autoRotateSpeed = 0.5;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; // --- MOUSE INTERACTION ---</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const raycaster = new THREE.Raycaster();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const mouse = new THREE.Vector2(9999, 9999); // Start off screen</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0); // Invisible plane for raycasting</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const mouseWorldPos = new THREE.Vector3();</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; window.addEventListener(&#39;mousemove&#39;, (e) =&gt; {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; // Normalize mouse pos</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; mouse.x = (e.clientX / window.innerWidth) * 2 - 1;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; // Raycast to invisible plane to get 3D coordinate</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; raycaster.setFromCamera(mouse, camera);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; const target = new THREE.Vector3();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; raycaster.ray.intersectPlane(plane, target);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; if(target) {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; mouseWorldPos.copy(target);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; });</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; // --- SHADERS (Optimized for Clarity) ---</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const vertexShader = `</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; uniform float uTime;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; uniform float uPixelRatio;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; uniform float uSizeBase;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; uniform float uNoiseScale;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; uniform float uCurlStrength;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; uniform float uRadius;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; uniform vec3 uColor1;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; uniform vec3 uColor2;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; // Audio</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; uniform float uBass;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; uniform float uMid;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; uniform float uHigh;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; // Interaction</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; uniform vec3 uMousePos;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; attribute vec3 aRandom;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; varying vec3 vColor;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; varying float vAlpha;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; varying float vCollisionEnergy; // Used for collision flash</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; // --- NOISE FUNCTIONS --- (Note: snoise function was missing proper return value, fixed.)</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; float snoise(vec3 v) {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; const vec2 C = vec2(1.0/6.0, 1.0/3.0);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec3 i = floor(v + dot(v, C.yyy));</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec3 x0 = v - i + dot(i, C.xxx);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec3 g = step(x0.yzx, x0.xyz);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec3 l = 1.0 - g;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec3 i1 = min(g.xyz, l.zxy);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec3 i2 = max(g.xyz, l.zxy);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec3 x1 = x0 - i1 + C.xxx;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec3 x2 = x0 - i2 + C.yyy;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec3 x3 = x0 - D.yyy;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i = mod289(i);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec4 p = permute(permute(permute(i.z + vec4(0.0, i1.z, i2.z, 1.0)) + i.y + vec4(0.0, i1.y, i2.y, 1.0)) + i.x + vec4(0.0, i1.x, i2.x, 1.0));</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; float n_ = 0.142857142857;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec3 ns = n_ * D.wyz - D.xzx;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec4 j = p - 49.0 * floor(p * ns.z * ns.z);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec4 x_ = floor(j * ns.z);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec4 y_ = floor(j - 7.0 * x_);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec4 x = x_ *ns.x + ns.yyyy;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec4 y = y_ *ns.x + ns.yyyy;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec4 h = 1.0 - abs(x) - abs(y);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec4 b0 = vec4(x.xy, y.xy);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec4 b1 = vec4(x.zw, y.zw);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec4 s0 = floor(b0) * 2.0 + 1.0;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec4 s1 = floor(b1) * 2.0 + 1.0;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec4 sh = -step(h, vec4(0.0));</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec4 a1 = b1.xzyw + s1.xzyw * sh.zzww;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec3 p0 = vec3(a0.xy, h.x);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec3 p1 = vec3(a0.zw, h.y);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec3 p2 = vec3(a1.xy, h.z);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec3 p3 = vec3(a1.zw, h.w);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec4 norm = taylorInvSqrt(vec4(dot(p0, p0), dot(p1, p1), dot(p2, p2), dot(p3, p3)));</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; p0 *= norm.x;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; p1 *= norm.y;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; p2 *= norm.z;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; p3 *= norm.w;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec4 m = max(0.6 - vec4(dot(x0, x0), dot(x1, x1), dot(x2, x2), dot(x3, x3)), 0.0);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; m = m * m;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; return 42.0 * dot(m * m, vec4(dot(p0, x0), dot(p1, x1), dot(p2, x2), dot(p3, x3)));</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; vec3 curl(float x, float y, float z) {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; float eps = 0.1;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec3 curl;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; curl.x = snoise(vec3(x, y+eps, z)) - snoise(vec3(x, y-eps, z));</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; curl.y = snoise(vec3(x, y, z+eps)) - snoise(vec3(x, y, z-eps));</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; curl.z = snoise(vec3(x+eps, y, z)) - snoise(vec3(x-eps, y, z));</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; return curl;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; void main() {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; float t = uTime * (1.0 + uMid * 0.5);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec3 noisePos = position * 0.04 + aRandom;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; // 1. Fluid Flow</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec3 flow = curl(noisePos.x * uNoiseScale + t*0.15, noisePos.y * uNoiseScale, noisePos.z * uNoiseScale);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec3 newPos = position + (flow * uCurlStrength);</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; // 2. Mouse Interaction (Collision Probe)</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; float distToMouse = distance(newPos, uMousePos);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; // Create a repulsion field around mouse</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; float repulsion = smoothstep(15.0, 0.0, distToMouse);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec3 repelDir = normalize(newPos - uMousePos);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; newPos += repelDir * repulsion * 8.0;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; // 3. Bass Shockwave</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec3 centerDir = normalize(newPos);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; float distToCenter = length(newPos);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; float kick = smoothstep(0.3, 0.8, uBass);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; newPos += centerDir * (kick * 4.0 * exp(-distToCenter * 0.1));</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec4 mvPosition = modelViewMatrix * vec4(newPos, 1.0);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; gl_Position = projectionMatrix * mvPosition;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; // 4. Size &amp; Collision Flash logic</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; float size = uSizeBase * (0.8 + uBass * 0.6);</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; // If repulsion is high, particles are bunched up -&gt; simulate energy flash</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; float collision = repulsion * uMid * 2.0;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vCollisionEnergy = collision;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; gl_PointSize = size * uPixelRatio * (60.0 / -mvPosition.z);</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; // 5. Coloring</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; float turb = length(flow);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; // Add collision brightness to the mix</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec3 c = mix(uColor1, uColor2, smoothstep(0.0, 2.0, turb + uHigh*2.0));</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; // White hot center + Collision Flash</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vColor = mix(c, vec3(1.0), uBass * 0.5 + collision);</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; // 6. Alpha &amp; Sparkle</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; float alpha = 1.0 - smoothstep(uRadius * 0.8, uRadius, distToCenter);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; float sparkle = 1.0 + (aRandom.x &gt; 0.7 ? sin(uTime * 20.0 + aRandom.y * 100.0) * uHigh * 4.0 : 0.0);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vAlpha = alpha * sparkle;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; `;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const fragmentShader = `</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; varying vec3 vColor;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; varying float vAlpha;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; varying float vCollisionEnergy;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; void main() {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec2 xy = gl_PointCoord.xy - vec2(0.5);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; float r = length(xy);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if(r &gt; 0.5) discard;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; // Optical Lens Effect:</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; // Sharp core, soft halo.</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; float glow = exp(-r * r * 20.0);</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; // Simulated Chromatic Aberration at edges of particle (Fake dispersion)</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vec3 finalColor = vColor;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if(r &gt; 0.3) {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; finalColor *= 0.8; // darken edges</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; gl_FragColor = vec4(finalColor, vAlpha * glow);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; `;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; // --- GEOMETRY ---</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const geometry = new THREE.BufferGeometry();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const pos = [], rnd = [];</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const vec = new THREE.Vector3();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; for(let i=0; i&lt;CONFIG.maxParticles; i++) {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; const r = CONFIG.fieldRadius * Math.pow(Math.random(), 0.4);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; const theta = Math.random() * Math.PI * 2;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; const phi = Math.acos(2 * Math.random() - 1);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; vec.setFromSphericalCoords(r, phi, theta);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; pos.push(vec.x, vec.y, vec.z);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; rnd.push(Math.random(), Math.random(), Math.random());</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; }</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; geometry.setAttribute(&#39;position&#39;, new THREE.Float32BufferAttribute(pos, 3));</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; geometry.setAttribute(&#39;aRandom&#39;, new THREE.Float32BufferAttribute(rnd, 3));</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; geometry.setDrawRange(0, Math.floor(CONFIG.maxParticles * STATE.density));</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const FIELD_TYPES = {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &#39;Photon (EM)&#39;: { c1:&#39;#00f2ff&#39;, c2:&#39;#0051ff&#39;, s:1.0, curl:0.8, sz:1.2 },</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &#39;Gluon (Strong)&#39;: { c1:&#39;#ff0055&#39;, c2:&#39;#7000ff&#39;, s:2.2, curl:2.0, sz:1.5 },</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &#39;Higgs (Mass)&#39;: { c1:&#39;#ffae00&#39;, c2:&#39;#ff4800&#39;, s:0.5, curl:0.2, sz:2.0 },</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &#39;Gravity&#39;: { c1:&#39;#ffffff&#39;, c2:&#39;#444444&#39;, s:0.6, curl:0.1, sz:1.0 }</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; };</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const def = FIELD_TYPES[STATE.field];</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const material = new THREE.ShaderMaterial({</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; vertexShader, fragmentShader,</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; uniforms: {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; uTime: { value: 0 },</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; uPixelRatio: { value: STATE.pixelRatio },</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; uSizeBase: { value: def.sz },</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; uNoiseScale: { value: def.s },</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; uCurlStrength: { value: def.curl },</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; uRadius: { value: CONFIG.fieldRadius },</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; uColor1: { value: new THREE.Color(def.c1) },</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; uColor2: { value: new THREE.Color(def.c2) },</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; uBass: { value: 0 }, uMid: { value: 0 }, uHigh: { value: 0 },</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; uMousePos: { value: new THREE.Vector3(999,999,999) } // Initialize off-screen</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; },</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; transparent: true, depthWrite: false, blending: THREE.AdditiveBlending</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; });</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const points = new THREE.Points(geometry, material);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; scene.add(points);</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; // --- POST PROCESSING (HD Chain) ---</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const composer = new EffectComposer(renderer);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const renderPass = new RenderPass(scene, camera);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; composer.addPass(renderPass);</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; // 1. Trails</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const afterimagePass = new AfterimagePass();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; afterimagePass.uniforms[&#39;damp&#39;].value = STATE.trails;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; composer.addPass(afterimagePass);</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; // 2. Bloom</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; bloomPass.threshold = 0.15;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; bloomPass.strength = STATE.bloom;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; bloomPass.radius = 0.4; // Lower radius = Sharper glow</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; composer.addPass(bloomPass);</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; // 3. Output (Color Correct)</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const outputPass = new OutputPass();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; composer.addPass(outputPass);</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; // --- GUI ---</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const gui = new GUI({ title: &#39;QUANTUM CONTROLS&#39; });</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; gui.add(STATE, &#39;sensitivity&#39;, 0.1, 3.0).name(&#39;Audio Sensitivity&#39;);</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const f_phys = gui.addFolder(&#39;Physics Engine&#39;);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; f_phys.add(STATE, &#39;field&#39;, Object.keys(FIELD_TYPES)).name(&#39;Field Type&#39;).onChange(val =&gt; {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; const d = FIELD_TYPES[val];</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; const c1 = new THREE.Color(d.c1);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; const c2 = new THREE.Color(d.c2);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; const start = performance.now();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; const startS = material.uniforms.uNoiseScale.value;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; function step() {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; const p = Math.min((performance.now()-start)/1000, 1);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; const e = 1 - Math.pow(1-p, 3);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; material.uniforms.uColor1.value.lerp(c1, 0.05);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; material.uniforms.uColor2.value.lerp(c2, 0.05);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; material.uniforms.uNoiseScale.value = startS + (d.s - startS)*e;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; material.uniforms.uCurlStrength.value = THREE.MathUtils.lerp(material.uniforms.uCurlStrength.value, d.curl, 0.05);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; material.uniforms.uSizeBase.value = THREE.MathUtils.lerp(material.uniforms.uSizeBase.value, d.sz, 0.05);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if(p&lt;1) requestAnimationFrame(step);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; step();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; });</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; f_phys.add(STATE, &#39;density&#39;, 0.0, 1.0).name(&#39;Density&#39;).onChange(v =&gt; geometry.setDrawRange(0, Math.floor(CONFIG.maxParticles*v)));</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const f_vis = gui.addFolder(&#39;Optics &amp; Visuals&#39;);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; f_vis.add(afterimagePass.uniforms[&#39;damp&#39;], &#39;value&#39;, 0.5, 0.98).name(&#39;Trail Persistence&#39;);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; f_vis.add(bloomPass, &#39;strength&#39;, 0.0, 3.0).name(&#39;Bloom Strength&#39;);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; f_vis.add(STATE, &#39;timeScale&#39;, 0.0, 2.0).name(&#39;Time Flow&#39;);</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; // --- EVENTS ---</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const overlay = document.getElementById(&#39;overlay&#39;);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const status = document.getElementById(&#39;status-bar&#39;);</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; function activate() {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; AUDIO.init();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; if(AUDIO.ctx.state === &#39;suspended&#39;) AUDIO.ctx.resume();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; overlay.style.opacity = 0;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; setTimeout(() =&gt; overlay.style.display = &#39;none&#39;, 800);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; status.innerHTML = &#39;SYSTEM: &lt;span&gt;ACTIVE&lt;/span&gt; // INTERACTION ENABLED&#39;;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; }</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; document.getElementById(&#39;file-input&#39;).addEventListener(&#39;change&#39;, (e) =&gt; {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; activate();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; const reader = new FileReader();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; reader.onload = (ev) =&gt; AUDIO.ctx.decodeAudioData(ev.target.result, (buf) =&gt; {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if(AUDIO.source) try{AUDIO.source.stop()}catch(e){} // Stop any previous source</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; AUDIO.source = AUDIO.ctx.createBufferSource();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; AUDIO.source.buffer = buf;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; AUDIO.source.loop = true;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; AUDIO.source.connect(AUDIO.analyser);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; AUDIO.analyser.connect(AUDIO.ctx.destination);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; AUDIO.source.start(0);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; status.innerHTML = &#39;SYSTEM: &lt;span&gt;PLAYING TRACK&lt;/span&gt;&#39;;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; });</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; reader.readAsArrayBuffer(e.target.files[0]);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; });</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; document.getElementById(&#39;mic-btn&#39;).addEventListener(&#39;click&#39;, () =&gt; {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; activate();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; navigator.mediaDevices.getUserMedia({ audio: true }).then(stream =&gt; {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if(AUDIO.source) try{AUDIO.source.disconnect()}catch(e){} // Disconnect previous source</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; AUDIO.source = AUDIO.ctx.createMediaStreamSource(stream);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; AUDIO.source.connect(AUDIO.analyser);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; status.innerHTML = &#39;SYSTEM: &lt;span&gt;LISTENING&lt;/span&gt;&#39;;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; });</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; });</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; // --- LOOP ---</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const clock = new THREE.Clock();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; function animate() {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; requestAnimationFrame(animate);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; const dt = clock.getDelta();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; material.uniforms.uTime.value += dt * STATE.timeScale;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; // Update Mouse Interaction in Shader</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; // Lerp for smooth movement of the interaction field</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; material.uniforms.uMousePos.value.lerp(mouseWorldPos, 0.1);</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; AUDIO.update();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; const s = STATE.sensitivity;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; material.uniforms.uBass.value = THREE.MathUtils.lerp(material.uniforms.uBass.value, AUDIO.bands.bass*s, 0.15);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; material.uniforms.uMid.value = THREE.MathUtils.lerp(material.uniforms.uMid.value, AUDIO.bands.mid*s, 0.15);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; material.uniforms.uHigh.value = THREE.MathUtils.lerp(material.uniforms.uHigh.value, AUDIO.bands.high*s, 0.15);</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; controls.autoRotateSpeed = 0.5 + (material.uniforms.uMid.value * 3.0);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; controls.update();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; composer.render();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; }</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; window.addEventListener(&#39;resize&#39;, () =&gt; {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; camera.aspect = window.innerWidth/window.innerHeight;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; camera.updateProjectionMatrix();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; renderer.setSize(window.innerWidth, window.innerHeight);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; composer.setSize(window.innerWidth, window.innerHeight);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; });</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; animate();</span></p><p class="c1"><span class="c0">&lt;/script&gt;</span></p><p class="c1"><span class="c0">&lt;/body&gt;</span></p><p class="c1"><span class="c0">&lt;/html&gt;&quot;&quot;&quot;</span></p><p class="c1 c2"><span class="c0"></span></p></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quantum Field: Interactive</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&display=swap');
+
+        canvas { display: block; }
+
+        /* CRT Scanline Effect */
+        #scanlines {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255,0,0,0.06), rgba(0,255,0,0.02), rgba(0,0,255,0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+            z-index: 10;
+            opacity: 0.4;
+        }
+
+        #overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 100;
+            backdrop-filter: blur(15px);
+            transition: opacity 0.8s ease;
+        }
+
+        .hud-panel {
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            background: rgba(5, 10, 15, 0.9);
+            padding: 60px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 0 60px rgba(0, 150, 255, 0.15);
+            border-radius: 4px;
+        }
+
+        /* HUD Reticles */
+        .hud-panel::after {
+            content: ''; position: absolute; bottom: -5px; right: -5px; width: 20px; height: 20px;
+            border-bottom: 2px solid #00ffff; border-right: 2px solid #00ffff;
+        }
+        .hud-panel::before {
+            content: ''; position: absolute; top: -5px; left: -5px; width: 20px; height: 20px;
+            border-top: 2px solid #00ffff; border-left: 2px solid #00ffff;
+        }
+
+        h1 {
+            color: #fff;
+            font-weight: 700;
+            letter-spacing: 8px;
+            font-size: 36px;
+            margin: 0 0 15px 0;
+            text-shadow: 0 0 25px rgba(0, 255, 255, 0.6);
+            text-transform: uppercase;
+        }
+
+        p { color: #7a8fa3; font-size: 12px; margin-bottom: 40px; letter-spacing: 3px; text-transform: uppercase; }
+
+        .btn-group { display: flex; gap: 20px; justify-content: center; }
+
+        button, .file-upload {
+            background: rgba(0, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.5);
+            color: #00ffff;
+            padding: 14px 35px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            letter-spacing: 2px;
+        }
+
+        button:hover, .file-upload:hover {
+            background: #00ffff;
+            color: #000;
+            box-shadow: 0 0 30px #00ffff;
+        }
+
+        input[type="file"] { display: none; }
+
+        #status-bar {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 11px;
+            letter-spacing: 2px;
+            border-left: 3px solid #00ffff;
+            padding-left: 15px;
+            z-index: 20;
+        }
+        #status-bar span { color: #00ffff; font-weight: bold; }
+
+        #interaction-hint {
+            position: absolute;
+            top: 30px;
+            width: 100%;
+            text-align: center;
+            color: rgba(0, 255, 255, 0.3);
+            font-size: 10px;
+            letter-spacing: 4px;
+            pointer-events: none;
+            z-index: 9;
+        }
+    </style>
+</head>
+<body>
+
+<div id="scanlines"></div>
+<div id="interaction-hint">MOUSE INTERACTION: ACTIVE</div>
+
+<div id="overlay">
+    <div class="hud-panel">
+        <h1>Quantum Labs</h1>
+        <p>Interactive Field Simulator v4.0</p>
+
+        <div class="btn-group">
+            <label class="file-upload">
+                Load Audio File
+                <input type="file" id="file-input" accept="audio/*">
+            </label>
+            <button id="mic-btn">Initialize Sensors</button>
+        </div>
+    </div>
+</div>
+
+<div id="status-bar">SYSTEM: <span>STANDBY</span> // AWAITING INPUT</div>
+
+<script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+            "lil-gui": "https://unpkg.com/lil-gui@0.19.1/dist/lil-gui.esm.min.js"
+        }
+    }
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+    import { AfterimagePass } from 'three/addons/postprocessing/AfterimagePass.js';
+    import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+    import GUI from 'lil-gui';
+
+    // --- CONFIGURATION ---
+    const CONFIG = {
+        maxParticles: 180000, // Optimized for HD sharpness
+        initialDensity: 0.164,
+        fieldRadius: 45.0
+    };
+
+    const STATE = {
+        field: 'Photon (EM)',
+        density: CONFIG.initialDensity,
+        sensitivity: 1.5,
+        trails: 0.643,
+        bloom: 0.309,
+        timeScale: 0.1,
+        pixelRatio: Math.min(window.devicePixelRatio, 2.0)
+    };
+
+    // --- AUDIO ---
+    const AUDIO = {
+        ctx: null, analyser: null, source: null, data: null,
+        bands: { bass: 0, mid: 0, high: 0 }, active: false,
+        init() {
+            if(this.ctx) return;
+            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            this.analyser = this.ctx.createAnalyser();
+            this.analyser.fftSize = 2048;
+            this.analyser.smoothingTimeConstant = 0.85;
+            this.data = new Uint8Array(this.analyser.frequencyBinCount);
+            this.active = true;
+        },
+        update() {
+            if(!this.active) return;
+            this.analyser.getByteFrequencyData(this.data);
+            let b=0, m=0, h=0;
+            const len = this.data.length;
+            const pBass = Math.floor(len*0.06);
+            const pMid = Math.floor(len*0.3);
+            for(let i=0; i<len; i++) {
+                const v = this.data[i]/255.0;
+                if(i<pBass) b+=v; else if(i<pMid) m+=v; else h+=v;
+            }
+            this.bands.bass = b/pBass;
+            this.bands.mid = m/(pMid-pBass);
+            this.bands.high = h/(len-pMid);
+        }
+    };
+
+    // --- SCENE ---
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x000000, 0.008); // Lighter fog for clarity
+
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 500);
+    camera.position.set(0, 10, 70);
+
+    const renderer = new THREE.WebGLRenderer({ powerPreference: "high-performance", antialias: false });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(STATE.pixelRatio);
+    // Tone Mapping is crucial for HD look
+    renderer.toneMapping = THREE.ReinhardToneMapping;
+    renderer.toneMappingExposure = 2.0;
+    document.body.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.5;
+
+    // --- MOUSE INTERACTION ---
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2(9999, 9999); // Start off screen
+    const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0); // Invisible plane for raycasting
+    const mouseWorldPos = new THREE.Vector3();
+
+    window.addEventListener('mousemove', (e) => {
+        // Normalize mouse pos
+        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+        // Raycast to invisible plane to get 3D coordinate
+        raycaster.setFromCamera(mouse, camera);
+        const target = new THREE.Vector3();
+        raycaster.ray.intersectPlane(plane, target);
+        if(target) {
+            mouseWorldPos.copy(target);
+        }
+    });
+
+    // --- SHADERS (Optimized for Clarity) ---
+    const vertexShader = `
+        uniform float uTime;
+        uniform float uPixelRatio;
+        uniform float uSizeBase;
+        uniform float uNoiseScale;
+        uniform float uCurlStrength;
+        uniform float uRadius;
+        uniform vec3 uColor1;
+        uniform vec3 uColor2;
+
+        // Audio
+        uniform float uBass;
+        uniform float uMid;
+        uniform float uHigh;
+
+        // Interaction
+        uniform vec3 uMousePos;
+
+        attribute vec3 aRandom;
+        varying vec3 vColor;
+        varying float vAlpha;
+        varying float vCollisionEnergy; // Used for collision flash
+
+        // --- NOISE FUNCTIONS --- (Note: snoise function was missing proper return value, fixed.)
+        vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+        vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+        vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+        vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+        float snoise(vec3 v) {
+            const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+            const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+            vec3 i = floor(v + dot(v, C.yyy));
+            vec3 x0 = v - i + dot(i, C.xxx);
+            vec3 g = step(x0.yzx, x0.xyz);
+            vec3 l = 1.0 - g;
+            vec3 i1 = min(g.xyz, l.zxy);
+            vec3 i2 = max(g.xyz, l.zxy);
+            vec3 x1 = x0 - i1 + C.xxx;
+            vec3 x2 = x0 - i2 + C.yyy;
+            vec3 x3 = x0 - D.yyy;
+            i = mod289(i);
+            vec4 p = permute(permute(permute(i.z + vec4(0.0, i1.z, i2.z, 1.0)) + i.y + vec4(0.0, i1.y, i2.y, 1.0)) + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+            float n_ = 0.142857142857;
+            vec3 ns = n_ * D.wyz - D.xzx;
+            vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+            vec4 x_ = floor(j * ns.z);
+            vec4 y_ = floor(j - 7.0 * x_);
+            vec4 x = x_ *ns.x + ns.yyyy;
+            vec4 y = y_ *ns.x + ns.yyyy;
+            vec4 h = 1.0 - abs(x) - abs(y);
+            vec4 b0 = vec4(x.xy, y.xy);
+            vec4 b1 = vec4(x.zw, y.zw);
+            vec4 s0 = floor(b0) * 2.0 + 1.0;
+            vec4 s1 = floor(b1) * 2.0 + 1.0;
+            vec4 sh = -step(h, vec4(0.0));
+            vec4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;
+            vec4 a1 = b1.xzyw + s1.xzyw * sh.zzww;
+            vec3 p0 = vec3(a0.xy, h.x);
+            vec3 p1 = vec3(a0.zw, h.y);
+            vec3 p2 = vec3(a1.xy, h.z);
+            vec3 p3 = vec3(a1.zw, h.w);
+            vec4 norm = taylorInvSqrt(vec4(dot(p0, p0), dot(p1, p1), dot(p2, p2), dot(p3, p3)));
+            p0 *= norm.x;
+            p1 *= norm.y;
+            p2 *= norm.z;
+            p3 *= norm.w;
+            vec4 m = max(0.6 - vec4(dot(x0, x0), dot(x1, x1), dot(x2, x2), dot(x3, x3)), 0.0);
+            m = m * m;
+            return 42.0 * dot(m * m, vec4(dot(p0, x0), dot(p1, x1), dot(p2, x2), dot(p3, x3)));
+        }
+
+        vec3 curl(float x, float y, float z) {
+            float eps = 0.1;
+            vec3 curl;
+            curl.x = snoise(vec3(x, y+eps, z)) - snoise(vec3(x, y-eps, z));
+            curl.y = snoise(vec3(x, y, z+eps)) - snoise(vec3(x, y, z-eps));
+            curl.z = snoise(vec3(x+eps, y, z)) - snoise(vec3(x-eps, y, z));
+            return curl;
+        }
+
+        void main() {
+            float t = uTime * (1.0 + uMid * 0.5);
+            vec3 noisePos = position * 0.04 + aRandom;
+
+            // 1. Fluid Flow
+            vec3 flow = curl(noisePos.x * uNoiseScale + t*0.15, noisePos.y * uNoiseScale, noisePos.z * uNoiseScale);
+            vec3 newPos = position + (flow * uCurlStrength);
+
+            // 2. Mouse Interaction (Collision Probe)
+            float distToMouse = distance(newPos, uMousePos);
+            // Create a repulsion field around mouse
+            float repulsion = smoothstep(15.0, 0.0, distToMouse);
+            vec3 repelDir = normalize(newPos - uMousePos);
+            newPos += repelDir * repulsion * 8.0;
+
+            // 3. Bass Shockwave
+            vec3 centerDir = normalize(newPos);
+            float distToCenter = length(newPos);
+            float kick = smoothstep(0.3, 0.8, uBass);
+            newPos += centerDir * (kick * 4.0 * exp(-distToCenter * 0.1));
+
+            vec4 mvPosition = modelViewMatrix * vec4(newPos, 1.0);
+            gl_Position = projectionMatrix * mvPosition;
+
+            // 4. Size & Collision Flash logic
+            float size = uSizeBase * (0.8 + uBass * 0.6);
+
+            // If repulsion is high, particles are bunched up -> simulate energy flash
+            float collision = repulsion * uMid * 2.0;
+            vCollisionEnergy = collision;
+
+            gl_PointSize = size * uPixelRatio * (60.0 / -mvPosition.z);
+
+            // 5. Coloring
+            float turb = length(flow);
+            // Add collision brightness to the mix
+            vec3 c = mix(uColor1, uColor2, smoothstep(0.0, 2.0, turb + uHigh*2.0));
+
+            // White hot center + Collision Flash
+            vColor = mix(c, vec3(1.0), uBass * 0.5 + collision);
+
+            // 6. Alpha & Sparkle
+            float alpha = 1.0 - smoothstep(uRadius * 0.8, uRadius, distToCenter);
+            float sparkle = 1.0 + (aRandom.x > 0.7 ? sin(uTime * 20.0 + aRandom.y * 100.0) * uHigh * 4.0 : 0.0);
+            vAlpha = alpha * sparkle;
+        }
+    `;
+
+    const fragmentShader = `
+        varying vec3 vColor;
+        varying float vAlpha;
+        varying float vCollisionEnergy;
+
+        void main() {
+            vec2 xy = gl_PointCoord.xy - vec2(0.5);
+            float r = length(xy);
+            if(r > 0.5) discard;
+
+            // Optical Lens Effect:
+            // Sharp core, soft halo.
+            float glow = exp(-r * r * 20.0);
+
+            // Simulated Chromatic Aberration at edges of particle (Fake dispersion)
+            vec3 finalColor = vColor;
+            if(r > 0.3) {
+                finalColor *= 0.8; // darken edges
+            }
+
+            gl_FragColor = vec4(finalColor, vAlpha * glow);
+        }
+    `;
+
+    // --- GEOMETRY ---
+    const geometry = new THREE.BufferGeometry();
+    const pos = [], rnd = [];
+    const vec = new THREE.Vector3();
+    for(let i=0; i<CONFIG.maxParticles; i++) {
+        const r = CONFIG.fieldRadius * Math.pow(Math.random(), 0.4);
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos(2 * Math.random() - 1);
+        vec.setFromSphericalCoords(r, phi, theta);
+        pos.push(vec.x, vec.y, vec.z);
+        rnd.push(Math.random(), Math.random(), Math.random());
+    }
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    geometry.setAttribute('aRandom', new THREE.Float32BufferAttribute(rnd, 3));
+    geometry.setDrawRange(0, Math.floor(CONFIG.maxParticles * STATE.density));
+
+    const FIELD_TYPES = {
+        'Photon (EM)': { c1:'#00f2ff', c2:'#0051ff', s:1.0, curl:0.8, sz:1.2 },
+        'Gluon (Strong)': { c1:'#ff0055', c2:'#7000ff', s:2.2, curl:2.0, sz:1.5 },
+        'Higgs (Mass)': { c1:'#ffae00', c2:'#ff4800', s:0.5, curl:0.2, sz:2.0 },
+        'Gravity': { c1:'#ffffff', c2:'#444444', s:0.6, curl:0.1, sz:1.0 }
+    };
+
+    const def = FIELD_TYPES[STATE.field];
+    const material = new THREE.ShaderMaterial({
+        vertexShader, fragmentShader,
+        uniforms: {
+            uTime: { value: 0 },
+            uPixelRatio: { value: STATE.pixelRatio },
+            uSizeBase: { value: def.sz },
+            uNoiseScale: { value: def.s },
+            uCurlStrength: { value: def.curl },
+            uRadius: { value: CONFIG.fieldRadius },
+            uColor1: { value: new THREE.Color(def.c1) },
+            uColor2: { value: new THREE.Color(def.c2) },
+            uBass: { value: 0 }, uMid: { value: 0 }, uHigh: { value: 0 },
+            uMousePos: { value: new THREE.Vector3(999,999,999) } // Initialize off-screen
+        },
+        transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+    });
+    const points = new THREE.Points(geometry, material);
+    scene.add(points);
+
+    // --- POST PROCESSING (HD Chain) ---
+    const composer = new EffectComposer(renderer);
+    const renderPass = new RenderPass(scene, camera);
+    composer.addPass(renderPass);
+
+    // 1. Trails
+    const afterimagePass = new AfterimagePass();
+    afterimagePass.uniforms['damp'].value = STATE.trails;
+    composer.addPass(afterimagePass);
+
+    // 2. Bloom
+    const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+    bloomPass.threshold = 0.15;
+    bloomPass.strength = STATE.bloom;
+    bloomPass.radius = 0.4; // Lower radius = Sharper glow
+    composer.addPass(bloomPass);
+
+    // 3. Output (Color Correct)
+    const outputPass = new OutputPass();
+    composer.addPass(outputPass);
+
+    // --- GUI ---
+    const gui = new GUI({ title: 'QUANTUM CONTROLS' });
+    gui.add(STATE, 'sensitivity', 0.1, 3.0).name('Audio Sensitivity');
+
+    const f_phys = gui.addFolder('Physics Engine');
+    f_phys.add(STATE, 'field', Object.keys(FIELD_TYPES)).name('Field Type').onChange(val => {
+        const d = FIELD_TYPES[val];
+        const c1 = new THREE.Color(d.c1);
+        const c2 = new THREE.Color(d.c2);
+        const start = performance.now();
+        const startS = material.uniforms.uNoiseScale.value;
+
+        function step() {
+            const p = Math.min((performance.now()-start)/1000, 1);
+            const e = 1 - Math.pow(1-p, 3);
+            material.uniforms.uColor1.value.lerp(c1, 0.05);
+            material.uniforms.uColor2.value.lerp(c2, 0.05);
+            material.uniforms.uNoiseScale.value = startS + (d.s - startS)*e;
+            material.uniforms.uCurlStrength.value = THREE.MathUtils.lerp(material.uniforms.uCurlStrength.value, d.curl, 0.05);
+            material.uniforms.uSizeBase.value = THREE.MathUtils.lerp(material.uniforms.uSizeBase.value, d.sz, 0.05);
+            if(p<1) requestAnimationFrame(step);
+        }
+        step();
+    });
+    f_phys.add(STATE, 'density', 0.0, 1.0).name('Density').onChange(v => geometry.setDrawRange(0, Math.floor(CONFIG.maxParticles*v)));
+
+    const f_vis = gui.addFolder('Optics & Visuals');
+    f_vis.add(afterimagePass.uniforms['damp'], 'value', 0.5, 0.98).name('Trail Persistence');
+    f_vis.add(bloomPass, 'strength', 0.0, 3.0).name('Bloom Strength');
+    f_vis.add(STATE, 'timeScale', 0.0, 2.0).name('Time Flow');
+
+    // --- EVENTS ---
+    const overlay = document.getElementById('overlay');
+    const status = document.getElementById('status-bar');
+
+    function activate() {
+        AUDIO.init();
+        if(AUDIO.ctx.state === 'suspended') AUDIO.ctx.resume();
+        overlay.style.opacity = 0;
+        setTimeout(() => overlay.style.display = 'none', 800);
+        status.innerHTML = 'SYSTEM: <span>ACTIVE</span> // INTERACTION ENABLED';
+    }
+
+    document.getElementById('file-input').addEventListener('change', (e) => {
+        activate();
+        const reader = new FileReader();
+        reader.onload = (ev) => AUDIO.ctx.decodeAudioData(ev.target.result, (buf) => {
+            if(AUDIO.source) try{AUDIO.source.stop()}catch(e){} // Stop any previous source
+            AUDIO.source = AUDIO.ctx.createBufferSource();
+            AUDIO.source.buffer = buf;
+            AUDIO.source.loop = true;
+            AUDIO.source.connect(AUDIO.analyser);
+            AUDIO.analyser.connect(AUDIO.ctx.destination);
+            AUDIO.source.start(0);
+            status.innerHTML = 'SYSTEM: <span>PLAYING TRACK</span>';
+        });
+        reader.readAsArrayBuffer(e.target.files[0]);
+    });
+
+    document.getElementById('mic-btn').addEventListener('click', () => {
+        activate();
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+            if(AUDIO.source) try{AUDIO.source.disconnect()}catch(e){} // Disconnect previous source
+            AUDIO.source = AUDIO.ctx.createMediaStreamSource(stream);
+            AUDIO.source.connect(AUDIO.analyser);
+            status.innerHTML = 'SYSTEM: <span>LISTENING</span>';
+        });
+    });
+
+    // --- LOOP ---
+    const clock = new THREE.Clock();
+    function animate() {
+        requestAnimationFrame(animate);
+        const dt = clock.getDelta();
+        material.uniforms.uTime.value += dt * STATE.timeScale;
+
+        // Update Mouse Interaction in Shader
+        // Lerp for smooth movement of the interaction field
+        material.uniforms.uMousePos.value.lerp(mouseWorldPos, 0.1);
+
+        AUDIO.update();
+        const s = STATE.sensitivity;
+
+        material.uniforms.uBass.value = THREE.MathUtils.lerp(material.uniforms.uBass.value, AUDIO.bands.bass*s, 0.15);
+        material.uniforms.uMid.value = THREE.MathUtils.lerp(material.uniforms.uMid.value, AUDIO.bands.mid*s, 0.15);
+        material.uniforms.uHigh.value = THREE.MathUtils.lerp(material.uniforms.uHigh.value, AUDIO.bands.high*s, 0.15);
+
+        controls.autoRotateSpeed = 0.5 + (material.uniforms.uMid.value * 3.0);
+        controls.update();
+        composer.render();
+    }
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth/window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        composer.setSize(window.innerWidth, window.innerHeight);
+    });
+    animate();
+</script>
+</body>
+</html>
