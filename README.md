@@ -13,7 +13,7 @@ simulating the behavior of different quantum fields (Electromagnetic, Strong For
 ---
 
 ## 🚀 Live Demo
-**[🔗 Click here to launch the simulation](qftvisualizer.netlify.app)**
+** DEMO 🔗 (qftvisualizer.netlify.app)**
 *(Note: Microphone access is required for the live audio reactivity feature)*
 
 ---
