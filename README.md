@@ -17,6 +17,9 @@ Gate Threshold slider to the left = pulse less likely to be triggered.
 
 Disable bass gate for voice/mic input to reduce pulse effect.
 
+I will update the readme further but I am tired and winding down for the day now. 
+Enjoy the updates!! :D 
+
 ---
 
 ## 🚀 Live Demo
