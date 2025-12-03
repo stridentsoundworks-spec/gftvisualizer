@@ -1,4 +1,4 @@
-# ⚛️ Quantum Manifold: Audio-Reactive Field Simulator
+# ⚛️ Quantum Visuals: Audio-Reactive Quantum Field Simulator
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![WebGL](https://img.shields.io/badge/WebGL-Three.js-black)
@@ -9,6 +9,10 @@
 This project visualizes the concept of vacuum fluctuations and particle excitations using GPU-accelerated fluid dynamics. 
 It renders up to **200,000 interactive particles** in the browser using custom GLSL shaders, 
 simulating the behavior of different quantum fields (Electromagnetic, Strong Force, Higgs, and Gravity).
+
+Enable the bass gate to make the simulator pulse with your music. The threshold and audio sensitivity settings interact so may need a tweak based on the input material.
+
+Disable bass gate for voice/mic input to reduce pulse effect.
 
 ---
 
