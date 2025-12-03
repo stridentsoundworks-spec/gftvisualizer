@@ -149,7 +149,7 @@
         }
 
         #audio-controls.visible {
-            opacity: 1;
+            opacity: 0.75;
             pointer-events: auto;
         }
 
@@ -225,7 +225,7 @@
 <div id="overlay">
     <div class="hud-panel">
         <h1>Quantum Playground</h1>
-        <p>Interactive Field Simulator v6.1 // Audio Control Edition</p>
+        <p>Interactive Field Simulator v4.5 // Audio Control Edition</p>
 
         <div class="btn-group">
             <label class="file-upload">
@@ -281,10 +281,10 @@
         maxParticles: 200000,
         secondaryParticles: 35000,
         initialDensity: 0.078,
-        fieldRadius: 55.0,
-        minZoom: 25,
+        fieldRadius: 150.0,
+        minZoom: 1,
         maxZoom: 200,
-        defaultZoom: 75
+        defaultZoom: 100
     };
 
     const STATE = {
@@ -1250,3 +1250,4 @@
 </script>
 </body>
 </html>
+
