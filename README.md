@@ -10,7 +10,10 @@ This project visualizes the concept of vacuum fluctuations and particle excitati
 It renders up to **200,000 interactive particles** in the browser using custom GLSL shaders, 
 simulating the behavior of different quantum fields (Electromagnetic, Strong Force, Higgs, and Gravity).
 
-Enable the bass gate to make the simulator pulse with your music. The threshold and audio sensitivity settings interact so may need a tweak based on the input material.
+Enable the bass gate to make the simulator pulse with your music. 
+The threshold and audio sensitivity settings interact so may need a tweak based on the input material.
+Gate Threshold slider to the right = pulse more likely to be triggered. 
+Gate Threshold slider to the left = pulse less likely to be triggered. 
 
 Disable bass gate for voice/mic input to reduce pulse effect.
 
@@ -44,7 +47,10 @@ Disable bass gate for voice/mic input to reduce pulse effect.
     1.  **Photon (EM):** Fluid, fast-moving, cyan/blue.
     2.  **Gluon (Strong):** Chaotic, high-turbulence, red/purple.
     3.  **Higgs (Mass):** Viscous, slow-moving, heavy gold/amber.
-    4.  **Gravity:** Structural, low-volatility, monochromatic.
+    4.  **Gravity:** Structural, low-volatility, monochromatic.  
+    5.  **Dark Energy:**
+    6.  **Neutrino**
+
 
 ---
 
