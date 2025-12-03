@@ -3,7 +3,7 @@
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![WebGL](https://img.shields.io/badge/WebGL-Three.js-black)
-![Version](https://img.shields.io/badge/version-6.1-purple)
+![Version](https://img.shields.io/badge/version-4.5-purple)
 ![Status](https://img.shields.io/badge/status-Stable-green)
 
 **A High-Definition, interactive 3D simulation of Quantum Field Theory (QFT) that reacts to audio analysis in real-time.**
