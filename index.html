@@ -238,34 +238,34 @@ const CONFIG = {
 const STATE = {
     field: 'Gluon (Strong)',
     density: CONFIG.initialDensity,
-    sensitivity: 1.1,
+    sensitivity: 0.435,
     trails: 0.66144,
     bloom: 0.2,
     timeScale: 2,
     pixelRatio: Math.min(window.devicePixelRatio, 2),
     chromaticAberration: 0.004,
-    filmGrain: 0,
-    cameraShake: 0,
-    vortexStrength: 0.656,
+    filmGrain: 0.001,
+    cameraShake: 0.066,
+    vortexStrength: 0.666,
     pulseIntensity: 1.1,
     anamorphicStretch: 0.1,
     bassGateThreshold: 0.2605,
     bassGateAttack: 0.029,
-    bassGateRelease: 0.05,
+    bassGateRelease: 0.5,
     bassGateRatio: 2.142,
     bassGateEnabled: true,
     // NEW EFFECTS
     godRaysEnabled: true,
-    godRaysIntensity: 0.35,
-    godRaysDecay: 0.94,
-    dofEnabled: true,
+    godRaysIntensity: 0.149,
+    godRaysDecay: 0.92,
+    dofEnabled: false,
     dofFocus: 75.0,
     dofAperture: 0.00012,
     dofMaxBlur: 0.0023,
     lensFlareEnabled: true,
     lensFlareIntensity: 0.28,
     particleTrailsEnabled: true,
-    particleTrailOpacity: 0.5
+    particleTrailOpacity: 0.75
 };
 
 // --- AUDIO SYSTEM ---
