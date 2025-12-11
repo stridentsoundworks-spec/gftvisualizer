@@ -6,7 +6,7 @@ README
 [![Three.js](https://img.shields.io/badge/Three.js-r182-black?logo=three.js)](https://threejs.org/)
 [![WebGL](https://img.shields.io/badge/WebGL-2.0-red)](https://www.khronos.org/webgl/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Software](https://perplexity.ai)]
+[![Software](https://img.shields.io/badge/Powered_By-Perplexity-blue)] (https://perplexity.ai)
 
 [![Live Demo](https://img.shields.io/badge/Demo-Live-brightgreen)](https://qftvisualizer.netlify.app)
 
