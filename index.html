@@ -232,13 +232,13 @@ const CONFIG = {
     fieldRadius: 75,
     minZoom: 1,
     maxZoom: 250,
-    defaultZoom: 75
+    defaultZoom: 87
 };
 
 const STATE = {
     field: 'Gluon (Strong)',
     density: CONFIG.initialDensity,
-    sensitivity: 0.5046,
+    sensitivity: 1.1,
     trails: 0.66144,
     bloom: 0.2,
     timeScale: 2,
@@ -258,14 +258,14 @@ const STATE = {
     godRaysEnabled: true,
     godRaysIntensity: 0.35,
     godRaysDecay: 0.94,
-    dofEnabled: false,
+    dofEnabled: true,
     dofFocus: 75.0,
     dofAperture: 0.00012,
-    dofMaxBlur: 0.008,
-    lensFlareEnabled: false,
-    lensFlareIntensity: 1.0,
+    dofMaxBlur: 0.0023,
+    lensFlareEnabled: true,
+    lensFlareIntensity: 0.28,
     particleTrailsEnabled: true,
-    particleTrailOpacity: 0.4
+    particleTrailOpacity: 0.5
 };
 
 // --- AUDIO SYSTEM ---
