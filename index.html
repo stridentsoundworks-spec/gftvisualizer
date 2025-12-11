@@ -247,7 +247,7 @@ const STATE = {
     filmGrain: 0.001,
     cameraShake: 0.066,
     vortexStrength: 0.666,
-    pulseIntensity: 1.1,
+    pulseIntensity: 0.6,
     anamorphicStretch: 0.1,
     bassGateThreshold: 0.2605,
     bassGateAttack: 0.029,
@@ -256,7 +256,7 @@ const STATE = {
     bassGateEnabled: true,
     // NEW EFFECTS
     godRaysEnabled: true,
-    godRaysIntensity: 0.149,
+    godRaysIntensity: 0.078,
     godRaysDecay: 0.92,
     dofEnabled: false,
     dofFocus: 75.0,
@@ -448,7 +448,7 @@ const renderer = new THREE.WebGLRenderer({ powerPreference: "high-performance", 
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(STATE.pixelRatio);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 2;
+renderer.toneMappingExposure = 2.1;
 document.body.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
