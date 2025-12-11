@@ -7,6 +7,9 @@ README
 [![WebGL](https://img.shields.io/badge/WebGL-2.0-red)](https://www.khronos.org/webgl/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+[![Live Demo](https://img.shields.io/badge/Demo-Live-brightgreen)](https://qftvisualizer.netlify.app)
+
+
 <p align="center">
   <img src="assets/preview.gif" alt="Quantum Fields Preview" width="800">
 </p>
@@ -125,27 +128,27 @@ The visualization includes a comprehensive control panel:
                   ▼
 ┌─────────────────────────────────────────────────────────┐
 │              Web Audio API Analyzer                     │
-│   ┌─────────┐ ┌──────────┐ ┌─────────┐ ┌────────────┐  │
-│   │ FFT     │ │ Band     │ │ Beat    │ │ Spectral   │  │
-│   │ Analysis│ │ Splitting│ │ Detect  │ │ Analysis   │  │
-│   └─────────┘ └──────────┘ └─────────┘ └────────────┘  │
+│   ┌─────────┐ ┌──────────┐ ┌─────────┐ ┌────────────┐   │
+│   │ FFT     │ │ Band     │ │ Beat    │ │ Spectral   │   │
+│   │ Analysis│ │ Splitting│ │ Detect  │ │ Analysis   │   │
+│   └─────────┘ └──────────┘ └─────────┘ └────────────┘   │
 └─────────────────┬───────────────────────────────────────┘
                   │
                   ▼
 ┌─────────────────────────────────────────────────────────┐
 │              GLSL Vertex Shader                         │
-│   ┌─────────┐ ┌──────────┐ ┌─────────┐ ┌────────────┐  │
-│   │ Curl    │ │ Vortex   │ │ Beat    │ │ Mouse      │  │
-│   │ Noise   │ │ Motion   │ │ Pulses  │ │ Repulsion  │  │
-│   └─────────┘ └──────────┘ └─────────┘ └────────────┘  │
+│   ┌─────────┐ ┌──────────┐ ┌─────────┐ ┌────────────┐   │
+│   │ Curl    │ │ Vortex   │ │ Beat    │ │ Mouse      │   │
+│   │ Noise   │ │ Motion   │ │ Pulses  │ │ Repulsion  │   │
+│   └─────────┘ └──────────┘ └─────────┘ └────────────┘   │
 └─────────────────┬───────────────────────────────────────┘
                   │
                   ▼
 ┌─────────────────────────────────────────────────────────┐
 │           Post-Processing Pipeline                      │
 │                                                         │
-│   Render → Afterimage → Bloom → God Rays → Lens Flare  │
-│         → Anamorphic → Chromatic → DOF → Vignette      │
+│   Render → Afterimage → Bloom → God Rays → Lens Flare   │
+│         → Anamorphic → Chromatic → DOF → Vignette       │
 │         → Grain → Output                                │
 └─────────────────────────────────────────────────────────┘
 ```
