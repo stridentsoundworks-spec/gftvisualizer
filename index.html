@@ -448,14 +448,14 @@ const renderer = new THREE.WebGLRenderer({ powerPreference: "high-performance", 
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(STATE.pixelRatio);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 2.1;
+renderer.toneMappingExposure = 2;
 document.body.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.06;
 controls.autoRotate = true;
-controls.autoRotateSpeed = 0.35;
+controls.autoRotateSpeed = 0.3;
 controls.minDistance = CONFIG.minZoom;
 controls.maxDistance = CONFIG.maxZoom;
 controls.maxPolarAngle = Math.PI * 0.85;
