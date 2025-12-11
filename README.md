@@ -1,231 +1,244 @@
+README 
+# ✦ Quantum Fields
 
-# ⚛️ Quantum Visuals: Audio-Reactive Quantum Field Simulator
+**An immersive, audio-reactive particle simulation exploring the visual aesthetics of quantum field theory.**
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![WebGL](https://img.shields.io/badge/WebGL-Three.js-black)
-![Version](https://img.shields.io/badge/version-4.5-purple)
-![Status](https://img.shields.io/badge/status-Stable-green)
+[![Three.js](https://img.shields.io/badge/Three.js-r182-black?logo=three.js)](https://threejs.org/)
+[![WebGL](https://img.shields.io/badge/WebGL-2.0-red)](https://www.khronos.org/webgl/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**A High-Definition, interactive 3D simulation of Quantum Field Theory (QFT) that reacts to audio analysis in real-time.**
+<p align="center">
+  <img src="assets/preview.gif" alt="Quantum Fields Preview" width="800">
+</p>
 
-This project visualizes the concept of vacuum fluctuations and particle excitations using GPU-accelerated fluid dynamics. 
-It renders up to **275,000 interactive particles** in the browser using custom GLSL shaders, 
-simulating the behavior of different quantum fields (Electromagnetic, Strong Force, Higgs, Gravity, Dark Energy, and Neutrino).
+## Overview
 
----
+Quantum Fields is a real-time WebGL visualization that renders 250,000+ particles simulating the behavior of quantum fields. The particles respond dynamically to audio input—either from uploaded music files or live microphone input—creating mesmerizing visual representations of sound through physics-inspired motion.
 
-## 🆕 What's New in v4.5
+## ✨ Features
 
-### 🎛️ Full Playback Controls
-- **Play/Pause** - Full transport controls with spacebar shortcut
-- **Progress Bar** - Visual timeline with click-to-seek functionality
-- **Track Switching** - Load new audio files without refreshing the page
-- **Time Display** - Current position and total duration
+### Particle System
+- **250,000+ GPU-accelerated particles** using custom GLSL shaders
+- **Curl noise flow fields** for fluid, organic motion
+- **Simplex noise** for natural turbulence patterns
+- **Multi-layer particle system** with primary and secondary fields
 
-### 🔊 Advanced Bass Gate System
-The bass gate provides consistent audio reactivity by filtering noise and controlling signal dynamics:
-- **Auto-Calibrating Noise Floor** - Automatically adapts to your audio source
-- **Hysteresis Threshold** - Prevents rapid gate chattering
-- **Attack/Release Envelope** - Smooth transitions when gate opens/closes
-- **Soft Knee Compression** - Prevents clipping on loud transients
+### Audio Reactivity
+- **7-band frequency analysis**: Sub-bass, Bass, Low-mid, Mid, High-mid, High, Ultra-high
+- **Beat detection** with dynamic threshold adaptation
+- **Spectral centroid & flux** analysis for nuanced responses
+- **Intelligent bass gate** with calibration, attack/release, and compression
+- **File playback** with full transport controls (play, pause, seek, loop)
+- **Live microphone** input support
 
-> **Tip:** Enable bass gate for music to make the simulator pulse cleanly. Disable for voice/mic input to reduce the pulse effect.
+### Quantum Field Types
+| Field | Characteristics |
+|-------|-----------------|
+| **Photon (EM)** | Cyan/blue palette, balanced flow |
+| **Gluon (Strong)** | Magenta/violet, high turbulence |
+| **Higgs (Mass)** | Orange/gold, slow & massive |
+| **Gravity** | White/blue, gentle curves |
+| **Dark Energy** | Deep purple, ethereal expansion |
+| **Neutrino** | Green/cyan, fast & chaotic |
 
-### 🔭 Enhanced Zoom & Navigation
-- **Scroll Wheel Zoom** - Smooth zoom with configurable limits (25-200 units)
-- **Keyboard Zoom** - `+`/`-` keys for fine control, `0` to reset view
-- **Zoom Indicator** - Real-time percentage display
-- **Zoom-Compensated Particles** - Particles scale appropriately at all distances
-- **Click to Pulse in voice mode** - Clicks and touches in voice mode pulse the field (Satisfying af and fun)
+### Visual Effects Pipeline
+- **God Rays** — Volumetric light scattering from bright particles
+- **Depth of Field** — Cinematic bokeh blur with auto-focus
+- **Particle Trails** — 50 independent trailing particles with vortex motion
+- **Lens Flares** — Procedural flares with chromatic ghosts and halos
+- **Bloom** — Unreal Engine-style HDR bloom
+- **Afterimage/Trails** — Configurable motion persistence
+- **Anamorphic Flares** — Horizontal streak effects on bright spots
+- **Chromatic Aberration** — Beat-reactive color fringing
+- **Film Grain** — Optional analog texture
+- **Vignette** — Dynamic edge darkening
 
----
+### Interactions
+- **Mouse repulsion** — Particles react to cursor with velocity-based influence
+- **Camera shake** — Beat-synchronized camera movement
+- **Orbital controls** — Smooth rotation, zoom, and pan
+- **Auto-rotation** — Speed modulated by audio energy
 
-## 🚀 Live Demo
+## 🚀 Getting Started
 
-**[DEMO 🔗](https://qftvisualizer.netlify.app)**
+### Quick Start
+1. Download `quantum_v9_aurora.html`
+2. Open in a modern browser (Chrome, Firefox, Edge, Safari)
+3. Click "Choose Audio" to load a music file, or "Microphone" for live input
+4. Enjoy the visualization!
 
-*(Note: Microphone access is required for the live audio reactivity feature)*
+### Local Development
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/quantum-fields.git
+cd quantum-fields
 
----
+# Serve locally (required for ES modules)
+npx serve .
+# or
+python -m http.server 8000
 
-## ✨ Key Features
+# Open http://localhost:8000 in your browser
+```
 
-### 🎨 High-Fidelity Visuals
-- **Dual-Layer Particle System:** Renders 250k primary + 25k secondary particles for depth
-- **Cinematic Post-Processing Stack:**
-  - Optical Bloom with dynamic intensity
-  - Anamorphic Lens Flares (horizontal light streaks)
-  - Chromatic Aberration (beat-reactive)
-  - Film Grain for atmosphere
-  - CRT Scanline overlays
-- **Particle Trails:** Afterimage processing for "bubble chamber" trail effects
-- **Fresnel Rim Lighting:** Particles glow at view-angle edges
-- **Atmospheric Perspective:** Depth-based color desaturation
-
-### 🔊 Audio Intelligence
-
-#### 7-Band Frequency Analysis (Can be modified to preference)
-| Band | Frequency Range | Visual Effect |
-|------|-----------------|---------------|
-| Sub-Bass | 20-60 Hz | Field breathing, deep pulses |
-| Bass | 60-250 Hz | Shockwaves, vortex rotation |
-| Low-Mid | 250-500 Hz | Turbulence modulation |
-| Mid | 500-2000 Hz | Time dilation, rotation speed |
-| High-Mid | 2000-4000 Hz | Color mixing intensity |
-| High | 4000-8000 Hz | Particle sparkle, shimmer |
-| Ultra-High | 8000-16000 Hz | Color tinting, micro-detail |
-
-#### Beat Detection System
-- **Onset Detection** - Identifies sudden transients in the audio
-- **Dynamic Thresholding** - Adapts to track energy levels
-- **Peak History Analysis** - Uses ~1 second of history for accuracy
-- **Spectral Flux Tracking** - Detects rapid frequency changes
-- **Spectral Centroid** - Measures audio "brightness" for color shifts
-
-#### Input Modes
-- **Audio File Upload** - Load MP3, WAV, FLAC, or any browser-supported format
-- **Live Microphone** - Real-time visualization of ambient audio
-- **Seamless Switching** - Change sources without page refresh
-
-### ⚗️ Physics Engine
-- **Multi-Octave Curl Noise:** Layered fluid dynamics with FBM (Fractal Brownian Motion)
-- **Dual Vortex System:** Separate sub-bass and bass-driven rotation patterns
-- **Y-Axis Spiral Motion:** Vertical particle spiraling based on mid frequencies
-- **Multi-Ring Beat Pulses:** Two phase-offset expanding rings on detected beats
-- **Interactive Collider:** Mouse cursor displaces particles with velocity-based intensity
-
-### 🌌 6 Field Presets
-
-| Field | Colors | Behavior |
-|-------|--------|----------|
-| **Photon (EM)** | Cyan / Blue / White | Fluid, fast-moving, clean |
-| **Gluon (Strong)** | Magenta / Purple / Orange | Chaotic, high-turbulence |
-| **Higgs (Mass)** | Gold / Orange / Yellow | Viscous, slow, heavy particles |
-| **Gravity** | White / Blue / Purple | Structural, low-volatility |
-| **Dark Energy** | Deep Purple / Violet / Magenta | Mysterious, expansive |
-| **Neutrino** | Green / Cyan / Aqua | Fast, high-turbulence, ethereal |
-
----
+### Requirements
+- Modern browser with WebGL 2.0 support
+- Hardware-accelerated graphics recommended
+- Audio input (file or microphone)
 
 ## 🎮 Controls
 
-### Audio Control Bar
-After loading audio, a control bar appears with:
-- **▶ Play / ⏸ Pause** - Toggle playback (or press `Spacebar`)
-- **Progress Bar** - Click anywhere to seek
-- **Time Display** - Shows current / total duration
-- **New Track** - Load a different audio file
-- **🎤 Mic** - Switch to microphone input
-
-### Mouse Interaction
-| Action | Effect |
-|--------|--------|
-| **Move** | Push particles, create ripples |
-| **Drag** | Rotate camera orbit |
-| **Scroll** | Zoom in/out |
-
-### Keyboard Shortcuts
+### Keyboard
 | Key | Action |
 |-----|--------|
-| `Space` | Play/Pause audio |
+| `Space` | Play / Pause audio |
+| `F` | Toggle Depth of Field |
 | `+` / `=` | Zoom in |
 | `-` / `_` | Zoom out |
-| `0` | Reset zoom to default |
+| `0` | Reset zoom |
+
+### Mouse
+| Action | Effect |
+|--------|--------|
+| **Drag** | Rotate camera |
+| **Scroll** | Zoom in/out |
+| **Move** | Particle repulsion field |
 
 ### GUI Panel
+The visualization includes a comprehensive control panel:
 
-#### Physics Engine
-- **Field Type** - Switch between quantum field simulations
-- **Density** - Particle count (0 - 275k)
-- **Vortex Strength** - Rotational force intensity
-- **Pulse Intensity** - Beat reaction strength
+- **Audio Sensitivity** — Global audio response multiplier
+- **Physics Engine** — Field type, density, vortex, pulse intensity
+- **Bass Gate** — Threshold, attack, release, ratio controls
+- **✨ New Effects** — God rays, DOF, lens flares, particle trails
+- **Optics** — Bloom, trails, chromatic aberration, grain, shake
 
-#### Bass Gate
-- **Enable Gate** - Toggle the noise gate
-- **Threshold** - Signal level to open gate (right = more sensitive)
-- **Attack** - How quickly gate opens (0.01 - 0.3s)
-- **Release** - How quickly gate closes (0.05 - 0.5s)
-- **Ratio** - Compression amount above threshold
+## 🔧 Technical Details
 
-#### Optics & Visuals
-- **Trail Persistence** - Afterimage decay rate
-- **Bloom Strength** - Glow intensity
-- **Anamorphic Flare** - Horizontal streak intensity
-- **Chromatic Aberration** - Color fringing amount
-- **Film Grain** - Noise texture intensity
-- **Camera Shake** - Beat-reactive shake amount
-- **Time Flow** - Simulation speed multiplier
+### Architecture
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Audio Input                          │
+│              (File / Microphone)                        │
+└─────────────────┬───────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────────────────────┐
+│              Web Audio API Analyzer                     │
+│   ┌─────────┐ ┌──────────┐ ┌─────────┐ ┌────────────┐  │
+│   │ FFT     │ │ Band     │ │ Beat    │ │ Spectral   │  │
+│   │ Analysis│ │ Splitting│ │ Detect  │ │ Analysis   │  │
+│   └─────────┘ └──────────┘ └─────────┘ └────────────┘  │
+└─────────────────┬───────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────────────────────┐
+│              GLSL Vertex Shader                         │
+│   ┌─────────┐ ┌──────────┐ ┌─────────┐ ┌────────────┐  │
+│   │ Curl    │ │ Vortex   │ │ Beat    │ │ Mouse      │  │
+│   │ Noise   │ │ Motion   │ │ Pulses  │ │ Repulsion  │  │
+│   └─────────┘ └──────────┘ └─────────┘ └────────────┘  │
+└─────────────────┬───────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────────────────────┐
+│           Post-Processing Pipeline                      │
+│                                                         │
+│   Render → Afterimage → Bloom → God Rays → Lens Flare  │
+│         → Anamorphic → Chromatic → DOF → Vignette      │
+│         → Grain → Output                                │
+└─────────────────────────────────────────────────────────┘
+```
 
----
+### Dependencies
+All dependencies are loaded via CDN (no build step required):
 
-## 🛠️ Technology Stack
+| Library | Version | Purpose |
+|---------|---------|---------|
+| [Three.js](https://threejs.org/) | r182 | 3D rendering engine |
+| [lil-gui](https://lil-gui.georgealways.com/) | 0.19.1 | Control panel UI |
 
-| Technology | Purpose |
-|------------|---------|
-| **[Three.js](https://threejs.org/)** | 3D Rendering Engine |
-| **GLSL** | Custom Vertex & Fragment Shaders |
-| **Web Audio API** | FFT Analysis & Playback Control |
-| **[Lil-GUI](https://lil-gui.georgealways.com/)** | Parameter Interface |
+### Performance
+- **Target**: 60 FPS on dedicated GPUs
+- **Particle count**: Adjustable via density slider (0-100%)
+- **Pixel ratio**: Capped at 2x for performance
+- **Draw calls**: Optimized single-draw particle system
 
-### Post-Processing Pipeline
-1. Render Pass → 2. Afterimage (Trails) → 3. Unreal Bloom → 4. Anamorphic Flare → 5. Chromatic Aberration → 6. Film Grain → 7. Output
+## 📁 Project Structure
 
----
+```
+quantum-fields/
+├── quantum_v9_aurora.html    # Main application (single file)
+├── README.md                 # This file
+├── LICENSE                   # MIT License
+└── assets/
+    └── preview.gif           # Preview animation
+```
 
-## 📊 Performance
+## 🎨 Customization
 
-| Setting | Particles | Target FPS |
-|---------|-----------|------------|
-| Low | ~50k | 60 fps |
-| Medium | ~150k | 60 fps |
-| High | ~275k | 30-60 fps |
+### Adding New Field Types
+```javascript
+const FIELD_TYPES = {
+    'Your Field': {
+        c1: '#ff0000',  // Primary color
+        c2: '#00ff00',  // Secondary color  
+        c3: '#0000ff',  // Accent color
+        s: 1.5,         // Noise scale
+        curl: 1.2,      // Curl strength
+        sz: 1.8         // Particle size
+    }
+};
+```
 
-Performance varies by GPU. Adjust **Density** slider for optimal framerate.
+### Modifying Shaders
+The vertex and fragment shaders are embedded in the HTML file. Key uniforms:
+- `uTime` — Animation time
+- `uBass`, `uMid`, `uHigh` — Frequency bands
+- `uBeatEnergy` — Beat detection envelope
+- `uVortexStrength` — Rotational force
+- `uPulseIntensity` — Radial wave strength
 
----
+## 📜 Changelog
 
-## 🧪 The Science Behind The Art
+### v9 — Aurora (Current)
+- ✨ Added God Rays volumetric lighting
+- ✨ Added Depth of Field with auto-focus
+- ✨ Added Particle Trail system (50 trails)
+- ✨ Added Lens Flare (3D + post-process)
+- ✨ Added Vignette + Glow enhancement
+- 🎮 New "F" key to toggle DOF
+- 🎛️ New GUI folder for effects controls
 
-While this is an artistic interpretation, it is grounded in QFT concepts:
+### v8
+- 🎵 Full audio playback controls
+- 🎚️ Bass gate with auto-calibration
+- 🎨 6 quantum field presets
+- 📸 Screenshot functionality
+- 🖥️ Fullscreen support
 
-- **Vacuum Fluctuations:** The "noise" in the field represents the zero-point energy where virtual particles pop in and out of existence.
-- **Excitations:** In QFT, a particle is not a solid sphere, but an excitation (vibration) in a field. When the bass kicks, the simulation increases the amplitude of these excitations, visualized as brighter, larger points.
-- **Field Interactions:** Different field types exhibit different coupling strengths and behaviors, reflected in the varied turbulence and color patterns.
+## 🤝 Contributing
 
----
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
 
-## 📝 Changelog
-
-### v4.5 - Audio Control Edition
-- Added play/pause functionality with spacebar shortcut
-- Added progress bar with seek-to-click
-- Added persistent audio control bar
-- Added ability to load new tracks without refresh
-- Added time display (current / duration)
-
-### v4.25 - Bass Gate Edition
-- Implemented professional bass gate with calibration
-- Restored and enhanced zoom controls
-- Added anamorphic lens flare effect
-- Added secondary particle layer (25k particles)
-- Added Neutrino field type
-- Improved vortex system with dual rotation
-
-### v4.1 - Enhanced Edition
-- Upgraded to 7-band frequency analysis
-- Implemented beat detection with onset detection
-- Added spectral flux and centroid tracking
-- Added chromatic aberration (beat-reactive)
-- Added film grain post-processing
-- Added camera shake on beats
-- Increased particle count to 220k
-
----
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+## 🙏 Acknowledgments
+
+- [Three.js](https://threejs.org/) team for the incredible 3D library
+- [Stefan Gustavson](https://github.com/stegu/webgl-noise) for simplex noise implementation
+- The WebGL and creative coding community
+
 ---
 
-*Created by [Theo B Harvey]*
+<p align="center">
+  Made with ✨ and WebGL
+</p>
