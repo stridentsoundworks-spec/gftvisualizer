@@ -1,31 +1,25 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Quantum Field: Interactive</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600&display=swap');
+        * { box-sizing: border-box; }
         body {
             margin: 0;
             overflow: hidden;
-            background: #000;
-            font-family: 'Rajdhani', sans-serif;
+            background: linear-gradient(135deg, #0a0a12 0%, #1a1025 50%, #0d0d1a 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
-
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&display=swap');
-
         canvas { display: block; }
-
         #scanlines {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255,0,0,0.06), rgba(0,255,0,0.02), rgba(0,0,255,0.06));
-            background-size: 100% 2px, 3px 100%;
+            background: radial-gradient(ellipse at center, transparent 0%, transparent 50%, rgba(0,0,0,0.5) 100%);
             pointer-events: none;
             z-index: 10;
-            opacity: 0.4;
         }
-
         #overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -33,1230 +27,1241 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: rgba(0, 0, 0, 0.92);
+            background: linear-gradient(180deg, rgba(15,10,25,0.97) 0%, rgba(10,10,20,0.98) 100%);
             z-index: 100;
-            backdrop-filter: blur(15px);
-            transition: opacity 0.8s ease;
+            backdrop-filter: blur(25px);
+            transition: opacity 1s ease;
         }
-
         .hud-panel {
-            border: 1px solid rgba(0, 255, 255, 0.4);
-            background: rgba(5, 10, 15, 0.9);
-            padding: 60px;
+            background: linear-gradient(165deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255,255,255,0.07);
+            padding: 55px 75px;
             text-align: center;
-            position: relative;
-            box-shadow: 0 0 60px rgba(0, 150, 255, 0.15);
-            border-radius: 4px;
+            border-radius: 28px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.5);
         }
-
-        .hud-panel::after {
-            content: ''; position: absolute; bottom: -5px; right: -5px; width: 20px; height: 20px;
-            border-bottom: 2px solid #00ffff; border-right: 2px solid #00ffff;
-        }
-        .hud-panel::before {
-            content: ''; position: absolute; top: -5px; left: -5px; width: 20px; height: 20px;
-            border-top: 2px solid #00ffff; border-left: 2px solid #00ffff;
-        }
-
         h1 {
-            color: #fff;
-            font-weight: 700;
-            letter-spacing: 8px;
-            font-size: 36px;
-            margin: 0 0 15px 0;
-            text-shadow: 0 0 25px rgba(0, 255, 255, 0.6);
-            text-transform: uppercase;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 500;
+            letter-spacing: 1px;
+            font-size: 34px;
+            margin: 0 0 8px 0;
+            background: linear-gradient(135deg, #ffffff 0%, #c4b5fd 40%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-
-        p { color: #7a8fa3; font-size: 12px; margin-bottom: 40px; letter-spacing: 3px; text-transform: uppercase; }
-
-        .btn-group { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
-
+        .hud-panel p {
+            color: rgba(255,255,255,0.35);
+            font-size: 13px;
+            margin-bottom: 40px;
+            letter-spacing: 0.5px;
+            font-weight: 300;
+        }
+        .btn-group { display: flex; gap: 14px; justify-content: center; }
         button, .file-upload {
-            background: rgba(0, 255, 255, 0.05);
-            border: 1px solid rgba(0, 255, 255, 0.5);
-            color: #00ffff;
-            padding: 14px 35px;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
+            background: linear-gradient(135deg, rgba(167,139,250,0.12) 0%, rgba(129,140,248,0.08) 100%);
+            border: 1px solid rgba(167,139,250,0.25);
+            color: rgba(255,255,255,0.85);
+            padding: 15px 30px;
+            font-size: 13px;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s ease;
-            letter-spacing: 2px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.3px;
+            border-radius: 14px;
+            font-family: 'Inter', sans-serif;
         }
-
         button:hover, .file-upload:hover {
-            background: #00ffff;
-            color: #000;
-            box-shadow: 0 0 30px #00ffff;
+            background: linear-gradient(135deg, rgba(167,139,250,0.25) 0%, rgba(129,140,248,0.2) 100%);
+            border-color: rgba(167,139,250,0.45);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(139,92,246,0.2);
         }
-
         input[type="file"] { display: none; }
-
         #status-bar {
             position: absolute;
-            bottom: 30px;
-            left: 30px;
-            color: rgba(255, 255, 255, 0.4);
-            font-size: 11px;
-            letter-spacing: 2px;
-            border-left: 3px solid #00ffff;
-            padding-left: 15px;
+            bottom: 80px;
+            left: 28px;
+            color: rgba(255,255,255,0.3);
+            font-size: 10px;
+            letter-spacing: 0.5px;
             z-index: 20;
         }
-        #status-bar span { color: #00ffff; font-weight: bold; }
-
+        #status-bar span { color: rgba(196,181,253,0.7); font-weight: 500; }
         #interaction-hint {
             position: absolute;
-            top: 30px;
+            top: 28px;
             width: 100%;
             text-align: center;
-            color: rgba(0, 255, 255, 0.3);
+            color: rgba(255,255,255,0.2);
             font-size: 10px;
-            letter-spacing: 4px;
+            letter-spacing: 3px;
             pointer-events: none;
             z-index: 9;
+            text-transform: lowercase;
         }
-
         #zoom-indicator {
             position: absolute;
-            bottom: 30px;
-            right: 30px;
-            color: rgba(0, 255, 255, 0.5);
+            bottom: 80px;
+            right: 28px;
+            color: rgba(255,255,255,0.3);
             font-size: 10px;
-            letter-spacing: 2px;
             z-index: 20;
         }
-
-        /* Audio Control Bar */
+        #zoom-indicator span { color: rgba(196,181,253,0.7); }
         #audio-controls {
-            position: absolute;
-            bottom: 80px;
+            position: fixed;
+            bottom: 24px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 15px;
+            gap: 10px;
             align-items: center;
-            padding: 15px 25px;
-            background: rgba(5, 10, 15, 0.85);
-            border: 1px solid rgba(0, 255, 255, 0.3);
-            border-radius: 4px;
-            z-index: 50;
+            padding: 12px 20px;
+            background: linear-gradient(180deg, rgba(35,28,50,0.88) 0%, rgba(22,20,38,0.92) 100%);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 18px;
+            z-index: 100;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.4s ease;
-            backdrop-filter: blur(10px);
+            transition: all 0.4s ease;
+            backdrop-filter: blur(25px);
         }
-
-        #audio-controls.visible {
-            opacity: 0.75;
-            pointer-events: auto;
-        }
-
-        #audio-controls button {
-            padding: 10px 20px;
+        #audio-controls.visible { opacity: 1; pointer-events: auto; }
+        #audio-controls button, #audio-controls .file-upload {
+            padding: 9px 14px;
             font-size: 11px;
-            min-width: 100px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            color: rgba(255,255,255,0.65);
+            border-radius: 10px;
         }
-
-        #audio-controls .file-upload {
-            padding: 10px 20px;
-            font-size: 11px;
-        }
-
         #play-pause-btn {
-            min-width: 120px;
+            min-width: 78px;
+            background: linear-gradient(135deg, rgba(167,139,250,0.18) 0%, rgba(129,140,248,0.12) 100%) !important;
+            border-color: rgba(167,139,250,0.28) !important;
+            color: #e9d5ff !important;
         }
-
         #play-pause-btn.playing {
-            background: rgba(255, 0, 100, 0.1);
-            border-color: rgba(255, 0, 100, 0.5);
-            color: #ff0064;
+            background: linear-gradient(135deg, rgba(251,113,133,0.18) 0%, rgba(244,114,182,0.12) 100%) !important;
+            border-color: rgba(251,113,133,0.35) !important;
         }
-
-        #play-pause-btn.playing:hover {
-            background: #ff0064;
-            color: #000;
-            box-shadow: 0 0 30px #ff0064;
+        #progress-container {
+            width: 85px;
+            height: 4px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 4px;
+            cursor: pointer;
         }
-
-        #track-name {
-            color: rgba(0, 255, 255, 0.7);
+        #progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #a78bfa, #c084fc, #e879f9);
+            border-radius: 4px;
+            width: 0%;
+        }
+        #time-display {
+            color: rgba(255,255,255,0.35);
             font-size: 10px;
-            letter-spacing: 1px;
-            max-width: 200px;
+            min-width: 62px;
+            text-align: center;
+        }
+        #track-name {
+            color: rgba(255,255,255,0.3);
+            font-size: 10px;
+            max-width: 85px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-
-        /* Progress bar */
-        #progress-container {
-            width: 150px;
-            height: 4px;
-            background: rgba(0, 255, 255, 0.2);
-            border-radius: 2px;
-            cursor: pointer;
-            position: relative;
-        }
-
-        #progress-bar {
-            height: 100%;
-            background: #00ffff;
-            border-radius: 2px;
-            width: 0%;
-            transition: width 0.1s linear;
-        }
-
-        #time-display {
-            color: rgba(0, 255, 255, 0.6);
-            font-size: 10px;
-            letter-spacing: 1px;
-            min-width: 80px;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
-
 <div id="scanlines"></div>
-<div id="interaction-hint">SCROLL TO ZOOM // DRAG TO ORBIT // MOUSE TO INTERACT</div>
-
+<div id="interaction-hint">space · play/pause    scroll · zoom    drag · rotate    F · focus mode</div>
 <div id="overlay">
     <div class="hud-panel">
-        <h1>Quantum Playground</h1>
-        <p>Interactive Field Simulator v4.5 // Audio Control Edition</p>
-
+        <h1>Quantum Fields</h1>
+        <p>Audio-reactive particle simulation</p>
         <div class="btn-group">
-            <label class="file-upload">
-                Load Audio File
-                <input type="file" id="file-input" accept="audio/*">
-            </label>
-            <button id="mic-btn">Initialize Sensors</button>
+            <label class="file-upload">♫ Choose Audio<input type="file" id="file-input" accept="audio/*"></label>
+            <button id="mic-btn">🎙 Microphone</button>
         </div>
     </div>
 </div>
-
-<!-- Persistent Audio Controls -->
 <div id="audio-controls">
-    <button id="play-pause-btn" class="playing">⏸ Pause</button>
-    <div id="progress-container">
-        <div id="progress-bar"></div>
-    </div>
+    <button id="play-pause-btn" class="playing">⏸ pause</button>
+    <div id="progress-container"><div id="progress-bar"></div></div>
     <span id="time-display">0:00 / 0:00</span>
-    <span id="track-name">No Track</span>
-    <label class="file-upload">
-        New Track
-        <input type="file" id="file-input-2" accept="audio/*">
-    </label>
-    <button id="mic-btn-2">🎤 Mic</button>
+    <span id="track-name">no track</span>
+    <label class="file-upload" title="Load audio">📁<input type="file" id="file-input-2" accept="audio/*"></label>
+    <button id="mic-btn-2" title="Microphone">🎙</button>
+    <button id="screenshot-btn" title="Screenshot">📷</button>
+    <button id="fullscreen-btn" title="Fullscreen">⛶</button>
 </div>
-
-<div id="status-bar">SYSTEM: <span>STANDBY</span> // AWAITING INPUT</div>
-<div id="zoom-indicator">ZOOM: <span id="zoom-level">100%</span></div>
+<div id="status-bar"><span>ready</span> · awaiting input</div>
+<div id="zoom-indicator">zoom <span id="zoom-level">100%</span></div>
 
 <script type="importmap">
-    {
-        "imports": {
-            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
-            "lil-gui": "https://unpkg.com/lil-gui@0.19.1/dist/lil-gui.esm.min.js"
-        }
+{
+    "imports": {
+        "three": "https://unpkg.com/three@0.182.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.182.0/examples/jsm/",
+        "lil-gui": "https://unpkg.com/lil-gui@0.19.1/dist/lil-gui.esm.min.js"
     }
+}
 </script>
 
 <script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-    import { AfterimagePass } from 'three/addons/postprocessing/AfterimagePass.js';
-    import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
-    import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-    import GUI from 'lil-gui';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { AfterimagePass } from 'three/addons/postprocessing/AfterimagePass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { Lensflare, LensflareElement } from 'three/addons/objects/Lensflare.js';
+import GUI from 'lil-gui';
 
-    // --- ENHANCED CONFIGURATION ---
-    const CONFIG = {
-        maxParticles: 250000,
-        secondaryParticles: 35000,
-        initialDensity: 0.078,
-        fieldRadius: 75,
-        minZoom: 1,
-        maxZoom: 250,
-        defaultZoom: 75
-    };
+const CONFIG = {
+    maxParticles: 250000,
+    secondaryParticles: 35000,
+    initialDensity: 0.078,
+    fieldRadius: 75,
+    minZoom: 1,
+    maxZoom: 250,
+    defaultZoom: 75
+};
 
-    const STATE = {
-        field: 'Gluon (Strong)',
-        density: CONFIG.initialDensity,
-        sensitivity: 0.5046,
-        trails: 0.66144,
-        bloom: 0.2,
-        timeScale: 2,
-        pixelRatio: Math.min(window.devicePixelRatio, 2),
-        chromaticAberration: 0.004,
-        filmGrain: 0,
-        cameraShake: 0,
-        vortexStrength: 0.656,
-        pulseIntensity: 1.1,
-        anamorphicStretch: 0.1,
-        bassGateThreshold: 0.2605,
-        bassGateAttack: 0.029,
-        bassGateRelease: 0.05,
-        bassGateRatio: 2.142,
-        bassGateEnabled: true
-    };
+const STATE = {
+    field: 'Gluon (Strong)',
+    density: CONFIG.initialDensity,
+    sensitivity: 0.5046,
+    trails: 0.66144,
+    bloom: 0.2,
+    timeScale: 2,
+    pixelRatio: Math.min(window.devicePixelRatio, 2),
+    chromaticAberration: 0.004,
+    filmGrain: 0,
+    cameraShake: 0,
+    vortexStrength: 0.656,
+    pulseIntensity: 1.1,
+    anamorphicStretch: 0.1,
+    bassGateThreshold: 0.2605,
+    bassGateAttack: 0.029,
+    bassGateRelease: 0.05,
+    bassGateRatio: 2.142,
+    bassGateEnabled: true,
+    // NEW EFFECTS
+    godRaysEnabled: true,
+    godRaysIntensity: 0.35,
+    godRaysDecay: 0.94,
+    dofEnabled: false,
+    dofFocus: 75.0,
+    dofAperture: 0.00012,
+    dofMaxBlur: 0.008,
+    lensFlareEnabled: false,
+    lensFlareIntensity: 1.0,
+    particleTrailsEnabled: true,
+    particleTrailOpacity: 0.4
+};
 
-    // --- ENHANCED AUDIO WITH PLAYBACK CONTROLS ---
-    const AUDIO = {
-        ctx: null, analyser: null, source: null, data: null,
-        // Playback state
-        audioBuffer: null,
-        isPlaying: false,
-        isPaused: false,
-        startTime: 0,
-        pauseTime: 0,
-        currentTrackName: 'No Track',
-        mode: null, // 'file' or 'mic'
-        micStream: null,
+// --- AUDIO SYSTEM ---
+const AUDIO = {
+    ctx: null, analyser: null, source: null, data: null,
+    audioBuffer: null, isPlaying: false, isPaused: false,
+    startTime: 0, pauseTime: 0, currentTrackName: 'No Track',
+    mode: null, micStream: null,
+    bands: { subBass: 0, bass: 0, lowMid: 0, mid: 0, highMid: 0, high: 0, ultraHigh: 0 },
+    gatedBands: { subBass: 0, bass: 0, lowMid: 0, mid: 0, highMid: 0, high: 0, ultraHigh: 0 },
+    beatThreshold: 0.1, beatDecay: 0.97, beatEnergy: 0,
+    lastBeatTime: 0, beatDetected: false, peakHistory: [],
+    spectralCentroid: 0, spectralFlux: 0, prevSpectrum: null, active: false,
+    gateState: { isOpen: false, envelope: 0, holdTime: 0, noiseFloor: 0.05,
+        calibrationSamples: [], isCalibrating: true, calibrationFrames: 60 },
 
-        bands: { subBass: 0.1, bass: 200, lowMid: 500, mid: 1000, highMid: 2500, high: 8000, ultraHigh: 20000 },
-        gatedBands: { subBass: 0, bass: 0, lowMid: 0, mid: 0, highMid: 0, high: 0, ultraHigh: 0 },
-        beatThreshold: 0.1,
-        beatDecay: 0.97,
-        beatEnergy: 0,
-        lastBeatTime: 0,
-        beatDetected: false,
-        peakHistory: [],
-        spectralCentroid: 0,
-        spectralFlux: 0,
-        prevSpectrum: null,
-        active: false,
+    init() {
+        if(this.ctx) return;
+        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        this.analyser = this.ctx.createAnalyser();
+        this.analyser.fftSize = 4096;
+        this.analyser.smoothingTimeConstant = 0.72;
+        this.data = new Uint8Array(this.analyser.frequencyBinCount);
+        this.prevSpectrum = new Float32Array(this.analyser.frequencyBinCount);
+        this.active = true;
+    },
 
-        gateState: {
-            isOpen: false,
-            envelope: 0,
-            holdTime: 0,
-            noiseFloor: 0.05,
-            calibrationSamples: [],
-            isCalibrating: true,
-            calibrationFrames: 60
-        },
-
-        init() {
-            if(this.ctx) return;
-            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-            this.analyser = this.ctx.createAnalyser();
-            this.analyser.fftSize = 4096;
-            this.analyser.smoothingTimeConstant = 0.72;
-            this.data = new Uint8Array(this.analyser.frequencyBinCount);
-            this.prevSpectrum = new Float32Array(this.analyser.frequencyBinCount);
-            this.active = true;
-        },
-
-        loadTrack(arrayBuffer, fileName) {
-            return new Promise((resolve, reject) => {
-                this.ctx.decodeAudioData(arrayBuffer, (buffer) => {
-                    this.stopCurrentSource();
-                    this.audioBuffer = buffer;
-                    this.currentTrackName = fileName || 'Unknown Track';
-                    this.mode = 'file';
-                    this.pauseTime = 0;
-                    this.resetCalibration();
-                    resolve(buffer);
-                }, reject);
-            });
-        },
-
-        play() {
-            if (!this.audioBuffer || this.mode !== 'file') return;
-            if (this.isPlaying) return;
-
-            this.source = this.ctx.createBufferSource();
-            this.source.buffer = this.audioBuffer;
-            this.source.loop = true;
-            this.source.connect(this.analyser);
-            this.analyser.connect(this.ctx.destination);
-
-            const offset = this.pauseTime;
-            this.source.start(0, offset);
-            this.startTime = this.ctx.currentTime - offset;
-            this.isPlaying = true;
-            this.isPaused = false;
-
-            this.source.onended = () => {
-                if (!this.isPaused) {
-                    this.isPlaying = false;
-                }
-            };
-        },
-
-        pause() {
-            if (!this.isPlaying || this.mode !== 'file') return;
-
-            this.pauseTime = this.getCurrentTime();
-            this.isPaused = true;
-            this.isPlaying = false;
-
-            if (this.source) {
-                try { this.source.stop(); } catch(e) {}
-                this.source.disconnect();
-                this.source = null;
-            }
-        },
-
-        togglePlayPause() {
-            if (this.mode === 'mic') return false;
-            if (this.isPlaying) {
-                this.pause();
-                return false;
-            } else {
-                this.play();
-                return true;
-            }
-        },
-
-        getCurrentTime() {
-            if (!this.isPlaying) return this.pauseTime;
-            if (!this.audioBuffer) return 0;
-            const elapsed = this.ctx.currentTime - this.startTime;
-            return elapsed % this.audioBuffer.duration;
-        },
-
-        getDuration() {
-            return this.audioBuffer ? this.audioBuffer.duration : 0;
-        },
-
-        seek(time) {
-            if (this.mode !== 'file' || !this.audioBuffer) return;
-            const wasPlaying = this.isPlaying;
-            if (wasPlaying) this.pause();
-            this.pauseTime = Math.max(0, Math.min(time, this.audioBuffer.duration));
-            if (wasPlaying) this.play();
-        },
-
-        stopCurrentSource() {
-            if (this.source) {
-                try { this.source.stop(); } catch(e) {}
-                try { this.source.disconnect(); } catch(e) {}
-                this.source = null;
-            }
-            if (this.micStream) {
-                this.micStream.getTracks().forEach(track => track.stop());
-                this.micStream = null;
-            }
-            this.isPlaying = false;
-            this.isPaused = false;
-            this.pauseTime = 0;
-        },
-
-        startMic() {
-            return navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+    loadTrack(arrayBuffer, fileName) {
+        return new Promise((resolve, reject) => {
+            this.ctx.decodeAudioData(arrayBuffer, (buffer) => {
                 this.stopCurrentSource();
-                this.micStream = stream;
-                this.source = this.ctx.createMediaStreamSource(stream);
-                this.source.connect(this.analyser);
-                this.mode = 'mic';
-                this.isPlaying = true;
-                this.currentTrackName = 'Live Microphone';
+                this.audioBuffer = buffer;
+                this.currentTrackName = fileName || 'Unknown';
+                this.mode = 'file';
+                this.pauseTime = 0;
                 this.resetCalibration();
-                return stream;
-            });
-        },
+                resolve(buffer);
+            }, reject);
+        });
+    },
 
-        resetCalibration() {
-            this.gateState.isCalibrating = true;
-            this.gateState.calibrationSamples = [];
-        },
+    play() {
+        if (!this.audioBuffer || this.mode !== 'file' || this.isPlaying) return;
+        this.source = this.ctx.createBufferSource();
+        this.source.buffer = this.audioBuffer;
+        this.source.loop = true;
+        this.source.connect(this.analyser);
+        this.analyser.connect(this.ctx.destination);
+        this.source.start(0, this.pauseTime);
+        this.startTime = this.ctx.currentTime - this.pauseTime;
+        this.isPlaying = true;
+        this.isPaused = false;
+    },
 
-        applyBassGate(rawValue, bandName) {
-            if (!STATE.bassGateEnabled) return rawValue;
+    pause() {
+        if (!this.isPlaying || this.mode !== 'file') return;
+        this.pauseTime = this.getCurrentTime();
+        this.isPaused = true;
+        this.isPlaying = false;
+        if (this.source) { try { this.source.stop(); } catch(e) {} this.source.disconnect(); this.source = null; }
+    },
 
-            const threshold = STATE.bassGateThreshold;
-            const attack = STATE.bassGateAttack;
-            const release = STATE.bassGateRelease;
-            const ratio = STATE.bassGateRatio;
+    togglePlayPause() {
+        if (this.mode === 'mic') return false;
+        if (this.isPlaying) { this.pause(); return false; }
+        else { this.play(); return true; }
+    },
 
-            if (this.gateState.isCalibrating) {
-                this.gateState.calibrationSamples.push(rawValue);
-                if (this.gateState.calibrationSamples.length >= this.gateState.calibrationFrames) {
-                    const sorted = [...this.gateState.calibrationSamples].sort((a, b) => a - b);
-                    const lowSamples = sorted.slice(0, Math.floor(sorted.length * 0.2));
-                    this.gateState.noiseFloor = lowSamples.reduce((a, b) => a + b, 0) / lowSamples.length;
-                    this.gateState.isCalibrating = false;
-                }
+    getCurrentTime() {
+        if (!this.isPlaying) return this.pauseTime;
+        if (!this.audioBuffer) return 0;
+        return (this.ctx.currentTime - this.startTime) % this.audioBuffer.duration;
+    },
+
+    getDuration() { return this.audioBuffer ? this.audioBuffer.duration : 0; },
+
+    seek(time) {
+        if (this.mode !== 'file' || !this.audioBuffer) return;
+        const wasPlaying = this.isPlaying;
+        if (wasPlaying) this.pause();
+        this.pauseTime = Math.max(0, Math.min(time, this.audioBuffer.duration));
+        if (wasPlaying) this.play();
+    },
+
+    stopCurrentSource() {
+        if (this.source) { try { this.source.stop(); this.source.disconnect(); } catch(e) {} this.source = null; }
+        if (this.micStream) { this.micStream.getTracks().forEach(t => t.stop()); this.micStream = null; }
+        this.isPlaying = false; this.isPaused = false; this.pauseTime = 0;
+    },
+
+    startMic() {
+        return navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+            this.stopCurrentSource();
+            this.micStream = stream;
+            this.source = this.ctx.createMediaStreamSource(stream);
+            this.source.connect(this.analyser);
+            this.mode = 'mic';
+            this.isPlaying = true;
+            this.currentTrackName = 'Live Microphone';
+            this.resetCalibration();
+            return stream;
+        });
+    },
+
+    resetCalibration() { this.gateState.isCalibrating = true; this.gateState.calibrationSamples = []; },
+
+    applyBassGate(rawValue) {
+        if (!STATE.bassGateEnabled) return rawValue;
+        const { bassGateThreshold: threshold, bassGateAttack: attack, bassGateRelease: release, bassGateRatio: ratio } = STATE;
+        if (this.gateState.isCalibrating) {
+            this.gateState.calibrationSamples.push(rawValue);
+            if (this.gateState.calibrationSamples.length >= this.gateState.calibrationFrames) {
+                const sorted = [...this.gateState.calibrationSamples].sort((a,b) => a-b);
+                this.gateState.noiseFloor = sorted.slice(0, Math.floor(sorted.length * 0.2)).reduce((a,b) => a+b, 0) / Math.floor(sorted.length * 0.2);
+                this.gateState.isCalibrating = false;
             }
-
-            const effectiveThreshold = Math.max(threshold, this.gateState.noiseFloor * 1.5);
-            const openThreshold = effectiveThreshold;
-            const closeThreshold = effectiveThreshold * 0.7;
-
-            if (rawValue > openThreshold) {
-                this.gateState.isOpen = true;
-                this.gateState.holdTime = 10;
-            } else if (rawValue < closeThreshold && this.gateState.holdTime <= 0) {
-                this.gateState.isOpen = false;
-            }
-
-            if (this.gateState.holdTime > 0) this.gateState.holdTime--;
-
-            const targetEnvelope = this.gateState.isOpen ? 1.0 : 0.0;
-            const rate = this.gateState.isOpen ? attack : release;
-            this.gateState.envelope += (targetEnvelope - this.gateState.envelope) * rate;
-
-            let output = rawValue;
-            if (this.gateState.isOpen && rawValue > effectiveThreshold) {
-                const excess = rawValue - effectiveThreshold;
-                const compressed = effectiveThreshold + excess / ratio;
-                output = compressed;
-            }
-
-            return output * this.gateState.envelope;
-        },
-
-        update() {
-            if(!this.active) return;
-            this.analyser.getByteFrequencyData(this.data);
-
-            const len = this.data.length;
-            const nyquist = this.ctx.sampleRate / 2;
-
-            const getFreqIndex = (freq) => Math.round(freq / nyquist * len);
-
-            const ranges = {
-                subBass: [20, 60],
-                bass: [60, 250],
-                lowMid: [250, 500],
-                mid: [500, 2000],
-                highMid: [2000, 4000],
-                high: [4000, 8000],
-                ultraHigh: [8000, 16000]
-            };
-
-            let totalEnergy = 0;
-            let weightedFreqSum = 0;
-
-            for (const [band, [low, high]] of Object.entries(ranges)) {
-                const lowIdx = getFreqIndex(low);
-                const highIdx = getFreqIndex(high);
-                let sum = 0;
-                for (let i = lowIdx; i < highIdx && i < len; i++) {
-                    const v = this.data[i] / 255.0;
-                    sum += v;
-                    totalEnergy += v;
-                    weightedFreqSum += v * i;
-                }
-                const rawBand = sum / (highIdx - lowIdx);
-                this.bands[band] = rawBand;
-
-                if (band === 'subBass' || band === 'bass' || band === 'lowMid') {
-                    this.gatedBands[band] = this.applyBassGate(rawBand, band);
-                } else {
-                    this.gatedBands[band] = rawBand;
-                }
-            }
-
-            this.spectralCentroid = totalEnergy > 0 ? weightedFreqSum / totalEnergy / len : 0;
-
-            let flux = 0;
-            for (let i = 0; i < len; i++) {
-                const current = this.data[i] / 255.0;
-                const diff = current - this.prevSpectrum[i];
-                flux += diff > 0 ? diff * diff : 0;
-                this.prevSpectrum[i] = current;
-            }
-            this.spectralFlux = Math.sqrt(flux / len);
-
-            const currentEnergy = this.gatedBands.bass * 0.6 + this.gatedBands.subBass * 0.4;
-            this.peakHistory.push(currentEnergy);
-            if (this.peakHistory.length > 50) this.peakHistory.shift();
-
-            const avgEnergy = this.peakHistory.reduce((a, b) => a + b, 0) / this.peakHistory.length;
-            const variance = this.peakHistory.reduce((a, b) => a + Math.pow(b - avgEnergy, 2), 0) / this.peakHistory.length;
-            const dynamicThreshold = avgEnergy + Math.sqrt(variance) * 1.8;
-
-            const now = performance.now();
-            if (currentEnergy > dynamicThreshold && currentEnergy > this.beatThreshold && 
-                now - this.lastBeatTime > 120) {
-                this.beatDetected = true;
-                this.beatEnergy = 1.0;
-                this.lastBeatTime = now;
-            } else {
-                this.beatDetected = false;
-            }
-
-            this.beatEnergy *= this.beatDecay;
         }
-    };
-
-    // --- SCENE ---
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x000508, 0.005);
-
-    const camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.1, 800);
-    camera.position.set(0, 12, CONFIG.defaultZoom);
-
-    const cameraShakeOffset = new THREE.Vector3();
-    const baseCameraPos = camera.position.clone();
-    const zoomIndicator = document.getElementById('zoom-level');
-
-    const renderer = new THREE.WebGLRenderer({ powerPreference: "high-performance", antialias: false });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(STATE.pixelRatio);
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 2.1;
-    document.body.appendChild(renderer.domElement);
-
-    // --- ZOOM CONTROLS ---
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.06;
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = 0.35;
-    controls.enableZoom = true;
-    controls.zoomSpeed = 1.2;
-    controls.minDistance = CONFIG.minZoom;
-    controls.maxDistance = CONFIG.maxZoom;
-    controls.enablePan = true;
-    controls.panSpeed = 0.5;
-    controls.maxPolarAngle = Math.PI * 0.85;
-    controls.minPolarAngle = Math.PI * 0.15;
-
-    controls.addEventListener('change', () => {
-        const dist = camera.position.length();
-        const zoomPercent = Math.round((1 - (dist - CONFIG.minZoom) / (CONFIG.maxZoom - CONFIG.minZoom)) * 100);
-        zoomIndicator.textContent = Math.max(0, Math.min(100, zoomPercent)) + '%';
-        baseCameraPos.copy(camera.position);
-    });
-
-    window.addEventListener('keydown', (e) => {
-        if (e.key === '+' || e.key === '=') {
-            camera.position.multiplyScalar(0.9);
-            controls.update();
-        } else if (e.key === '-' || e.key === '_') {
-            camera.position.multiplyScalar(1.1);
-            controls.update();
-        } else if (e.key === '0') {
-            camera.position.normalize().multiplyScalar(CONFIG.defaultZoom);
-            controls.update();
-        } else if (e.key === ' ') {
-            e.preventDefault();
-            togglePlayPause();
+        const effectiveThreshold = Math.max(threshold, this.gateState.noiseFloor * 1.5);
+        if (rawValue > effectiveThreshold) { this.gateState.isOpen = true; this.gateState.holdTime = 10; }
+        else if (rawValue < effectiveThreshold * 0.7 && this.gateState.holdTime <= 0) { this.gateState.isOpen = false; }
+        if (this.gateState.holdTime > 0) this.gateState.holdTime--;
+        this.gateState.envelope += ((this.gateState.isOpen ? 1.0 : 0.0) - this.gateState.envelope) * (this.gateState.isOpen ? attack : release);
+        let output = rawValue;
+        if (this.gateState.isOpen && rawValue > effectiveThreshold) {
+            output = effectiveThreshold + (rawValue - effectiveThreshold) / ratio;
         }
-    });
+        return output * this.gateState.envelope;
+    },
 
-    // --- MOUSE INTERACTION ---
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2(9999, 9999);
-    const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-    const mouseWorldPos = new THREE.Vector3();
-    let mouseVelocity = new THREE.Vector2();
-    let prevMouse = new THREE.Vector2();
-
-    window.addEventListener('mousemove', (e) => {
-        const newMouse = new THREE.Vector2(
-            (e.clientX / window.innerWidth) * 2 - 1,
-            -(e.clientY / window.innerHeight) * 2 + 1
-        );
-        mouseVelocity.subVectors(newMouse, prevMouse);
-        prevMouse.copy(newMouse);
-        mouse.copy(newMouse);
-
-        raycaster.setFromCamera(mouse, camera);
-        const target = new THREE.Vector3();
-        raycaster.ray.intersectPlane(plane, target);
-        if(target) mouseWorldPos.copy(target);
-    });
-
-    // --- SHADERS (Same as before) ---
-    const vertexShader = `
-        uniform float uTime;
-        uniform float uPixelRatio;
-        uniform float uSizeBase;
-        uniform float uNoiseScale;
-        uniform float uCurlStrength;
-        uniform float uRadius;
-        uniform vec3 uColor1;
-        uniform vec3 uColor2;
-        uniform vec3 uColor3;
-
-        uniform float uSubBass;
-        uniform float uBass;
-        uniform float uLowMid;
-        uniform float uMid;
-        uniform float uHighMid;
-        uniform float uHigh;
-        uniform float uUltraHigh;
-        uniform float uBeatEnergy;
-        uniform float uSpectralCentroid;
-        uniform float uSpectralFlux;
-
-        uniform float uVortexStrength;
-        uniform float uPulseIntensity;
-        uniform float uZoomFactor;
-
-        uniform vec3 uMousePos;
-        uniform vec2 uMouseVelocity;
-
-        attribute vec3 aRandom;
-        attribute float aPhase;
-        attribute float aLayer;
-
-        varying vec3 vColor;
-        varying float vAlpha;
-        varying float vEnergy;
-        varying float vDepth;
-        varying float vRimLight;
-
-        vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-        vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-        vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
-        vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
-
-        float snoise(vec3 v) {
-            const vec2 C = vec2(1.0/6.0, 1.0/3.0);
-            const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
-            vec3 i = floor(v + dot(v, C.yyy));
-            vec3 x0 = v - i + dot(i, C.xxx);
-            vec3 g = step(x0.yzx, x0.xyz);
-            vec3 l = 1.0 - g;
-            vec3 i1 = min(g.xyz, l.zxy);
-            vec3 i2 = max(g.xyz, l.zxy);
-            vec3 x1 = x0 - i1 + C.xxx;
-            vec3 x2 = x0 - i2 + C.yyy;
-            vec3 x3 = x0 - D.yyy;
-            i = mod289(i);
-            vec4 p = permute(permute(permute(i.z + vec4(0.0, i1.z, i2.z, 1.0)) + i.y + vec4(0.0, i1.y, i2.y, 1.0)) + i.x + vec4(0.0, i1.x, i2.x, 1.0));
-            float n_ = 0.142857142857;
-            vec3 ns = n_ * D.wyz - D.xzx;
-            vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
-            vec4 x_ = floor(j * ns.z);
-            vec4 y_ = floor(j - 7.0 * x_);
-            vec4 x = x_ * ns.x + ns.yyyy;
-            vec4 y = y_ * ns.x + ns.yyyy;
-            vec4 h = 1.0 - abs(x) - abs(y);
-            vec4 b0 = vec4(x.xy, y.xy);
-            vec4 b1 = vec4(x.zw, y.zw);
-            vec4 s0 = floor(b0) * 2.0 + 1.0;
-            vec4 s1 = floor(b1) * 2.0 + 1.0;
-            vec4 sh = -step(h, vec4(0.0));
-            vec4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;
-            vec4 a1 = b1.xzyw + s1.xzyw * sh.zzww;
-            vec3 p0 = vec3(a0.xy, h.x);
-            vec3 p1 = vec3(a0.zw, h.y);
-            vec3 p2 = vec3(a1.xy, h.z);
-            vec3 p3 = vec3(a1.zw, h.w);
-            vec4 norm = taylorInvSqrt(vec4(dot(p0, p0), dot(p1, p1), dot(p2, p2), dot(p3, p3)));
-            p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
-            vec4 m = max(0.6 - vec4(dot(x0, x0), dot(x1, x1), dot(x2, x2), dot(x3, x3)), 0.0);
-            m = m * m;
-            return 42.0 * dot(m * m, vec4(dot(p0, x0), dot(p1, x1), dot(p2, x2), dot(p3, x3)));
-        }
-
-        float fbm(vec3 p, int octaves) {
-            float value = 0.0;
-            float amplitude = 0.5;
-            float frequency = 1.0;
-            for(int i = 0; i < 5; i++) {
-                if(i >= octaves) break;
-                value += amplitude * snoise(p * frequency);
-                frequency *= 2.1;
-                amplitude *= 0.48;
+    update() {
+        if(!this.active) return;
+        this.analyser.getByteFrequencyData(this.data);
+        const len = this.data.length, nyquist = this.ctx.sampleRate / 2;
+        const getFreqIndex = (freq) => Math.round(freq / nyquist * len);
+        const ranges = { subBass: [20,60], bass: [60,250], lowMid: [250,500], mid: [500,2000], highMid: [2000,4000], high: [4000,8000], ultraHigh: [8000,16000] };
+        let totalEnergy = 0, weightedFreqSum = 0;
+        for (const [band, [low, high]] of Object.entries(ranges)) {
+            const lowIdx = getFreqIndex(low), highIdx = getFreqIndex(high);
+            let sum = 0;
+            for (let i = lowIdx; i < highIdx && i < len; i++) {
+                const v = this.data[i] / 255.0;
+                sum += v; totalEnergy += v; weightedFreqSum += v * i;
             }
-            return value;
+            const rawBand = sum / (highIdx - lowIdx);
+            this.bands[band] = rawBand;
+            this.gatedBands[band] = (band === 'subBass' || band === 'bass' || band === 'lowMid') ? this.applyBassGate(rawBand) : rawBand;
         }
+        this.spectralCentroid = totalEnergy > 0 ? weightedFreqSum / totalEnergy / len : 0;
+        let flux = 0;
+        for (let i = 0; i < len; i++) {
+            const current = this.data[i] / 255.0, diff = current - this.prevSpectrum[i];
+            flux += diff > 0 ? diff * diff : 0;
+            this.prevSpectrum[i] = current;
+        }
+        this.spectralFlux = Math.sqrt(flux / len);
+        const currentEnergy = this.gatedBands.bass * 0.6 + this.gatedBands.subBass * 0.4;
+        this.peakHistory.push(currentEnergy);
+        if (this.peakHistory.length > 50) this.peakHistory.shift();
+        const avgEnergy = this.peakHistory.reduce((a,b) => a+b, 0) / this.peakHistory.length;
+        const variance = this.peakHistory.reduce((a,b) => a + Math.pow(b - avgEnergy, 2), 0) / this.peakHistory.length;
+        const dynamicThreshold = avgEnergy + Math.sqrt(variance) * 1.8;
+        const now = performance.now();
+        if (currentEnergy > dynamicThreshold && currentEnergy > this.beatThreshold && now - this.lastBeatTime > 120) {
+            this.beatDetected = true; this.beatEnergy = 1.0; this.lastBeatTime = now;
+        } else { this.beatDetected = false; }
+        this.beatEnergy *= this.beatDecay;
+    }
+};
 
-        vec3 curl(float x, float y, float z) {
-            float eps = 0.08;
-            vec3 curl;
-            curl.x = snoise(vec3(x, y+eps, z)) - snoise(vec3(x, y-eps, z));
-            curl.y = snoise(vec3(x, y, z+eps)) - snoise(vec3(x, y, z-eps));
-            curl.z = snoise(vec3(x+eps, y, z)) - snoise(vec3(x-eps, y, z));
-            return curl;
-        }
+// --- SCENE SETUP ---
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x000508, 0.005);
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.1, 800);
+camera.position.set(0, 12, CONFIG.defaultZoom);
+const cameraShakeOffset = new THREE.Vector3();
+const baseCameraPos = camera.position.clone();
+const zoomIndicator = document.getElementById('zoom-level');
+
+const renderer = new THREE.WebGLRenderer({ powerPreference: "high-performance", antialias: false });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(STATE.pixelRatio);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 2.1;
+document.body.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 0.35;
+controls.minDistance = CONFIG.minZoom;
+controls.maxDistance = CONFIG.maxZoom;
+controls.maxPolarAngle = Math.PI * 0.85;
+controls.minPolarAngle = Math.PI * 0.15;
+
+controls.addEventListener('change', () => {
+    const dist = camera.position.length();
+    const zoomPercent = Math.round((1 - (dist - CONFIG.minZoom) / (CONFIG.maxZoom - CONFIG.minZoom)) * 100);
+    zoomIndicator.textContent = Math.max(0, Math.min(100, zoomPercent)) + '%';
+    baseCameraPos.copy(camera.position);
+});
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2(9999, 9999);
+const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+const mouseWorldPos = new THREE.Vector3();
+let mouseVelocity = new THREE.Vector2();
+let prevMouse = new THREE.Vector2();
+
+window.addEventListener('mousemove', (e) => {
+    const newMouse = new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+    mouseVelocity.subVectors(newMouse, prevMouse);
+    prevMouse.copy(newMouse);
+    mouse.copy(newMouse);
+    raycaster.setFromCamera(mouse, camera);
+    const target = new THREE.Vector3();
+    raycaster.ray.intersectPlane(plane, target);
+    if(target) mouseWorldPos.copy(target);
+});
+
+window.addEventListener('keydown', (e) => {
+    if (e.key === '+' || e.key === '=') { camera.position.multiplyScalar(0.9); controls.update(); }
+    else if (e.key === '-' || e.key === '_') { camera.position.multiplyScalar(1.1); controls.update(); }
+    else if (e.key === '0') { camera.position.normalize().multiplyScalar(CONFIG.defaultZoom); controls.update(); }
+    else if (e.key === ' ') { e.preventDefault(); togglePlayPause(); }
+    else if (e.key === 'f' || e.key === 'F') { STATE.dofEnabled = !STATE.dofEnabled; bokehPass.enabled = STATE.dofEnabled; }
+});
+
+// --- PARTICLE VERTEX SHADER ---
+const vertexShader = `
+uniform float uTime, uPixelRatio, uSizeBase, uNoiseScale, uCurlStrength, uRadius;
+uniform vec3 uColor1, uColor2, uColor3;
+uniform float uSubBass, uBass, uLowMid, uMid, uHighMid, uHigh, uUltraHigh;
+uniform float uBeatEnergy, uSpectralCentroid, uSpectralFlux;
+uniform float uVortexStrength, uPulseIntensity, uZoomFactor;
+uniform vec3 uMousePos;
+uniform vec2 uMouseVelocity;
+attribute vec3 aRandom;
+attribute float aPhase, aLayer;
+varying vec3 vColor;
+varying float vAlpha, vEnergy, vDepth, vRimLight;
+
+vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
+float snoise(vec3 v) {
+    const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+    const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+    vec3 i = floor(v + dot(v, C.yyy));
+    vec3 x0 = v - i + dot(i, C.xxx);
+    vec3 g = step(x0.yzx, x0.xyz);
+    vec3 l = 1.0 - g;
+    vec3 i1 = min(g.xyz, l.zxy);
+    vec3 i2 = max(g.xyz, l.zxy);
+    vec3 x1 = x0 - i1 + C.xxx;
+    vec3 x2 = x0 - i2 + C.yyy;
+    vec3 x3 = x0 - D.yyy;
+    i = mod289(i);
+    vec4 p = permute(permute(permute(i.z + vec4(0.0, i1.z, i2.z, 1.0)) + i.y + vec4(0.0, i1.y, i2.y, 1.0)) + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+    float n_ = 0.142857142857;
+    vec3 ns = n_ * D.wyz - D.xzx;
+    vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+    vec4 x_ = floor(j * ns.z);
+    vec4 y_ = floor(j - 7.0 * x_);
+    vec4 x = x_ * ns.x + ns.yyyy;
+    vec4 y = y_ * ns.x + ns.yyyy;
+    vec4 h = 1.0 - abs(x) - abs(y);
+    vec4 b0 = vec4(x.xy, y.xy);
+    vec4 b1 = vec4(x.zw, y.zw);
+    vec4 s0 = floor(b0) * 2.0 + 1.0;
+    vec4 s1 = floor(b1) * 2.0 + 1.0;
+    vec4 sh = -step(h, vec4(0.0));
+    vec4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;
+    vec4 a1 = b1.xzyw + s1.xzyw * sh.zzww;
+    vec3 p0 = vec3(a0.xy, h.x);
+    vec3 p1 = vec3(a0.zw, h.y);
+    vec3 p2 = vec3(a1.xy, h.z);
+    vec3 p3 = vec3(a1.zw, h.w);
+    vec4 norm = taylorInvSqrt(vec4(dot(p0, p0), dot(p1, p1), dot(p2, p2), dot(p3, p3)));
+    p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+    vec4 m = max(0.6 - vec4(dot(x0, x0), dot(x1, x1), dot(x2, x2), dot(x3, x3)), 0.0);
+    m = m * m;
+    return 42.0 * dot(m * m, vec4(dot(p0, x0), dot(p1, x1), dot(p2, x2), dot(p3, x3)));
+}
+
+vec3 curl(float x, float y, float z) {
+    float eps = 0.08;
+    return vec3(
+        snoise(vec3(x, y+eps, z)) - snoise(vec3(x, y-eps, z)),
+        snoise(vec3(x, y, z+eps)) - snoise(vec3(x, y, z-eps)),
+        snoise(vec3(x+eps, y, z)) - snoise(vec3(x-eps, y, z))
+    );
+}
+
+void main() {
+    float t = uTime * (1.0 + uMid * 0.5);
+    vec3 noisePos = position * 0.035 + aRandom;
+    float layerMod = 1.0 + aLayer * 0.5;
+
+    vec3 flow1 = curl(noisePos.x * uNoiseScale + t*0.1, noisePos.y * uNoiseScale, noisePos.z * uNoiseScale);
+    vec3 flow2 = curl(noisePos.x * uNoiseScale * 2.2 + t*0.07, noisePos.y * uNoiseScale * 2.2 + t*0.08, noisePos.z * uNoiseScale * 2.2) * 0.4;
+    vec3 flow3 = curl(noisePos.x * uNoiseScale * 0.5 - t*0.05, noisePos.y * uNoiseScale * 0.5, noisePos.z * uNoiseScale * 0.5) * 0.6 * uLowMid;
+    vec3 flow = flow1 + flow2 * uHigh + flow3;
+
+    vec3 newPos = position + (flow * uCurlStrength * layerMod * (1.0 + uSpectralFlux * 2.5));
+
+    float distFromCenter = length(newPos.xz);
+    float vortexAngle = uVortexStrength * uBass * 3.5 / (1.0 + distFromCenter * 0.08);
+    float cosA = cos(vortexAngle), sinA = sin(vortexAngle);
+    vec2 rotated = vec2(newPos.x * cosA - newPos.z * sinA, newPos.x * sinA + newPos.z * cosA);
+    newPos.xz = mix(newPos.xz, rotated, uBass * uVortexStrength);
+
+    float yVortex = sin(newPos.y * 0.1 + uTime) * uMid * uVortexStrength * 2.0;
+    newPos.x += cos(newPos.y * 0.15) * yVortex;
+    newPos.z += sin(newPos.y * 0.15) * yVortex;
+
+    float distToMouse = distance(newPos, uMousePos);
+    float repulsion = smoothstep(25.0, 0.0, distToMouse);
+    vec3 repelDir = normalize(newPos - uMousePos + vec3(0.001));
+    newPos += repelDir * repulsion * (12.0 + length(uMouseVelocity) * 360.0);
+
+    float distToCenter = length(newPos);
+    vec3 centerDir = normalize(newPos + vec3(0.001));
+
+    float beatRing = sin(distToCenter * 0.25 - uTime * 6.0) * uBeatEnergy * uPulseIntensity;
+    newPos += centerDir * beatRing * 3.5;
+
+    float breathing = sin(uTime * 1.8 + aPhase) * uSubBass * 4.0;
+    newPos += centerDir * breathing * exp(-distToCenter * 0.04);
+
+    newPos += centerDir * smoothstep(0.3, 0.8, uBass) * 6.0 * exp(-distToCenter * 0.06);
+
+    vec4 mvPosition = modelViewMatrix * vec4(newPos, 1.0);
+    gl_Position = projectionMatrix * mvPosition;
+
+    float size = uSizeBase * (0.65 + uBass * 0.6 + uBeatEnergy * 0.9) * (1.0 + (uZoomFactor - 1.0) * 0.3);
+    size *= 1.0 + sin(uTime * 10.0 + aPhase * 6.28) * uHigh * 0.35;
+    gl_PointSize = clamp(size * uPixelRatio * (70.0 / -mvPosition.z) * layerMod, 0.5, 100.0);
+
+    float colorMix = smoothstep(0.0, 2.8, length(flow) + uHighMid * 3.0);
+    vec3 baseColor = mix(uColor1, uColor2, colorMix);
+    baseColor = mix(baseColor, uColor3, uSpectralCentroid * uHigh * 2.5);
+
+    float energyLevel = uBeatEnergy * 0.7 + repulsion * uMid * 3.0 + uSpectralFlux * 1.2;
+    vColor = mix(baseColor, vec3(1.0), energyLevel * 0.75);
+    vColor += vec3(0.12, 0.06, 0.18) * uUltraHigh * 4.0;
+
+    vRimLight = pow(1.0 - max(0.0, dot(normalize(-mvPosition.xyz), normalize(newPos))), 3.0);
+    vEnergy = energyLevel;
+    vDepth = clamp(-mvPosition.z / 120.0, 0.0, 1.0);
+
+    float alpha = 1.0 - smoothstep(uRadius * 0.7, uRadius, distToCenter);
+    float sparkle = 1.0 + (aRandom.x > 0.72 ? sin(uTime * 30.0 + aRandom.y * 200.0) * uHigh * 6.0 : 0.0);
+    vAlpha = alpha * sparkle * (0.75 + uMid * 0.5) * layerMod;
+}`;
+
+const fragmentShader = `
+varying vec3 vColor;
+varying float vAlpha, vEnergy, vDepth, vRimLight;
+
+void main() {
+    vec2 xy = gl_PointCoord.xy - vec2(0.5);
+    float r = length(xy);
+    if(r > 0.5) discard;
+
+    float core = smoothstep(0.16 - vEnergy * 0.04, 0.12 - vEnergy * 0.04, r);
+    float glow = exp(-r * r * (20.0 - vEnergy * 10.0));
+    float halo = exp(-r * r * 5.0) * 0.35 + exp(-r * r * 2.5) * 0.15;
+
+    vec3 finalColor = mix(vColor, vec3(1.0, 0.95, 0.9), core * 0.7);
+    finalColor += vec3(0.2, 0.3, 0.4) * vRimLight * 0.3;
+    finalColor = mix(finalColor, vec3(0.02, 0.03, 0.05), vDepth * 0.4);
+
+    float finalAlpha = clamp(vAlpha * (glow + halo + pow(1.0 - r * 2.0, 2.5) * 0.6), 0.0, 1.0);
+    gl_FragColor = vec4(finalColor, finalAlpha);
+}`;
+
+// ═══════ POST-PROCESSING SHADERS ═══════
+
+// GOD RAYS SHADER (Radial Light Scattering)
+const GodRaysShader = {
+    uniforms: {
+        tDiffuse: { value: null },
+        uCenter: { value: new THREE.Vector2(0.5, 0.5) },
+        uIntensity: { value: 0.35 },
+        uDecay: { value: 0.94 },
+        uBeatEnergy: { value: 0.0 }
+    },
+    vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `
+        uniform sampler2D tDiffuse;
+        uniform vec2 uCenter;
+        uniform float uIntensity, uDecay, uBeatEnergy;
+        varying vec2 vUv;
 
         void main() {
-            float t = uTime * (1.0 + uMid * 0.5);
-            vec3 noisePos = position * 0.035 + aRandom;
-            float layerMod = 1.0 + aLayer * 0.5;
-
-            vec3 flow1 = curl(noisePos.x * uNoiseScale + t*0.1, noisePos.y * uNoiseScale, noisePos.z * uNoiseScale);
-            vec3 flow2 = curl(noisePos.x * uNoiseScale * 2.2 + t*0.07, noisePos.y * uNoiseScale * 2.2 + t*0.08, noisePos.z * uNoiseScale * 2.2) * 0.4;
-            vec3 flow3 = curl(noisePos.x * uNoiseScale * 0.5 - t*0.05, noisePos.y * uNoiseScale * 0.5, noisePos.z * uNoiseScale * 0.5) * 0.6 * uLowMid;
-            vec3 flow = flow1 + flow2 * uHigh + flow3;
-
-            vec3 newPos = position + (flow * uCurlStrength * layerMod * (1.0 + uSpectralFlux * 2.5));
-
-            float distFromCenter = length(newPos.xz);
-            float vortexAngle = uVortexStrength * uBass * 3.5 / (1.0 + distFromCenter * 0.08);
-            float vortexAngle2 = uVortexStrength * uSubBass * 1.5 / (1.0 + distFromCenter * 0.15);
-            float cosA = cos(vortexAngle + vortexAngle2);
-            float sinA = sin(vortexAngle + vortexAngle2);
-            vec2 rotated = vec2(newPos.x * cosA - newPos.z * sinA, newPos.x * sinA + newPos.z * cosA);
-            newPos.xz = mix(newPos.xz, rotated, uBass * uVortexStrength);
-
-            float yVortex = sin(newPos.y * 0.1 + uTime) * uMid * uVortexStrength * 2.0;
-            newPos.x += cos(newPos.y * 0.15) * yVortex;
-            newPos.z += sin(newPos.y * 0.15) * yVortex;
-
-            float distToMouse = distance(newPos, uMousePos);
-            float repulsion = smoothstep(25.0, 0.0, distToMouse);
-            vec3 repelDir = normalize(newPos - uMousePos + vec3(0.001));
-            float mouseSpeed = length(uMouseVelocity) * 60.0;
-            newPos += repelDir * repulsion * (12.0 + mouseSpeed * 6.0);
-
-            float distToCenter = length(newPos);
-            vec3 centerDir = normalize(newPos + vec3(0.001));
-
-            float beatRing1 = sin(distToCenter * 0.25 - uTime * 6.0) * uBeatEnergy * uPulseIntensity;
-            float beatRing2 = sin(distToCenter * 0.4 - uTime * 4.0 + 1.57) * uBeatEnergy * uPulseIntensity * 0.5;
-            newPos += centerDir * (beatRing1 + beatRing2) * 3.5;
-
-            float breathing = sin(uTime * 1.8 + aPhase) * uSubBass * 4.0;
-            breathing += sin(uTime * 3.6 + aPhase * 2.0) * uSubBass * 1.5;
-            newPos += centerDir * breathing * exp(-distToCenter * 0.04);
-
-            float kick = smoothstep(0.3, 0.8, uBass);
-            newPos += centerDir * (kick * 6.0 * exp(-distToCenter * 0.06));
-
-            float shimmer = fbm(newPos * 0.4 + uTime * 2.5, 3) * uHigh * 2.5;
-            newPos += vec3(shimmer * 0.4, shimmer * 0.6, shimmer * 0.4);
-
-            float sparkleDisp = snoise(newPos * 2.0 + uTime * 10.0) * uUltraHigh * 0.8;
-            newPos += aRandom * sparkleDisp;
-
-            vec4 mvPosition = modelViewMatrix * vec4(newPos, 1.0);
-            gl_Position = projectionMatrix * mvPosition;
-
-            float zoomComp = 1.0 + (uZoomFactor - 1.0) * 0.3;
-            float size = uSizeBase * (0.65 + uBass * 0.6 + uBeatEnergy * 0.9) * zoomComp;
-            size *= 1.0 + sin(uTime * 10.0 + aPhase * 6.28) * uHigh * 0.35;
-            size *= layerMod;
-
-            gl_PointSize = size * uPixelRatio * (70.0 / -mvPosition.z);
-            gl_PointSize = clamp(gl_PointSize, 0.5, 100.0);
-
-            float turb = length(flow);
-            float colorMix = smoothstep(0.0, 2.8, turb + uHighMid * 3.0);
-
-            vec3 baseColor = mix(uColor1, uColor2, colorMix);
-            baseColor = mix(baseColor, uColor3, uSpectralCentroid * uHigh * 2.5);
-
-            baseColor += vec3(0.15, 0.0, 0.0) * uBass * 0.5;
-            baseColor += vec3(0.0, 0.1, 0.2) * uHigh * 0.5;
-
-            float collision = repulsion * uMid * 3.0;
-            float energyLevel = uBeatEnergy * 0.7 + collision + uSpectralFlux * 1.2;
-
-            vColor = mix(baseColor, vec3(1.0), energyLevel * 0.75);
-            vColor += vec3(0.12, 0.06, 0.18) * uUltraHigh * 4.0;
-
-            vec3 viewDir = normalize(-mvPosition.xyz);
-            vec3 normal = normalize(newPos);
-            vRimLight = pow(1.0 - max(0.0, dot(viewDir, normal)), 3.0);
-
-            vEnergy = energyLevel;
-            vDepth = clamp(-mvPosition.z / 120.0, 0.0, 1.0);
-
-            float alpha = 1.0 - smoothstep(uRadius * 0.7, uRadius, distToCenter);
-            float sparkle = 1.0 + (aRandom.x > 0.72 ? sin(uTime * 30.0 + aRandom.y * 200.0) * uHigh * 6.0 : 0.0);
-            sparkle += uBeatEnergy * (aRandom.z > 0.75 ? 2.5 : 0.0);
-            vAlpha = alpha * sparkle * (0.75 + uMid * 0.5) * layerMod;
-        }
-    `;
-
-    const fragmentShader = `
-        varying vec3 vColor;
-        varying float vAlpha;
-        varying float vEnergy;
-        varying float vDepth;
-        varying float vRimLight;
-
-        void main() {
-            vec2 xy = gl_PointCoord.xy - vec2(0.5);
-            float r = length(xy);
-            if(r > 0.5) discard;
-
-            float coreSize = 0.12 - vEnergy * 0.04;
-            float core = smoothstep(coreSize + 0.04, coreSize, r);
-            float glow = exp(-r * r * (20.0 - vEnergy * 10.0));
-            float halo = exp(-r * r * 5.0) * 0.35;
-            float outerHalo = exp(-r * r * 2.5) * 0.15;
-            float fresnel = pow(1.0 - r * 2.0, 2.5) * 0.6;
-
-            vec3 finalColor = vColor;
-            finalColor = mix(finalColor, vec3(1.0, 0.95, 0.9), core * 0.7);
-            finalColor += vec3(0.2, 0.3, 0.4) * vRimLight * 0.3;
-
-            vec3 fogColor = vec3(0.02, 0.03, 0.05);
-            finalColor = mix(finalColor, fogColor, vDepth * 0.4);
-            finalColor = mix(vec3(dot(finalColor, vec3(0.299, 0.587, 0.114))), finalColor, 1.0 + vEnergy * 0.3);
-
-            float finalAlpha = vAlpha * (glow + halo + outerHalo + fresnel);
-            finalAlpha = clamp(finalAlpha, 0.0, 1.0);
-
-            gl_FragColor = vec4(finalColor, finalAlpha);
-        }
-    `;
-
-    // --- POST-PROCESSING SHADERS ---
-    const AnamorphicShader = {
-        uniforms: {
-            tDiffuse: { value: null },
-            uStretch: { value: STATE.anamorphicStretch },
-            uThreshold: { value: 0.7 },
-            uIntensity: { value: 0.4 }
-        },
-        vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-        fragmentShader: `
-            uniform sampler2D tDiffuse; uniform float uStretch; uniform float uThreshold; uniform float uIntensity; varying vec2 vUv;
-            void main() {
-                vec4 color = texture2D(tDiffuse, vUv);
-                vec3 streak = vec3(0.0); float samples = 15.0;
-                for(float i = -samples; i <= samples; i++) {
-                    vec2 offset = vec2(i * uStretch * 0.01, 0.0);
-                    vec4 sampleColor = texture2D(tDiffuse, vUv + offset);
-                    float sampleBright = dot(sampleColor.rgb, vec3(0.299, 0.587, 0.114));
-                    if(sampleBright > uThreshold) { float weight = 1.0 - abs(i) / samples; streak += sampleColor.rgb * weight * weight; }
-                }
-                streak /= samples * 0.5; streak *= vec3(0.6, 0.8, 1.0);
-                gl_FragColor = vec4(color.rgb + streak * uIntensity, color.a);
-            }`
-    };
-
-    const ChromaticAberrationShader = {
-        uniforms: { tDiffuse: { value: null }, uIntensity: { value: STATE.chromaticAberration }, uBeatEnergy: { value: 0.0 } },
-        vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-        fragmentShader: `
-            uniform sampler2D tDiffuse; uniform float uIntensity; uniform float uBeatEnergy; varying vec2 vUv;
-            void main() {
-                vec2 center = vec2(0.5); vec2 dir = vUv - center; float dist = length(dir);
-                float aberration = uIntensity * (1.0 + uBeatEnergy * 4.0); vec2 offset = dir * dist * aberration;
-                float r = texture2D(tDiffuse, vUv + offset * 1.2).r;
-                float g = texture2D(tDiffuse, vUv).g;
-                float b = texture2D(tDiffuse, vUv - offset * 1.2).b;
-                gl_FragColor = vec4(r, g, b, 1.0);
-            }`
-    };
-
-    const FilmGrainShader = {
-        uniforms: { tDiffuse: { value: null }, uTime: { value: 0.0 }, uIntensity: { value: STATE.filmGrain } },
-        vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-        fragmentShader: `
-            uniform sampler2D tDiffuse; uniform float uTime; uniform float uIntensity; varying vec2 vUv;
-            float random(vec2 co) { return fract(sin(dot(co.xy, vec2(12.9898,78.233))) * 43758.5453); }
-            void main() {
-                vec4 color = texture2D(tDiffuse, vUv);
-                float grain = random(vUv + fract(uTime)) * 2.0 - 1.0;
-                float luminance = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-                color.rgb += grain * uIntensity * (1.0 - luminance * 0.5);
-                gl_FragColor = color;
-            }`
-    };
-
-    // --- GEOMETRY ---
-    const geometry = new THREE.BufferGeometry();
-    const pos = [], rnd = [], phase = [], layer = [];
-    const vec = new THREE.Vector3();
-
-    for(let i = 0; i < CONFIG.maxParticles; i++) {
-        const r = CONFIG.fieldRadius * Math.pow(Math.random(), 0.33);
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos(2 * Math.random() - 1);
-        vec.setFromSphericalCoords(r, phi, theta);
-        pos.push(vec.x, vec.y, vec.z);
-        rnd.push(Math.random(), Math.random(), Math.random());
-        phase.push(Math.random() * Math.PI * 2);
-        layer.push(0);
-    }
-
-    for(let i = 0; i < CONFIG.secondaryParticles; i++) {
-        const r = CONFIG.fieldRadius * (0.7 + Math.random() * 0.4);
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos(2 * Math.random() - 1);
-        vec.setFromSphericalCoords(r, phi, theta);
-        pos.push(vec.x, vec.y, vec.z);
-        rnd.push(Math.random(), Math.random(), Math.random());
-        phase.push(Math.random() * Math.PI * 2);
-        layer.push(1);
-    }
-
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-    geometry.setAttribute('aRandom', new THREE.Float32BufferAttribute(rnd, 3));
-    geometry.setAttribute('aPhase', new THREE.Float32BufferAttribute(phase, 1));
-    geometry.setAttribute('aLayer', new THREE.Float32BufferAttribute(layer, 1));
-    geometry.setDrawRange(0, Math.floor((CONFIG.maxParticles + CONFIG.secondaryParticles) * STATE.density));
-
-    const FIELD_TYPES = {
-        'Photon (EM)': { c1:'#00f2ff', c2:'#0051ff', c3:'#ffffff', s:1.0, curl:1.0, sz:1.4 },
-        'Gluon (Strong)': { c1:'#ff0055', c2:'#7000ff', c3:'#ff8800', s:2.5, curl:2.4, sz:1.7 },
-        'Higgs (Mass)': { c1:'#ffae00', c2:'#ff4800', c3:'#ffff00', s:0.6, curl:0.3, sz:2.3 },
-        'Gravity': { c1:'#ffffff', c2:'#4466ff', c3:'#8844ff', s:0.75, curl:0.18, sz:1.2 },
-        'Dark Energy': { c1:'#1a0033', c2:'#6600ff', c3:'#ff00ff', s:1.9, curl:1.6, sz:1.5 },
-        'Neutrino': { c1:'#00ff88', c2:'#00ffcc', c3:'#88ffff', s:3.0, curl:3.0, sz:1.0 }
-    };
-
-    const def = FIELD_TYPES[STATE.field];
-    const material = new THREE.ShaderMaterial({
-        vertexShader, fragmentShader,
-        uniforms: {
-            uTime: { value: 0 },
-            uPixelRatio: { value: STATE.pixelRatio },
-            uSizeBase: { value: def.sz },
-            uNoiseScale: { value: def.s },
-            uCurlStrength: { value: def.curl },
-            uRadius: { value: CONFIG.fieldRadius },
-            uColor1: { value: new THREE.Color(def.c1) },
-            uColor2: { value: new THREE.Color(def.c2) },
-            uColor3: { value: new THREE.Color(def.c3) },
-            uSubBass: { value: 0 }, uBass: { value: 0 }, uLowMid: { value: 0 },
-            uMid: { value: 0 }, uHighMid: { value: 0 }, uHigh: { value: 0 }, uUltraHigh: { value: 0 },
-            uBeatEnergy: { value: 0 }, uSpectralCentroid: { value: 0 }, uSpectralFlux: { value: 0 },
-            uVortexStrength: { value: STATE.vortexStrength },
-            uPulseIntensity: { value: STATE.pulseIntensity },
-            uZoomFactor: { value: 1.0 },
-            uMousePos: { value: new THREE.Vector3(999,999,999) },
-            uMouseVelocity: { value: new THREE.Vector2(0, 0) }
-        },
-        transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
-    });
-
-    const points = new THREE.Points(geometry, material);
-    scene.add(points);
-
-    // --- POST PROCESSING ---
-    const composer = new EffectComposer(renderer);
-    composer.addPass(new RenderPass(scene, camera));
-    const afterimagePass = new AfterimagePass();
-    afterimagePass.uniforms['damp'].value = STATE.trails;
-    composer.addPass(afterimagePass);
-    const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-    bloomPass.threshold = 0.1; bloomPass.strength = STATE.bloom; bloomPass.radius = 0.32;
-    composer.addPass(bloomPass);
-    const anamorphicPass = new ShaderPass(AnamorphicShader);
-    composer.addPass(anamorphicPass);
-    const chromaticPass = new ShaderPass(ChromaticAberrationShader);
-    composer.addPass(chromaticPass);
-    const grainPass = new ShaderPass(FilmGrainShader);
-    composer.addPass(grainPass);
-    composer.addPass(new OutputPass());
-
-    // --- GUI ---
-    const gui = new GUI({ title: 'QUANTUM CONTROLS v4.5' });
-    gui.add(STATE, 'sensitivity', 0.1, 3.0).name('Audio Sensitivity');
-
-    const f_phys = gui.addFolder('Physics Engine');
-    f_phys.add(STATE, 'field', Object.keys(FIELD_TYPES)).name('Field Type').onChange(val => {
-        const d = FIELD_TYPES[val];
-        const c1 = new THREE.Color(d.c1), c2 = new THREE.Color(d.c2), c3 = new THREE.Color(d.c3);
-        const start = performance.now();
-        function step() {
-            const p = Math.min((performance.now()-start)/1500, 1);
-            material.uniforms.uColor1.value.lerp(c1, 0.05);
-            material.uniforms.uColor2.value.lerp(c2, 0.05);
-            material.uniforms.uColor3.value.lerp(c3, 0.05);
-            material.uniforms.uNoiseScale.value = THREE.MathUtils.lerp(material.uniforms.uNoiseScale.value, d.s, 0.04);
-            material.uniforms.uCurlStrength.value = THREE.MathUtils.lerp(material.uniforms.uCurlStrength.value, d.curl, 0.04);
-            material.uniforms.uSizeBase.value = THREE.MathUtils.lerp(material.uniforms.uSizeBase.value, d.sz, 0.04);
-            if(p<1) requestAnimationFrame(step);
-        }
-        step();
-    });
-    f_phys.add(STATE, 'density', 0.0, 1.0).name('Density').onChange(v => geometry.setDrawRange(0, Math.floor((CONFIG.maxParticles + CONFIG.secondaryParticles)*v)));
-    f_phys.add(STATE, 'vortexStrength', 0.0, 1.0).name('Vortex Strength').onChange(v => material.uniforms.uVortexStrength.value = v);
-    f_phys.add(STATE, 'pulseIntensity', 0.0, 2.5).name('Pulse Intensity').onChange(v => material.uniforms.uPulseIntensity.value = v);
-
-    const f_gate = gui.addFolder('Bass Gate');
-    f_gate.add(STATE, 'bassGateEnabled').name('Enable Gate');
-    f_gate.add(STATE, 'bassGateThreshold', 0.0, 0.5).name('Threshold');
-    f_gate.add(STATE, 'bassGateAttack', 0.01, 0.3).name('Attack');
-    f_gate.add(STATE, 'bassGateRelease', 0.05, 0.5).name('Release');
-    f_gate.add(STATE, 'bassGateRatio', 1.0, 10.0).name('Ratio');
-
-    const f_vis = gui.addFolder('Optics & Visuals');
-    f_vis.add(afterimagePass.uniforms['damp'], 'value', 0.5, 0.98).name('Trail Persistence');
-    f_vis.add(bloomPass, 'strength', 0.0, 3.0).name('Bloom Strength');
-    f_vis.add(STATE, 'anamorphicStretch', 0.0, 1.0).name('Anamorphic Flare').onChange(v => anamorphicPass.uniforms.uStretch.value = v);
-    f_vis.add(STATE, 'chromaticAberration', 0.0, 0.025).name('Chromatic Aberration').onChange(v => chromaticPass.uniforms.uIntensity.value = v);
-    f_vis.add(STATE, 'filmGrain', 0.0, 0.2).name('Film Grain').onChange(v => grainPass.uniforms.uIntensity.value = v);
-    f_vis.add(STATE, 'cameraShake', 0.0, 2.0).name('Camera Shake');
-    f_vis.add(STATE, 'timeScale', 0.0, 3.0).name('Time Flow');
-
-    // --- UI ELEMENTS ---
-    const overlay = document.getElementById('overlay');
-    const status = document.getElementById('status-bar');
-    const audioControls = document.getElementById('audio-controls');
-    const playPauseBtn = document.getElementById('play-pause-btn');
-    const progressBar = document.getElementById('progress-bar');
-    const progressContainer = document.getElementById('progress-container');
-    const timeDisplay = document.getElementById('time-display');
-    const trackName = document.getElementById('track-name');
-
-    function formatTime(seconds) {
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-    }
-
-    function updatePlayPauseButton() {
-        if (AUDIO.mode === 'mic') {
-            playPauseBtn.textContent = '🎤 Live';
-            playPauseBtn.classList.remove('playing');
-            playPauseBtn.disabled = true;
-        } else if (AUDIO.isPlaying) {
-            playPauseBtn.textContent = '⏸ Pause';
-            playPauseBtn.classList.add('playing');
-            playPauseBtn.disabled = false;
-        } else {
-            playPauseBtn.textContent = '▶ Play';
-            playPauseBtn.classList.remove('playing');
-            playPauseBtn.disabled = false;
-        }
-    }
-
-    function updateProgressDisplay() {
-        if (AUDIO.mode === 'file' && AUDIO.audioBuffer) {
-            const current = AUDIO.getCurrentTime();
-            const duration = AUDIO.getDuration();
-            progressBar.style.width = (current / duration * 100) + '%';
-            timeDisplay.textContent = `${formatTime(current)} / ${formatTime(duration)}`;
-        } else {
-            progressBar.style.width = '0%';
-            timeDisplay.textContent = AUDIO.mode === 'mic' ? 'LIVE' : '0:00 / 0:00';
-        }
-    }
-
-    function togglePlayPause() {
-        if (AUDIO.mode !== 'file') return;
-        AUDIO.togglePlayPause();
-        updatePlayPauseButton();
-        status.innerHTML = AUDIO.isPlaying ? 
-            'SYSTEM: <span>PLAYING</span> // QUANTUM SYNC ACTIVE' : 
-            'SYSTEM: <span>PAUSED</span> // PRESS PLAY TO RESUME';
-    }
-
-    function activate() {
-        AUDIO.init();
-        if(AUDIO.ctx.state === 'suspended') AUDIO.ctx.resume();
-        overlay.style.opacity = 0;
-        setTimeout(() => overlay.style.display = 'none', 800);
-        audioControls.classList.add('visible');
-    }
-
-    async function loadAndPlayTrack(file) {
-        activate();
-        const arrayBuffer = await file.arrayBuffer();
-        await AUDIO.loadTrack(arrayBuffer, file.name);
-        AUDIO.play();
-        trackName.textContent = file.name.length > 25 ? file.name.substring(0, 22) + '...' : file.name;
-        updatePlayPauseButton();
-        status.innerHTML = 'SYSTEM: <span>PLAYING</span> // QUANTUM SYNC ACTIVE';
-    }
-
-    async function startMicMode() {
-        activate();
-        await AUDIO.startMic();
-        trackName.textContent = 'Live Microphone';
-        updatePlayPauseButton();
-        status.innerHTML = 'SYSTEM: <span>LISTENING</span> // LIVE MODE';
-    }
-
-    // --- EVENT LISTENERS ---
-    document.getElementById('file-input').addEventListener('change', (e) => {
-        if (e.target.files[0]) loadAndPlayTrack(e.target.files[0]);
-    });
-
-    document.getElementById('file-input-2').addEventListener('change', (e) => {
-        if (e.target.files[0]) loadAndPlayTrack(e.target.files[0]);
-        e.target.value = ''; // Reset so same file can be selected again
-    });
-
-    document.getElementById('mic-btn').addEventListener('click', startMicMode);
-    document.getElementById('mic-btn-2').addEventListener('click', startMicMode);
-
-    playPauseBtn.addEventListener('click', togglePlayPause);
-
-    progressContainer.addEventListener('click', (e) => {
-        if (AUDIO.mode !== 'file' || !AUDIO.audioBuffer) return;
-        const rect = progressContainer.getBoundingClientRect();
-        const percent = (e.clientX - rect.left) / rect.width;
-        AUDIO.seek(percent * AUDIO.getDuration());
-    });
-
-    // --- ANIMATION LOOP ---
-    const clock = new THREE.Clock();
-
-    function animate() {
-        requestAnimationFrame(animate);
-        const dt = clock.getDelta();
-        const elapsed = clock.getElapsedTime();
-
-        material.uniforms.uTime.value += dt * STATE.timeScale;
-        grainPass.uniforms.uTime.value = elapsed;
-
-        const currentZoom = camera.position.length();
-        material.uniforms.uZoomFactor.value = currentZoom / CONFIG.defaultZoom;
-
-        material.uniforms.uMousePos.value.lerp(mouseWorldPos, 0.1);
-        material.uniforms.uMouseVelocity.value.lerp(mouseVelocity, 0.08);
-
-        AUDIO.update();
-        updateProgressDisplay();
-
-        const s = STATE.sensitivity;
-        const lerpFactor = 0.16;
-        material.uniforms.uSubBass.value = THREE.MathUtils.lerp(material.uniforms.uSubBass.value, AUDIO.gatedBands.subBass*s, lerpFactor);
-        material.uniforms.uBass.value = THREE.MathUtils.lerp(material.uniforms.uBass.value, AUDIO.gatedBands.bass*s, lerpFactor);
-        material.uniforms.uLowMid.value = THREE.MathUtils.lerp(material.uniforms.uLowMid.value, AUDIO.gatedBands.lowMid*s, lerpFactor);
-        material.uniforms.uMid.value = THREE.MathUtils.lerp(material.uniforms.uMid.value, AUDIO.gatedBands.mid*s, lerpFactor);
-        material.uniforms.uHighMid.value = THREE.MathUtils.lerp(material.uniforms.uHighMid.value, AUDIO.gatedBands.highMid*s, lerpFactor);
-        material.uniforms.uHigh.value = THREE.MathUtils.lerp(material.uniforms.uHigh.value, AUDIO.gatedBands.high*s, lerpFactor);
-        material.uniforms.uUltraHigh.value = THREE.MathUtils.lerp(material.uniforms.uUltraHigh.value, AUDIO.gatedBands.ultraHigh*s, lerpFactor);
-        material.uniforms.uBeatEnergy.value = THREE.MathUtils.lerp(material.uniforms.uBeatEnergy.value, AUDIO.beatEnergy, 0.22);
-        material.uniforms.uSpectralCentroid.value = THREE.MathUtils.lerp(material.uniforms.uSpectralCentroid.value, AUDIO.spectralCentroid, lerpFactor);
-        material.uniforms.uSpectralFlux.value = THREE.MathUtils.lerp(material.uniforms.uSpectralFlux.value, AUDIO.spectralFlux*s, lerpFactor);
-
-        chromaticPass.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
-
-        if (STATE.cameraShake > 0 && AUDIO.beatEnergy > 0.1) {
-            const shakeIntensity = AUDIO.beatEnergy * STATE.cameraShake;
-            cameraShakeOffset.set(
-                (Math.random() - 0.5) * shakeIntensity * 0.6,
-                (Math.random() - 0.5) * shakeIntensity * 0.4,
-                (Math.random() - 0.5) * shakeIntensity * 0.25
+            vec4 color = texture2D(tDiffuse, vUv);
+            vec2 dir = vUv - uCenter;
+            float dist = length(dir);
+            dir = normalize(dir);
+
+            vec3 rays = vec3(0.0);
+            float decay = 1.0;
+
+            for(int i = 0; i < 32; i++) {
+                float t = float(i) / 32.0;
+                vec2 samplePos = vUv - dir * t * 0.15 * (1.0 + uBeatEnergy);
+                vec4 s = texture2D(tDiffuse, samplePos);
+                float lum = dot(s.rgb, vec3(0.3, 0.59, 0.11));
+                rays += s.rgb * decay * step(0.35, lum);
+                decay *= uDecay;
+            }
+            rays /= 16.0;
+            rays *= (1.0 - smoothstep(0.3, 0.9, dist));
+
+            gl_FragColor = vec4(color.rgb + rays * uIntensity * (1.0 + uBeatEnergy * 2.0), 1.0);
+        }`
+};
+
+// LENS FLARE POST-PROCESS SHADER
+const LensFlareShader = {
+    uniforms: {
+        tDiffuse: { value: null },
+        uIntensity: { value: 1.0 },
+        uGhostDispersal: { value: 0.35 },
+        uHaloWidth: { value: 0.5 },
+        uBeatEnergy: { value: 0.0 },
+        uTime: { value: 0.0 }
+    },
+    vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `
+        uniform sampler2D tDiffuse;
+        uniform float uIntensity, uGhostDispersal, uHaloWidth, uBeatEnergy, uTime;
+        varying vec2 vUv;
+
+        vec3 sampleDistorted(vec2 uv, vec2 dir, float distortion) {
+            return vec3(
+                texture2D(tDiffuse, uv + dir * distortion * -0.004).r,
+                texture2D(tDiffuse, uv).g,
+                texture2D(tDiffuse, uv + dir * distortion * 0.004).b
             );
-            camera.position.copy(baseCameraPos).add(cameraShakeOffset);
         }
 
-        controls.autoRotateSpeed = 0.35 + material.uniforms.uMid.value * 2.0 + material.uniforms.uBeatEnergy.value * 2.0;
-        const energyLevel = (AUDIO.gatedBands.bass + AUDIO.gatedBands.mid + AUDIO.beatEnergy) / 3;
-        bloomPass.strength = STATE.bloom + energyLevel * 0.5;
-        anamorphicPass.uniforms.uIntensity.value = 0.3 + AUDIO.gatedBands.bass * 0.4;
+        void main() {
+            vec4 color = texture2D(tDiffuse, vUv);
+            vec2 texcoord = -vUv + vec2(1.0);
+            vec2 ghostVec = (vec2(0.5) - texcoord) * uGhostDispersal;
+            vec2 direction = normalize(ghostVec);
 
-        controls.update();
-        composer.render();
+            vec3 result = vec3(0.0);
+
+            for(int i = 0; i < 4; i++) {
+                vec2 offset = fract(texcoord + ghostVec * float(i));
+                float weight = pow(1.0 - length(vec2(0.5) - offset) / 0.707, 5.0);
+                vec3 s = sampleDistorted(offset, direction, 1.5);
+                result += s * weight * step(0.5, dot(s, vec3(0.3, 0.59, 0.11)));
+            }
+
+            vec2 haloVec = normalize(ghostVec) * uHaloWidth;
+            float haloWeight = pow(1.0 - length(vec2(0.5) - fract(texcoord + haloVec)) / 0.707, 8.0);
+            result += sampleDistorted(texcoord + haloVec, direction, 1.5) * haloWeight * 0.5;
+
+            float dist = length(vUv - 0.5);
+            float ring = smoothstep(0.35, 0.4, dist) * smoothstep(0.5, 0.45, dist);
+            result += vec3(0.4, 0.3, 0.6) * ring * (0.15 + uBeatEnergy * 0.3);
+
+            gl_FragColor = vec4(color.rgb + result * uIntensity * (1.0 + uBeatEnergy * 0.8) * 0.25, 1.0);
+        }`
+};
+
+// ANAMORPHIC FLARE SHADER
+const AnamorphicShader = {
+    uniforms: {
+        tDiffuse: { value: null },
+        uStretch: { value: 0.1 },
+        uThreshold: { value: 0.7 },
+        uIntensity: { value: 0.4 }
+    },
+    vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `
+        uniform sampler2D tDiffuse;
+        uniform float uStretch, uThreshold, uIntensity;
+        varying vec2 vUv;
+        void main() {
+            vec4 color = texture2D(tDiffuse, vUv);
+            vec3 streak = vec3(0.0);
+            for(float i = -15.0; i <= 15.0; i++) {
+                vec4 s = texture2D(tDiffuse, vUv + vec2(i * uStretch * 0.01, 0.0));
+                float bright = dot(s.rgb, vec3(0.299, 0.587, 0.114));
+                if(bright > uThreshold) {
+                    float w = 1.0 - abs(i) / 15.0;
+                    streak += s.rgb * w * w;
+                }
+            }
+            gl_FragColor = vec4(color.rgb + streak / 7.5 * vec3(0.6, 0.8, 1.0) * uIntensity, color.a);
+        }`
+};
+
+// CHROMATIC ABERRATION SHADER
+const ChromaticShader = {
+    uniforms: {
+        tDiffuse: { value: null },
+        uIntensity: { value: 0.004 },
+        uBeatEnergy: { value: 0.0 }
+    },
+    vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `
+        uniform sampler2D tDiffuse;
+        uniform float uIntensity, uBeatEnergy;
+        varying vec2 vUv;
+        void main() {
+            vec2 dir = vUv - vec2(0.5);
+            float dist = length(dir);
+            vec2 offset = dir * dist * uIntensity * (1.0 + uBeatEnergy * 4.0);
+            gl_FragColor = vec4(
+                texture2D(tDiffuse, vUv + offset * 1.2).r,
+                texture2D(tDiffuse, vUv).g,
+                texture2D(tDiffuse, vUv - offset * 1.2).b,
+                1.0
+            );
+        }`
+};
+
+// FILM GRAIN SHADER
+const GrainShader = {
+    uniforms: {
+        tDiffuse: { value: null },
+        uTime: { value: 0.0 },
+        uIntensity: { value: 0.0 }
+    },
+    vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `
+        uniform sampler2D tDiffuse;
+        uniform float uTime, uIntensity;
+        varying vec2 vUv;
+        float rand(vec2 co) { return fract(sin(dot(co, vec2(12.9898,78.233))) * 43758.5453); }
+        void main() {
+            vec4 color = texture2D(tDiffuse, vUv);
+            float grain = (rand(vUv + fract(uTime)) * 2.0 - 1.0) * uIntensity;
+            gl_FragColor = vec4(color.rgb + grain * (1.0 - dot(color.rgb, vec3(0.299, 0.587, 0.114)) * 0.5), color.a);
+        }`
+};
+
+// VIGNETTE + GLOW SHADER
+const VignetteShader = {
+    uniforms: {
+        tDiffuse: { value: null },
+        uBeatEnergy: { value: 0.0 }
+    },
+    vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `
+        uniform sampler2D tDiffuse;
+        uniform float uBeatEnergy;
+        varying vec2 vUv;
+        void main() {
+            vec4 color = texture2D(tDiffuse, vUv);
+            vec2 uv = vUv * (1.0 - vUv.yx);
+            float vig = pow(uv.x * uv.y * 15.0, 0.35 * (1.0 - uBeatEnergy * 0.3));
+            float lum = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+            float glow = smoothstep(0.4, 0.9, lum) * 0.15 * (1.0 + uBeatEnergy);
+            gl_FragColor = vec4(color.rgb * vig * (1.0 + glow), color.a);
+        }`
+};
+
+// ═══════ GEOMETRY ═══════
+const geometry = new THREE.BufferGeometry();
+const pos = [], rnd = [], phase = [], layer = [];
+const vec = new THREE.Vector3();
+
+for(let i = 0; i < CONFIG.maxParticles; i++) {
+    vec.setFromSphericalCoords(
+        CONFIG.fieldRadius * Math.pow(Math.random(), 0.33),
+        Math.acos(2 * Math.random() - 1),
+        Math.random() * Math.PI * 2
+    );
+    pos.push(vec.x, vec.y, vec.z);
+    rnd.push(Math.random(), Math.random(), Math.random());
+    phase.push(Math.random() * Math.PI * 2);
+    layer.push(0);
+}
+
+for(let i = 0; i < CONFIG.secondaryParticles; i++) {
+    vec.setFromSphericalCoords(
+        CONFIG.fieldRadius * (0.7 + Math.random() * 0.4),
+        Math.acos(2 * Math.random() - 1),
+        Math.random() * Math.PI * 2
+    );
+    pos.push(vec.x, vec.y, vec.z);
+    rnd.push(Math.random(), Math.random(), Math.random());
+    phase.push(Math.random() * Math.PI * 2);
+    layer.push(1);
+}
+
+geometry.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+geometry.setAttribute('aRandom', new THREE.Float32BufferAttribute(rnd, 3));
+geometry.setAttribute('aPhase', new THREE.Float32BufferAttribute(phase, 1));
+geometry.setAttribute('aLayer', new THREE.Float32BufferAttribute(layer, 1));
+geometry.setDrawRange(0, Math.floor((CONFIG.maxParticles + CONFIG.secondaryParticles) * STATE.density));
+
+const FIELD_TYPES = {
+    'Photon (EM)': { c1:'#00f2ff', c2:'#0051ff', c3:'#ffffff', s:1.0, curl:1.0, sz:1.4 },
+    'Gluon (Strong)': { c1:'#ff0055', c2:'#7000ff', c3:'#ff8800', s:2.5, curl:2.4, sz:1.7 },
+    'Higgs (Mass)': { c1:'#ffae00', c2:'#ff4800', c3:'#ffff00', s:0.6, curl:0.3, sz:2.3 },
+    'Gravity': { c1:'#ffffff', c2:'#4466ff', c3:'#8844ff', s:0.75, curl:0.18, sz:1.2 },
+    'Dark Energy': { c1:'#1a0033', c2:'#6600ff', c3:'#ff00ff', s:1.9, curl:1.6, sz:1.5 },
+    'Neutrino': { c1:'#00ff88', c2:'#00ffcc', c3:'#88ffff', s:3.0, curl:3.0, sz:1.0 }
+};
+
+const def = FIELD_TYPES[STATE.field];
+const material = new THREE.ShaderMaterial({
+    vertexShader, fragmentShader,
+    uniforms: {
+        uTime: { value: 0 },
+        uPixelRatio: { value: STATE.pixelRatio },
+        uSizeBase: { value: def.sz },
+        uNoiseScale: { value: def.s },
+        uCurlStrength: { value: def.curl },
+        uRadius: { value: CONFIG.fieldRadius },
+        uColor1: { value: new THREE.Color(def.c1) },
+        uColor2: { value: new THREE.Color(def.c2) },
+        uColor3: { value: new THREE.Color(def.c3) },
+        uSubBass: { value: 0 }, uBass: { value: 0 }, uLowMid: { value: 0 },
+        uMid: { value: 0 }, uHighMid: { value: 0 }, uHigh: { value: 0 }, uUltraHigh: { value: 0 },
+        uBeatEnergy: { value: 0 }, uSpectralCentroid: { value: 0 }, uSpectralFlux: { value: 0 },
+        uVortexStrength: { value: STATE.vortexStrength },
+        uPulseIntensity: { value: STATE.pulseIntensity },
+        uZoomFactor: { value: 1.0 },
+        uMousePos: { value: new THREE.Vector3(999,999,999) },
+        uMouseVelocity: { value: new THREE.Vector2(0, 0) }
+    },
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+});
+
+const points = new THREE.Points(geometry, material);
+scene.add(points);
+
+// ═══════ PARTICLE TRAIL SYSTEM ═══════
+class TrailSystem {
+    constructor(count, length) {
+        this.trails = [];
+        this.meshes = [];
+
+        for(let i = 0; i < count; i++) {
+            const trail = {
+                positions: Array(length).fill().map(() => new THREE.Vector3(
+                    (Math.random() - 0.5) * 80,
+                    (Math.random() - 0.5) * 80,
+                    (Math.random() - 0.5) * 80
+                )),
+                phase: Math.random() * Math.PI * 2,
+                speed: 0.3 + Math.random() * 0.7,
+                color: new THREE.Color().setHSL(Math.random(), 0.7, 0.6)
+            };
+            this.trails.push(trail);
+
+            const geom = new THREE.BufferGeometry();
+            const positions = new Float32Array(length * 3);
+            const alphas = new Float32Array(length);
+            for(let j = 0; j < length; j++) alphas[j] = 1.0 - j / length;
+
+            geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geom.setAttribute('alpha', new THREE.BufferAttribute(alphas, 1));
+
+            const mat = new THREE.ShaderMaterial({
+                vertexShader: `attribute float alpha; varying float vAlpha; void main() { vAlpha = alpha; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+                fragmentShader: `uniform vec3 uColor; uniform float uOpacity, uBeat; varying float vAlpha; void main() { gl_FragColor = vec4(uColor * (1.0 + uBeat * 0.3), vAlpha * uOpacity * 0.6 * (1.0 + uBeat * 0.5)); }`,
+                uniforms: { uColor: { value: trail.color }, uOpacity: { value: 0.4 }, uBeat: { value: 0 } },
+                transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+            });
+
+            const line = new THREE.Line(geom, mat);
+            this.meshes.push(line);
+            scene.add(line);
+        }
     }
 
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth/window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        composer.setSize(window.innerWidth, window.innerHeight);
-        baseCameraPos.copy(camera.position);
-    });
+    update(time, audio, fieldColor) {
+        for(let i = 0; i < this.trails.length; i++) {
+            const trail = this.trails[i], mesh = this.meshes[i];
+            mesh.visible = STATE.particleTrailsEnabled;
+            if(!mesh.visible) continue;
 
-    animate();
+            const angle = time * 0.5 * trail.speed + trail.phase;
+            const radius = 30 + audio.bass * 20;
+            const newPos = new THREE.Vector3(
+                Math.cos(angle) * radius + Math.sin(time * trail.speed + trail.phase) * (10 + audio.bass * 15),
+                Math.sin(time * 0.3 + trail.phase) * 20 + Math.cos(time * trail.speed * 0.7 + trail.phase) * (8 + audio.mid * 12),
+                Math.sin(angle) * radius + Math.sin(time * trail.speed * 0.5 + trail.phase * 2) * (10 + audio.high * 10)
+            );
+
+            for(let j = trail.positions.length - 1; j > 0; j--) trail.positions[j].copy(trail.positions[j-1]);
+            trail.positions[0].copy(newPos);
+
+            const posAttr = mesh.geometry.getAttribute('position');
+            for(let j = 0; j < trail.positions.length; j++) {
+                posAttr.setXYZ(j, trail.positions[j].x, trail.positions[j].y, trail.positions[j].z);
+            }
+            posAttr.needsUpdate = true;
+
+            mesh.material.uniforms.uBeat.value = audio.beat;
+            mesh.material.uniforms.uOpacity.value = STATE.particleTrailOpacity;
+            if(fieldColor) trail.color.lerp(fieldColor, 0.01);
+        }
+    }
+}
+
+const trailSystem = new TrailSystem(50, 12);
+
+// ═══════ LENS FLARE (3D Object) ═══════
+function createFlareTexture(size, inner, outer, color) {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const grad = ctx.createRadialGradient(size/2, size/2, inner, size/2, size/2, outer);
+    grad.addColorStop(0, color);
+    grad.addColorStop(0.4, color.replace('1)', '0.4)'));
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, size, size);
+    return new THREE.CanvasTexture(canvas);
+}
+
+const flareMain = createFlareTexture(256, 0, 128, 'rgba(255,255,255,1)');
+const flareRing = createFlareTexture(256, 80, 120, 'rgba(160,120,255,1)');
+const flareHex = createFlareTexture(128, 0, 60, 'rgba(100,180,255,1)');
+
+const lensflare = new Lensflare();
+lensflare.addElement(new LensflareElement(flareMain, 200, 0, new THREE.Color(0xffffff)));
+lensflare.addElement(new LensflareElement(flareHex, 60, 0.3, new THREE.Color(0x8866ff)));
+lensflare.addElement(new LensflareElement(flareRing, 120, 0.5, new THREE.Color(0x6644ff)));
+lensflare.addElement(new LensflareElement(flareHex, 40, 0.7, new THREE.Color(0xff66aa)));
+lensflare.addElement(new LensflareElement(flareMain, 30, 0.9, new THREE.Color(0x44aaff)));
+lensflare.position.set(0, 0, 0);
+scene.add(lensflare);
+
+// ═══════ POST-PROCESSING COMPOSER ═══════
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+
+const afterimagePass = new AfterimagePass();
+afterimagePass.uniforms['damp'].value = STATE.trails;
+composer.addPass(afterimagePass);
+
+const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+bloomPass.threshold = 0.1;
+bloomPass.strength = STATE.bloom;
+bloomPass.radius = 0.32;
+composer.addPass(bloomPass);
+
+const godRaysPass = new ShaderPass(GodRaysShader);
+godRaysPass.enabled = STATE.godRaysEnabled;
+composer.addPass(godRaysPass);
+
+const lensFlarePass = new ShaderPass(LensFlareShader);
+lensFlarePass.enabled = STATE.lensFlareEnabled;
+composer.addPass(lensFlarePass);
+
+const anamorphicPass = new ShaderPass(AnamorphicShader);
+composer.addPass(anamorphicPass);
+
+const chromaticPass = new ShaderPass(ChromaticShader);
+composer.addPass(chromaticPass);
+
+const bokehPass = new BokehPass(scene, camera, {
+    focus: STATE.dofFocus,
+    aperture: STATE.dofAperture,
+    maxblur: STATE.dofMaxBlur
+});
+bokehPass.enabled = STATE.dofEnabled;
+composer.addPass(bokehPass);
+
+const vignettePass = new ShaderPass(VignetteShader);
+composer.addPass(vignettePass);
+
+const grainPass = new ShaderPass(GrainShader);
+composer.addPass(grainPass);
+
+composer.addPass(new OutputPass());
+
+// ═══════ GUI ═══════
+const gui = new GUI({ title: '✦ Quantum Fields' });
+gui.add(STATE, 'sensitivity', 0.1, 3.0).name('Audio Sensitivity');
+
+const f_phys = gui.addFolder('Physics Engine');
+f_phys.add(STATE, 'field', Object.keys(FIELD_TYPES)).name('Field Type').onChange(val => {
+    const d = FIELD_TYPES[val];
+    const c1 = new THREE.Color(d.c1), c2 = new THREE.Color(d.c2), c3 = new THREE.Color(d.c3);
+    function step() {
+        material.uniforms.uColor1.value.lerp(c1, 0.05);
+        material.uniforms.uColor2.value.lerp(c2, 0.05);
+        material.uniforms.uColor3.value.lerp(c3, 0.05);
+        material.uniforms.uNoiseScale.value = THREE.MathUtils.lerp(material.uniforms.uNoiseScale.value, d.s, 0.04);
+        material.uniforms.uCurlStrength.value = THREE.MathUtils.lerp(material.uniforms.uCurlStrength.value, d.curl, 0.04);
+        material.uniforms.uSizeBase.value = THREE.MathUtils.lerp(material.uniforms.uSizeBase.value, d.sz, 0.04);
+        if(Math.abs(material.uniforms.uNoiseScale.value - d.s) > 0.01) requestAnimationFrame(step);
+    }
+    step();
+});
+f_phys.add(STATE, 'density', 0.0, 1.0).name('Density').onChange(v => geometry.setDrawRange(0, Math.floor((CONFIG.maxParticles + CONFIG.secondaryParticles)*v)));
+f_phys.add(STATE, 'vortexStrength', 0.0, 1.0).name('Vortex').onChange(v => material.uniforms.uVortexStrength.value = v);
+f_phys.add(STATE, 'pulseIntensity', 0.0, 2.5).name('Pulse').onChange(v => material.uniforms.uPulseIntensity.value = v);
+
+const f_gate = gui.addFolder('Bass Gate');
+f_gate.add(STATE, 'bassGateEnabled').name('Enable');
+f_gate.add(STATE, 'bassGateThreshold', 0.0, 0.5).name('Threshold');
+f_gate.add(STATE, 'bassGateAttack', 0.01, 0.3).name('Attack');
+f_gate.add(STATE, 'bassGateRelease', 0.05, 0.5).name('Release');
+
+const f_fx = gui.addFolder('✨ New Effects');
+f_fx.add(STATE, 'godRaysEnabled').name('God Rays').onChange(v => godRaysPass.enabled = v);
+f_fx.add(STATE, 'godRaysIntensity', 0.0, 1.0).name('Rays Intensity').onChange(v => godRaysPass.uniforms.uIntensity.value = v);
+f_fx.add(STATE, 'godRaysDecay', 0.8, 0.99).name('Rays Decay').onChange(v => godRaysPass.uniforms.uDecay.value = v);
+f_fx.add(STATE, 'dofEnabled').name('Depth of Field').onChange(v => bokehPass.enabled = v);
+f_fx.add(STATE, 'dofFocus', 1.0, 200.0).name('DOF Focus').onChange(v => bokehPass.uniforms['focus'].value = v);
+f_fx.add(STATE, 'dofAperture', 0.0, 0.001).step(0.00001).name('DOF Aperture').onChange(v => bokehPass.uniforms['aperture'].value = v);
+f_fx.add(STATE, 'dofMaxBlur', 0.0, 0.02).name('DOF Blur').onChange(v => bokehPass.uniforms['maxblur'].value = v);
+f_fx.add(STATE, 'lensFlareEnabled').name('Lens Flare').onChange(v => { lensFlarePass.enabled = v; lensflare.visible = v; });
+f_fx.add(STATE, 'lensFlareIntensity', 0.0, 2.0).name('Flare Intensity').onChange(v => lensFlarePass.uniforms.uIntensity.value = v);
+f_fx.add(STATE, 'particleTrailsEnabled').name('Particle Trails');
+f_fx.add(STATE, 'particleTrailOpacity', 0.0, 1.0).name('Trail Opacity');
+
+const f_vis = gui.addFolder('Optics');
+f_vis.add(afterimagePass.uniforms['damp'], 'value', 0.5, 0.98).name('Trail Persistence');
+f_vis.add(bloomPass, 'strength', 0.0, 3.0).name('Bloom');
+f_vis.add(STATE, 'anamorphicStretch', 0.0, 1.0).name('Anamorphic').onChange(v => anamorphicPass.uniforms.uStretch.value = v);
+f_vis.add(STATE, 'chromaticAberration', 0.0, 0.025).name('Chromatic').onChange(v => chromaticPass.uniforms.uIntensity.value = v);
+f_vis.add(STATE, 'filmGrain', 0.0, 0.2).name('Film Grain').onChange(v => grainPass.uniforms.uIntensity.value = v);
+f_vis.add(STATE, 'cameraShake', 0.0, 2.0).name('Camera Shake');
+f_vis.add(STATE, 'timeScale', 0.0, 3.0).name('Time Flow');
+
+// ═══════ UI & EVENTS ═══════
+const overlay = document.getElementById('overlay');
+const audioControls = document.getElementById('audio-controls');
+const playPauseBtn = document.getElementById('play-pause-btn');
+const progressBar = document.getElementById('progress-bar');
+const progressContainer = document.getElementById('progress-container');
+const timeDisplay = document.getElementById('time-display');
+const trackName = document.getElementById('track-name');
+const status = document.getElementById('status-bar');
+
+const formatTime = s => `${Math.floor(s/60)}:${Math.floor(s%60).toString().padStart(2,'0')}`;
+
+function updateUI() {
+    if (AUDIO.mode === 'mic') {
+        playPauseBtn.textContent = '🎙 live';
+        playPauseBtn.disabled = true;
+    } else {
+        playPauseBtn.textContent = AUDIO.isPlaying ? '⏸ pause' : '▶ play';
+        playPauseBtn.classList.toggle('playing', AUDIO.isPlaying);
+        playPauseBtn.disabled = false;
+    }
+    if (AUDIO.mode === 'file' && AUDIO.audioBuffer) {
+        const cur = AUDIO.getCurrentTime(), dur = AUDIO.getDuration();
+        progressBar.style.width = (cur/dur*100) + '%';
+        timeDisplay.textContent = `${formatTime(cur)} / ${formatTime(dur)}`;
+    } else {
+        progressBar.style.width = '0%';
+        timeDisplay.textContent = AUDIO.mode === 'mic' ? 'LIVE' : '0:00 / 0:00';
+    }
+}
+
+function togglePlayPause() {
+    if (AUDIO.mode !== 'file') return;
+    AUDIO.togglePlayPause();
+    updateUI();
+    status.innerHTML = AUDIO.isPlaying ? 'SYSTEM: <span>PLAYING</span>' : 'SYSTEM: <span>PAUSED</span>';
+}
+
+function activate() {
+    AUDIO.init();
+    if(AUDIO.ctx.state === 'suspended') AUDIO.ctx.resume();
+    overlay.style.opacity = 0;
+    setTimeout(() => overlay.style.display = 'none', 800);
+    audioControls.classList.add('visible');
+}
+
+async function loadTrack(file) {
+    activate();
+    await AUDIO.loadTrack(await file.arrayBuffer(), file.name);
+    AUDIO.play();
+    trackName.textContent = file.name.length > 25 ? file.name.slice(0,22) + '...' : file.name;
+    updateUI();
+    status.innerHTML = 'SYSTEM: <span>PLAYING</span>';
+}
+
+async function startMic() {
+    activate();
+    await AUDIO.startMic();
+    trackName.textContent = 'Live Mic';
+    updateUI();
+    status.innerHTML = 'SYSTEM: <span>LISTENING</span>';
+}
+
+document.getElementById('file-input').onchange = e => e.target.files[0] && loadTrack(e.target.files[0]);
+document.getElementById('file-input-2').onchange = e => { if(e.target.files[0]) loadTrack(e.target.files[0]); e.target.value = ''; };
+document.getElementById('mic-btn').onclick = startMic;
+document.getElementById('mic-btn-2').onclick = startMic;
+playPauseBtn.onclick = togglePlayPause;
+progressContainer.onclick = e => {
+    if (AUDIO.mode !== 'file' || !AUDIO.audioBuffer) return;
+    const rect = progressContainer.getBoundingClientRect();
+    AUDIO.seek((e.clientX - rect.left) / rect.width * AUDIO.getDuration());
+};
+document.getElementById('screenshot-btn')?.addEventListener('click', () => {
+    composer.render();
+    const a = document.createElement('a');
+    a.download = 'quantum-' + Date.now() + '.png';
+    a.href = renderer.domElement.toDataURL('image/png');
+    a.click();
+});
+document.getElementById('fullscreen-btn')?.addEventListener('click', () => {
+    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+});
+
+// ═══════ ANIMATION LOOP ═══════
+const clock = new THREE.Clock();
+
+function animate() {
+    requestAnimationFrame(animate);
+    const dt = clock.getDelta(), elapsed = clock.getElapsedTime();
+
+    material.uniforms.uTime.value += dt * STATE.timeScale;
+    grainPass.uniforms.uTime.value = elapsed;
+    lensFlarePass.uniforms.uTime.value = elapsed;
+
+    material.uniforms.uZoomFactor.value = camera.position.length() / CONFIG.defaultZoom;
+    material.uniforms.uMousePos.value.lerp(mouseWorldPos, 0.1);
+    material.uniforms.uMouseVelocity.value.lerp(mouseVelocity, 0.08);
+
+    AUDIO.update();
+    updateUI();
+
+    const s = STATE.sensitivity, lf = 0.16;
+    material.uniforms.uSubBass.value = THREE.MathUtils.lerp(material.uniforms.uSubBass.value, AUDIO.gatedBands.subBass*s, lf);
+    material.uniforms.uBass.value = THREE.MathUtils.lerp(material.uniforms.uBass.value, AUDIO.gatedBands.bass*s, lf);
+    material.uniforms.uLowMid.value = THREE.MathUtils.lerp(material.uniforms.uLowMid.value, AUDIO.gatedBands.lowMid*s, lf);
+    material.uniforms.uMid.value = THREE.MathUtils.lerp(material.uniforms.uMid.value, AUDIO.gatedBands.mid*s, lf);
+    material.uniforms.uHighMid.value = THREE.MathUtils.lerp(material.uniforms.uHighMid.value, AUDIO.gatedBands.highMid*s, lf);
+    material.uniforms.uHigh.value = THREE.MathUtils.lerp(material.uniforms.uHigh.value, AUDIO.gatedBands.high*s, lf);
+    material.uniforms.uUltraHigh.value = THREE.MathUtils.lerp(material.uniforms.uUltraHigh.value, AUDIO.gatedBands.ultraHigh*s, lf);
+    material.uniforms.uBeatEnergy.value = THREE.MathUtils.lerp(material.uniforms.uBeatEnergy.value, AUDIO.beatEnergy, 0.22);
+    material.uniforms.uSpectralCentroid.value = THREE.MathUtils.lerp(material.uniforms.uSpectralCentroid.value, AUDIO.spectralCentroid, lf);
+    material.uniforms.uSpectralFlux.value = THREE.MathUtils.lerp(material.uniforms.uSpectralFlux.value, AUDIO.spectralFlux*s, lf);
+
+    // Update post-processing
+    chromaticPass.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
+    godRaysPass.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
+    lensFlarePass.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
+    vignettePass.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
+
+    // Update trails
+    trailSystem.update(elapsed, {
+        bass: material.uniforms.uBass.value,
+        mid: material.uniforms.uMid.value,
+        high: material.uniforms.uHigh.value,
+        beat: material.uniforms.uBeatEnergy.value
+    }, material.uniforms.uColor1.value);
+
+    // Update lens flare
+    if(STATE.lensFlareEnabled) {
+        lensflare.visible = false;
+        lensflare.scale.setScalar((1.0 + AUDIO.beatEnergy * 0.5) * STATE.lensFlareIntensity);
+        lensflare.position.y = Math.sin(elapsed * 0.5) * 5 * material.uniforms.uBass.value;
+    } else {
+        lensflare.visible = false;
+    }
+
+    // Auto-focus DOF
+    if(STATE.dofEnabled) bokehPass.uniforms['focus'].value = camera.position.length() * 0.8;
+
+    // Camera shake
+    if (STATE.cameraShake > 0 && AUDIO.beatEnergy > 0.1) {
+        const shake = AUDIO.beatEnergy * STATE.cameraShake;
+        cameraShakeOffset.set((Math.random()-0.5)*shake*0.6, (Math.random()-0.5)*shake*0.4, (Math.random()-0.5)*shake*0.25);
+        camera.position.copy(baseCameraPos).add(cameraShakeOffset);
+    }
+
+    controls.autoRotateSpeed = 0.35 + material.uniforms.uMid.value * 2.0 + material.uniforms.uBeatEnergy.value * 2.0;
+    bloomPass.strength = STATE.bloom + (AUDIO.gatedBands.bass + AUDIO.gatedBands.mid + AUDIO.beatEnergy) / 6;
+    anamorphicPass.uniforms.uIntensity.value = 0.3 + AUDIO.gatedBands.bass * 0.4;
+
+    controls.update();
+    composer.render();
+}
+
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    composer.setSize(window.innerWidth, window.innerHeight);
+    baseCameraPos.copy(camera.position);
+});
+
+animate();
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
