@@ -67,7 +67,7 @@ Quantum Fields is a real-time WebGL visualization that renders 250,000+ particle
 ## 🚀 Getting Started
 
 ### Quick Start
-1. Download `quantum_v9_aurora.html`
+1. Download `index.html`
 2. Open in a modern browser (Chrome, Firefox, Edge, Safari)
 3. Click "Choose Audio" to load a music file, or "Microphone" for live input
 4. Enjoy the visualization!
