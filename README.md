@@ -1,4 +1,3 @@
-README 
 # ✦ Quantum Fields
 
 **An immersive, audio-reactive particle simulation exploring the visual aesthetics of quantum field theory.**
@@ -11,14 +10,15 @@ README
 [![Live Demo](https://img.shields.io/badge/Demo-Live-brightgreen)](https://qftvisualizer.netlify.app)
 [![Netlify Status](https://api.netlify.com/api/v1/badges/2ad835a7-d376-4a50-a38e-add9314ca1ce/deploy-status)](https://qftvisualizer.netlify.app)
 
-
 <p align="center">
   <img src="assets/preview.gif" alt="Quantum Fields Preview" width="800">
 </p>
 
 ## Overview
 
-Quantum Fields is a real-time WebGL visualization that renders 250,000+ particles simulating the behavior of quantum fields. The particles respond dynamically to audio input—either from uploaded music files or live microphone input—creating mesmerizing visual representations of sound through physics-inspired motion.
+Quantum Fields is a real-time WebGL visualization that renders **250,000+ particles** simulating the behavior of quantum fields. The particles respond dynamically to audio input—either from uploaded music files or live microphone input—creating mesmerizing visual representations of sound through physics-inspired motion.
+
+**[▶ Launch Live Demo](https://qftvisualizer.netlify.app)**
 
 ## ✨ Features
 
@@ -33,7 +33,7 @@ Quantum Fields is a real-time WebGL visualization that renders 250,000+ particle
 - **Beat detection** with dynamic threshold adaptation
 - **Spectral centroid & flux** analysis for nuanced responses
 - **Intelligent bass gate** with calibration, attack/release, and compression
-- **File playback** with full transport controls (play, pause, seek, loop)
+- **File playback** with full transport controls (play, pause, seek)
 - **Live microphone** input support
 
 ### Quantum Field Types
@@ -67,16 +67,16 @@ Quantum Fields is a real-time WebGL visualization that renders 250,000+ particle
 ## 🚀 Getting Started
 
 ### Quick Start
-1. Download `index.html`
-2. Open in a modern browser (Chrome, Firefox, Edge, Safari)
-3. Click "Choose Audio" to load a music file, or "Microphone" for live input
-4. Enjoy the visualization!
+1. Visit **[qftvisualizer.netlify.app](https://qftvisualizer.netlify.app)** — no installation required
+2. Click "Choose Audio" to load a music file, or "Microphone" for live input
+3. Explore the 6 quantum field presets and adjust effects in the GUI
+4. Press `F` to toggle cinematic depth of field
 
 ### Local Development
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/quantum-fields.git
-cd quantum-fields
+git clone https://github.com/stridentsoundworks-spec/gftvisualizer.git
+cd gftvisualizer
 
 # Serve locally (required for ES modules)
 npx serve .
@@ -114,9 +114,9 @@ The visualization includes a comprehensive control panel:
 
 - **Audio Sensitivity** — Global audio response multiplier
 - **Physics Engine** — Field type, density, vortex, pulse intensity
-- **Bass Gate** — Threshold, attack, release, ratio controls
+- **Bass Gate** — Threshold, attack, release controls
 - **✨ New Effects** — God rays, DOF, lens flares, particle trails
-- **Optics** — Bloom, trails, chromatic aberration, grain, shake
+- **Optics** — Bloom, trails, chromatic aberration, grain, camera shake
 
 ## 🔧 Technical Details
 
@@ -165,15 +165,15 @@ All dependencies are loaded via CDN (no build step required):
 
 ### Performance
 - **Target**: 60 FPS on dedicated GPUs
-- **Particle count**: Adjustable via density slider (0-100%)
+- **Particle count**: Adjustable via density slider
 - **Pixel ratio**: Capped at 2x for performance
 - **Draw calls**: Optimized single-draw particle system
 
 ## 📁 Project Structure
 
 ```
-quantum-fields/
-├── quantum_v9_aurora.html    # Main application (single file)
+gftvisualizer/
+├── index.html                # Main application (single file)
 ├── README.md                 # This file
 ├── LICENSE                   # MIT License
 └── assets/
@@ -207,12 +207,12 @@ The vertex and fragment shaders are embedded in the HTML file. Key uniforms:
 ## 📜 Changelog
 
 ### v9 — Aurora (Current)
-- ✨ Added God Rays volumetric lighting
-- ✨ Added Depth of Field with auto-focus
-- ✨ Added Particle Trail system (50 trails)
-- ✨ Added Lens Flare (3D + post-process)
-- ✨ Added Vignette + Glow enhancement
-- 🎮 New "F" key to toggle DOF
+- ✨ **God Rays** — Volumetric light scattering with beat-reactive intensity
+- ✨ **Depth of Field** — Cinematic bokeh blur with auto-focus
+- ✨ **Particle Trails** — 50 independent trailing particles with vortex motion
+- ✨ **Lens Flares** — Dual-layer procedural flares with chromatic ghosts
+- ✨ **Vignette** — Dynamic beat-pulsing edge darkening
+- 🎮 "F" key to toggle DOF
 - 🎛️ New GUI folder for effects controls
 
 ### v8
