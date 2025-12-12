@@ -9,7 +9,7 @@ README
 [![Software](https://img.shields.io/badge/Powered_By-Perplexity-gold)](https://perplexity.ai)
 
 [![Live Demo](https://img.shields.io/badge/Demo-Live-brightgreen)](https://qftvisualizer.netlify.app)
-[![Netlify Status](https://api.netlify.com/api/v1/badges/2ad835a7-d376-4a50-a38e-add9314ca1ce/deploy-status)](https://app.netlify.com/projects/qftvisualizer/deploys)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/2ad835a7-d376-4a50-a38e-add9314ca1ce/deploy-status)](https://app.netlify.com/projects/qftvisualizer)
 
 
 <p align="center">
