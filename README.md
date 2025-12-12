@@ -16,23 +16,26 @@
 
 ## Overview
 
-Quantum Fields is a real-time WebGL visualization that renders **250,000+ particles** simulating the behavior of quantum fields. The particles respond dynamically to audio input—either from uploaded music files or live microphone input—creating mesmerizing visual representations of sound through physics-inspired motion.
+Quantum Fields is a real-time WebGL visualization that renders **285,000 particles** (250K primary + 35K secondary) simulating the behavior of quantum fields. Set against a procedural space nebula backdrop, the particles respond dynamically to audio input—either from uploaded music files or live microphone input—creating mesmerizing visual representations of sound through physics-inspired motion.
 
 **[▶ Launch Live Demo](https://qftvisualizer.netlify.app)**
 
 ## ✨ Features
 
 ### Particle System
-- **250,000+ GPU-accelerated particles** using custom GLSL shaders
+- **285,000 GPU-accelerated particles** — 250K primary + 35K secondary shell
 - **Curl noise flow fields** for fluid, organic motion
 - **Simplex noise** for natural turbulence patterns
-- **Multi-layer particle system** with primary and secondary fields
+- **Multi-layer particle system** with independent primary and secondary behaviors
+- **Force Network** — Dynamic connections between nearby particles
 
 ### Audio Reactivity
 - **7-band frequency analysis**: Sub-bass, Bass, Low-mid, Mid, High-mid, High, Ultra-high
 - **Beat detection** with dynamic threshold adaptation
+- **Onset detection** with configurable punch sensitivity
 - **Spectral centroid & flux** analysis for nuanced responses
-- **Intelligent bass gate** with calibration, attack/release, and compression
+- **Intelligent bass gate** with threshold, attack/release controls
+- **Audio-reactive camera** — Camera movement synced to music energy
 - **File playback** with full transport controls (play, pause, seek)
 - **Live microphone** input support
 
@@ -46,17 +49,21 @@ Quantum Fields is a real-time WebGL visualization that renders **250,000+ partic
 | **Dark Energy** | Deep purple, ethereal expansion |
 | **Neutrino** | Green/cyan, fast & chaotic |
 
-### Visual Effects Pipeline
-- **God Rays** — Volumetric light scattering from bright particles
-- **Depth of Field** — Cinematic bokeh blur with auto-focus
+### Environment
+- **Space Nebula** — Procedural nebula background that breathes with audio
+- **Force Network** — Dynamic particle connections with configurable range/opacity
 - **Particle Trails** — 50 independent trailing particles with vortex motion
-- **Lens Flares** — Procedural flares with chromatic ghosts and halos
+
+### Visual Effects Pipeline
+- **God Rays** — Volumetric light scattering with beat-reactive intensity
+- **Radial Depth of Field** — Custom bokeh blur with focus ring control
+- **Lens Flares** — Dual-layer procedural flares (3D + post-process)
 - **Bloom** — Unreal Engine-style HDR bloom
-- **Afterimage/Trails** — Configurable motion persistence
+- **Motion Blur** — Configurable afterimage persistence
 - **Anamorphic Flares** — Horizontal streak effects on bright spots
 - **Chromatic Aberration** — Beat-reactive color fringing
-- **Film Grain** — Optional analog texture
-- **Vignette** — Dynamic edge darkening
+- **Film Grain** — Optional analog texture overlay
+- **Vignette** — Dynamic beat-pulsing edge darkening
 
 ### Interactions
 - **Mouse repulsion** — Particles react to cursor with velocity-based influence
@@ -110,13 +117,17 @@ python -m http.server 8000
 | **Move** | Particle repulsion field |
 
 ### GUI Panel
-The visualization includes a comprehensive control panel:
+The visualization includes a comprehensive control panel with 7 folders:
 
-- **Audio Sensitivity** — Global audio response multiplier
-- **Physics Engine** — Field type, density, vortex, pulse intensity
-- **Bass Gate** — Threshold, attack, release controls
-- **✨ New Effects** — God rays, DOF, lens flares, particle trails
-- **Optics** — Bloom, trails, chromatic aberration, grain, camera shake
+| Folder | Controls |
+|--------|----------|
+| **Main** | Field Type, Audio Sensitivity, Density, Time Flow |
+| **🌌 Environment** | Space Nebula, Force Network, Particle Trails |
+| **🎥 Camera & Lens** | Lens Flare, Depth of Field, Focus Ring, Camera Shake |
+| **✨ Post Processing** | Bloom, Motion Blur, Chromatic, Anamorphic, God Rays, Film Grain |
+| **⚙️ Physics** | Vortex Strength, Pulse Intensity |
+| **🎤 Audio Gate** | Enable, Threshold, Attack, Release |
+| **🚀 Enhancement Pack** | Onset Punch, Audio Camera, Terrain Height, Auto Quality, FPS Monitor |
 
 ## 🔧 Technical Details
 
@@ -164,10 +175,11 @@ All dependencies are loaded via CDN (no build step required):
 | [lil-gui](https://lil-gui.georgealways.com/) | 0.19.1 | Control panel UI |
 
 ### Performance
-- **Target**: 60 FPS on dedicated GPUs
-- **Particle count**: Adjustable via density slider
+- **Target**: 30-60 FPS (configurable via Enhancement Pack)
+- **Adaptive quality**: Automatically adjusts to maintain target FPS
+- **Particle count**: Adjustable via density slider (1.7%-14%)
 - **Pixel ratio**: Capped at 2x for performance
-- **Draw calls**: Optimized single-draw particle system
+- **Real-time monitoring**: FPS counter in GUI
 
 ## 📁 Project Structure
 
@@ -206,14 +218,26 @@ The vertex and fragment shaders are embedded in the HTML file. Key uniforms:
 
 ## 📜 Changelog
 
-### v9 — Aurora (Current)
-- ✨ **God Rays** — Volumetric light scattering with beat-reactive intensity
-- ✨ **Depth of Field** — Cinematic bokeh blur with auto-focus
-- ✨ **Particle Trails** — 50 independent trailing particles with vortex motion
-- ✨ **Lens Flares** — Dual-layer procedural flares with chromatic ghosts
-- ✨ **Vignette** — Dynamic beat-pulsing edge darkening
+### Nebula v1 (Current) — December 2025
+- 🌌 **Space Nebula** — Procedural nebula background with audio reactivity
+- 🔗 **Force Network** — Dynamic particle connections with configurable range/opacity
+- 🎯 **Radial DOF** — Custom depth of field with focus ring and bokeh controls
+- 🚀 **Enhancement Pack v2.0**:
+  - Onset detection with punch sensitivity
+  - Audio-reactive camera movement
+  - Waveform terrain mode
+  - Adaptive quality system with FPS targeting
+- 🎨 **35K Secondary Particles** — Independent shell layer with high-frequency response
+- 📊 **Real-time FPS monitoring** in GUI
+- 🎛️ Reorganized GUI with 7 control folders
+
+### v9 — Aurora
+- ✨ God Rays volumetric lighting
+- ✨ Depth of Field with auto-focus
+- ✨ Particle Trail system (50 trails)
+- ✨ Lens Flare (3D + post-process)
+- ✨ Vignette + Glow enhancement
 - 🎮 "F" key to toggle DOF
-- 🎛️ New GUI folder for effects controls
 
 ### v8
 - 🎵 Full audio playback controls

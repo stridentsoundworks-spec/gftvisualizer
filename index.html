@@ -228,7 +228,7 @@ import GUI from 'lil-gui';
 const CONFIG = {
     maxParticles: 250000,
     secondaryParticles: 35000,
-    initialDensity: 0.05805,
+    initialDensity: 0.078,
     fieldRadius: 75,
     minZoom: 1,
     maxZoom: 250,
@@ -238,7 +238,7 @@ const CONFIG = {
 const STATE = {
     field: 'Gluon (Strong)',
     density: CONFIG.initialDensity,
-    sensitivity: 0.8381,
+    sensitivity: 1,
     trails: 0.66144,
     bloom: 0.2,
     timeScale: 2,
@@ -247,7 +247,7 @@ const STATE = {
     filmGrain: 0.001,
     cameraShake: 0.066,
     vortexStrength: 0.666,
-    pulseIntensity: 0.5,
+    pulseIntensity: 0.6,
     anamorphicStretch: 0.1,
     bassGateThreshold: 0.2605,
     bassGateAttack: 0.029,
@@ -267,10 +267,28 @@ const STATE = {
     particleTrailsEnabled: true,
     particleTrailOpacity: 0.75,
     nebulaEnabled: true,
-    nebulaIntensity: 0.708,
+    nebulaIntensity: 1.0,
     connectionsEnabled: true,
     connectionThreshold: 20.0,
-    connectionOpacity: 1.0
+    connectionOpacity: 1.0,
+    // === ENHANCEMENT PACK v2.0 ===
+    // 1. Motion Blur
+    motionBlurEnabled: true,
+    motionBlurStrength: 0.15,
+    // 2. Adaptive Quality
+    adaptiveQualityEnabled: true,
+    targetFPS: 55,
+    qualityLevel: 1.0,
+    // 3. Onset Detection
+    onsetSensitivity: 1.5,
+    onsetDecay: 0.92,
+    // 4. Audio-Reactive Camera
+    audioCameraEnabled: true,
+    audioCameraSmoothing: 0.08,
+    audioCameraIntensity: 0.3,
+    // 5. Waveform Terrain
+    waveformTerrainScale: 1.0,
+    waveformTerrainHeight: 15.0
 };
 
 // --- AUDIO SYSTEM ---
@@ -284,6 +302,10 @@ const AUDIO = {
     beatThreshold: 0.1, beatDecay: 0.97, beatEnergy: 0,
     lastBeatTime: 0, beatDetected: false, peakHistory: [],
     spectralCentroid: 0, spectralFlux: 0, prevSpectrum: null, active: false,
+    // === ENHANCEMENT: Onset Detection ===
+    onsetEnergy: 0, onsetDetected: false, onsetHistory: [], onsetThreshold: 0,
+    // === ENHANCEMENT: Waveform Data ===
+    waveformData: new Float32Array(128), waveformSmoothed: new Float32Array(128),
     gateState: { isOpen: false, envelope: 0, holdTime: 0, noiseFloor: 0.05,
         calibrationSamples: [], isCalibrating: true, calibrationFrames: 60 },
 
@@ -437,6 +459,30 @@ const AUDIO = {
             this.beatDetected = true; this.beatEnergy = 1.0; this.lastBeatTime = now;
         } else { this.beatDetected = false; }
         this.beatEnergy *= this.beatDecay;
+        
+        // === ENHANCEMENT: Improved Onset Detection ===
+        // Uses spectral flux derivative for sharper transient response
+        const onsetSens = STATE.onsetSensitivity;
+        this.onsetHistory.push(this.spectralFlux);
+        if (this.onsetHistory.length > 8) this.onsetHistory.shift();
+        const recentAvg = this.onsetHistory.slice(-4).reduce((a,b) => a+b, 0) / 4;
+        const olderAvg = this.onsetHistory.slice(0, 4).reduce((a,b) => a+b, 0) / Math.max(1, this.onsetHistory.slice(0, 4).length);
+        const onsetDelta = (recentAvg - olderAvg) * onsetSens;
+        this.onsetDetected = onsetDelta > 0.015 && now - this.lastBeatTime > 50;
+        this.onsetEnergy = this.onsetDetected ? 1.0 : this.onsetEnergy * STATE.onsetDecay;
+        
+        // === ENHANCEMENT: Waveform Data for Terrain Field ===
+        const waveformBins = 128;
+        const binSize = Math.floor(len / waveformBins);
+        for (let i = 0; i < waveformBins; i++) {
+            let sum = 0;
+            for (let j = 0; j < binSize; j++) {
+                sum += this.data[i * binSize + j] / 255.0;
+            }
+            const target = sum / binSize;
+            this.waveformSmoothed[i] += (target - this.waveformSmoothed[i]) * 0.3;
+            this.waveformData[i] = this.waveformSmoothed[i];
+        }
     }
 };
 
@@ -505,6 +551,7 @@ uniform float uTime, uPixelRatio, uSizeBase, uNoiseScale, uCurlStrength, uRadius
 uniform vec3 uColor1, uColor2, uColor3;
 uniform float uSubBass, uBass, uLowMid, uMid, uHighMid, uHigh, uUltraHigh;
 uniform float uBeatEnergy, uSpectralCentroid, uSpectralFlux;
+uniform float uOnsetEnergy, uTerrainMode, uTerrainHeight;
 uniform float uVortexStrength, uPulseIntensity, uZoomFactor;
 uniform vec3 uMousePos;
 uniform vec2 uMouseVelocity;
@@ -604,6 +651,37 @@ void main() {
     newPos += centerDir * breathing * exp(-distToCenter * 0.04);
 
     newPos += centerDir * smoothstep(0.3, 0.8, uBass) * 6.0 * exp(-distToCenter * 0.06);
+    
+    // === ENHANCEMENT: Onset Energy Punch ===
+    float onsetPunch = uOnsetEnergy * 8.0 * exp(-distToCenter * 0.03);
+    newPos += centerDir * onsetPunch;
+    
+    // === ENHANCEMENT: Waveform Terrain Mode ===
+    if (uTerrainMode > 0.5) {
+        // Convert to grid-like terrain formation
+        float gridX = floor(position.x * 0.5 + 64.0) / 128.0;
+        float gridZ = floor(position.z * 0.5 + 64.0) / 128.0;
+        
+        // Sample waveform based on position (simulate frequency bins)
+        float freqBin = gridX;
+        float waveHeight = uBass * sin(freqBin * 6.28 * 8.0 + uTime * 3.0) * 0.5;
+        waveHeight += uMid * sin(freqBin * 6.28 * 16.0 + uTime * 5.0) * 0.3;
+        waveHeight += uHigh * sin(freqBin * 6.28 * 32.0 + uTime * 8.0) * 0.2;
+        
+        // Modulate by spectral data
+        waveHeight *= (1.0 + uSpectralFlux * 3.0);
+        
+        // Apply terrain displacement
+        float terrainY = waveHeight * uTerrainHeight;
+        terrainY += sin(gridZ * 6.28 * 4.0 + uTime) * uSubBass * 5.0;
+        
+        // Blend between sphere and terrain based on position
+        float terrainBlend = smoothstep(0.0, 30.0, abs(position.y));
+        newPos.y = mix(terrainY, newPos.y, terrainBlend);
+        
+        // Flatten to XZ plane for terrain effect
+        newPos.xz = mix(vec2(gridX * 150.0 - 75.0, gridZ * 150.0 - 75.0), newPos.xz, terrainBlend * 0.3);
+    }
 
     vec4 mvPosition = modelViewMatrix * vec4(newPos, 1.0);
     gl_Position = projectionMatrix * mvPosition;
@@ -952,7 +1030,84 @@ const FIELD_TYPES = {
     'Higgs (Mass)': { c1:'#ffae00', c2:'#ff4800', c3:'#ffff00', s:0.6, curl:0.3, sz:2.3, sc1:'#ffcc66', sc2:'#ffdd99' },
     'Gravity': { c1:'#ffffff', c2:'#4466ff', c3:'#8844ff', s:0.75, curl:0.18, sz:1.2, sc1:'#aabbff', sc2:'#ccaaff' },
     'Dark Energy': { c1:'#1a0033', c2:'#6600ff', c3:'#ff00ff', s:1.9, curl:1.6, sz:1.5, sc1:'#9933ff', sc2:'#cc66ff' },
-    'Neutrino': { c1:'#00ff88', c2:'#00ffcc', c3:'#88ffff', s:3.0, curl:3.0, sz:1.0, sc1:'#66ffbb', sc2:'#99ffdd' }
+    'Neutrino': { c1:'#00ff88', c2:'#00ffcc', c3:'#88ffff', s:3.0, curl:3.0, sz:1.0, sc1:'#66ffbb', sc2:'#99ffdd' },
+    // === ENHANCEMENT: Waveform Terrain Field ===
+    'Waveform Terrain': { c1:'#ff3366', c2:'#33ff99', c3:'#6633ff', s:0.4, curl:0.15, sz:1.8, sc1:'#ff6699', sc2:'#66ffcc', terrain: true }
+};
+
+// === ENHANCEMENT: Adaptive Quality System ===
+const QUALITY_SYSTEM = {
+    frameCount: 0,
+    frameTimes: [],
+    lastAdjustTime: 0,
+    currentFPS: 60,
+    
+    update(deltaTime) {
+        this.frameCount++;
+        this.frameTimes.push(deltaTime);
+        if (this.frameTimes.length > 30) this.frameTimes.shift();
+        
+        if (this.frameCount % 30 === 0) {
+            const avgDelta = this.frameTimes.reduce((a,b) => a+b, 0) / this.frameTimes.length;
+            this.currentFPS = 1000 / avgDelta;
+            
+            if (STATE.adaptiveQualityEnabled && performance.now() - this.lastAdjustTime > 2000) {
+                if (this.currentFPS < STATE.targetFPS - 10 && STATE.qualityLevel > 0.3) {
+                    STATE.qualityLevel = Math.max(0.3, STATE.qualityLevel - 0.1);
+                    this.applyQuality();
+                    this.lastAdjustTime = performance.now();
+                } else if (this.currentFPS > STATE.targetFPS + 5 && STATE.qualityLevel < 1.0) {
+                    STATE.qualityLevel = Math.min(1.0, STATE.qualityLevel + 0.05);
+                    this.applyQuality();
+                    this.lastAdjustTime = performance.now();
+                }
+            }
+        }
+    },
+    
+    applyQuality() {
+        const q = STATE.qualityLevel;
+        geometry.setDrawRange(0, Math.floor(CONFIG.maxParticles * STATE.density * q));
+        renderer.setPixelRatio(Math.max(1, STATE.pixelRatio * q));
+    }
+};
+
+// === ENHANCEMENT: Audio-Reactive Camera System ===
+const AUDIO_CAMERA = {
+    targetOffset: new THREE.Vector3(),
+    currentOffset: new THREE.Vector3(),
+    targetFOV: 55,
+    baseFOV: 55,
+    breathPhase: 0,
+    
+    update(deltaTime) {
+        if (!STATE.audioCameraEnabled || !AUDIO.active) return;
+        
+        const bass = AUDIO.gatedBands.bass;
+        const mid = AUDIO.gatedBands.mid;
+        const high = AUDIO.gatedBands.high;
+        const intensity = STATE.audioCameraIntensity;
+        const smooth = STATE.audioCameraSmoothing;
+        
+        // Bass-driven zoom pulse
+        this.targetFOV = this.baseFOV - bass * 8 * intensity + AUDIO.beatEnergy * 5 * intensity;
+        camera.fov += (this.targetFOV - camera.fov) * smooth;
+        camera.updateProjectionMatrix();
+        
+        // Subtle sway based on mid frequencies
+        this.breathPhase += deltaTime * 0.001 * (1 + mid * 2);
+        this.targetOffset.x = Math.sin(this.breathPhase * 0.7) * mid * 3 * intensity;
+        this.targetOffset.y = Math.cos(this.breathPhase * 0.5) * high * 2 * intensity;
+        this.targetOffset.z = Math.sin(this.breathPhase * 0.3) * bass * 4 * intensity;
+        
+        // Smooth interpolation
+        this.currentOffset.lerp(this.targetOffset, smooth);
+        
+        // Apply onset punch
+        if (AUDIO.onsetDetected) {
+            this.currentOffset.z -= AUDIO.onsetEnergy * 2 * intensity;
+        }
+    }
 };
 
 const def = FIELD_TYPES[STATE.field];
@@ -971,6 +1126,7 @@ const material = new THREE.ShaderMaterial({
         uSubBass: { value: 0 }, uBass: { value: 0 }, uLowMid: { value: 0 },
         uMid: { value: 0 }, uHighMid: { value: 0 }, uHigh: { value: 0 }, uUltraHigh: { value: 0 },
         uBeatEnergy: { value: 0 }, uSpectralCentroid: { value: 0 }, uSpectralFlux: { value: 0 },
+        uOnsetEnergy: { value: 0 }, uTerrainMode: { value: 0 }, uTerrainHeight: { value: 15.0 },
         uVortexStrength: { value: STATE.vortexStrength },
         uPulseIntensity: { value: STATE.pulseIntensity },
         uZoomFactor: { value: 1.0 },
@@ -1682,6 +1838,17 @@ f_gate.add(STATE, 'bassGateAttack', 0.01, 0.3).name('Attack');
 f_gate.add(STATE, 'bassGateRelease', 0.05, 0.5).name('Release');
 f_gate.close();
 
+// === ENHANCEMENT PACK v2.0 ===
+const f_enhance = gui.addFolder('🚀 Enhancement Pack');
+f_enhance.add(STATE, 'onsetSensitivity', 0.5, 3.0).name('Onset Punch');
+f_enhance.add(STATE, 'audioCameraEnabled').name('Audio Camera');
+f_enhance.add(STATE, 'audioCameraIntensity', 0.0, 1.0).name('Camera React');
+f_enhance.add(STATE, 'waveformTerrainHeight', 5.0, 30.0).name('Terrain Height');
+f_enhance.add(STATE, 'adaptiveQualityEnabled').name('Auto Quality');
+f_enhance.add(STATE, 'targetFPS', 30, 60).name('Target FPS');
+f_enhance.add({ fps: () => QUALITY_SYSTEM.currentFPS.toFixed(1) }, 'fps').name('Current FPS').listen();
+f_enhance.close();
+
 // ═══════ UI & EVENTS ═══════
 const overlay = document.getElementById('overlay');
 const audioControls = document.getElementById('audio-controls');
@@ -1795,6 +1962,11 @@ function animate() {
     material.uniforms.uBeatEnergy.value = THREE.MathUtils.lerp(material.uniforms.uBeatEnergy.value, AUDIO.beatEnergy, 0.22);
     material.uniforms.uSpectralCentroid.value = THREE.MathUtils.lerp(material.uniforms.uSpectralCentroid.value, AUDIO.spectralCentroid, lf);
     material.uniforms.uSpectralFlux.value = THREE.MathUtils.lerp(material.uniforms.uSpectralFlux.value, AUDIO.spectralFlux*s, lf);
+    
+    // === ENHANCEMENT: Update new uniforms ===
+    material.uniforms.uOnsetEnergy.value = THREE.MathUtils.lerp(material.uniforms.uOnsetEnergy.value, AUDIO.onsetEnergy, 0.25);
+    material.uniforms.uTerrainMode.value = FIELD_TYPES[STATE.field]?.terrain ? 1.0 : 0.0;
+    material.uniforms.uTerrainHeight.value = STATE.waveformTerrainHeight;
 
     // Update secondary particles
     secondaryPoints.visible = STATE.secondaryEnabled;
@@ -1850,6 +2022,12 @@ function animate() {
 
 
 
+    // === ENHANCEMENT: Adaptive Quality System ===
+    QUALITY_SYSTEM.update(dt * 1000);
+    
+    // === ENHANCEMENT: Audio-Reactive Camera ===
+    AUDIO_CAMERA.update(dt * 1000);
+    
     // Camera shake
     if (STATE.cameraShake > 0 && AUDIO.beatEnergy > 0.1) {
         const shake = AUDIO.beatEnergy * STATE.cameraShake;
