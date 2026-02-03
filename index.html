@@ -1,45 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Quantum Field: Interactive</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600&display=swap');
-        * { box-sizing: border-box; }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             overflow: hidden;
             background: linear-gradient(135deg, #0a0a12 0%, #1a1025 50%, #0d0d1a 100%);
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
-        canvas { display: block; }
+
+        canvas {
+            display: block;
+        }
+
         #scanlines {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(ellipse at center, transparent 0%, transparent 50%, rgba(0,0,0,0.5) 100%);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, transparent 0%, transparent 50%, rgba(0, 0, 0, 0.5) 100%);
             pointer-events: none;
             z-index: 10;
         }
+
         #overlay {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(180deg, rgba(15,10,25,0.97) 0%, rgba(10,10,20,0.98) 100%);
+            background: linear-gradient(180deg, rgba(15, 10, 25, 0.97) 0%, rgba(10, 10, 20, 0.98) 100%);
             z-index: 100;
-            backdrop-filter: blur(25px);
+            backdrop-filter: blur(20px);
             transition: opacity 1s ease;
+            pointer-events: none;
+            /* Allow clicks to pass through to canvas */
         }
+
         .hud-panel {
-            background: linear-gradient(165deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
-            border: 1px solid rgba(255,255,255,0.07);
+            background: linear-gradient(165deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.07);
             padding: 55px 75px;
             text-align: center;
             border-radius: 28px;
-            box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+            pointer-events: auto;
+            /* Re-enable clicks for buttons */
         }
+
         h1 {
             font-family: 'Space Grotesk', sans-serif;
             font-weight: 500;
@@ -51,18 +73,26 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+
         .hud-panel p {
-            color: rgba(255,255,255,0.35);
+            color: rgba(255, 255, 255, 0.35);
             font-size: 13px;
             margin-bottom: 40px;
             letter-spacing: 0.5px;
             font-weight: 300;
         }
-        .btn-group { display: flex; gap: 14px; justify-content: center; }
-        button, .file-upload {
-            background: linear-gradient(135deg, rgba(167,139,250,0.12) 0%, rgba(129,140,248,0.08) 100%);
-            border: 1px solid rgba(167,139,250,0.25);
-            color: rgba(255,255,255,0.85);
+
+        .btn-group {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+        }
+
+        button,
+        .file-upload {
+            background: linear-gradient(135deg, rgba(167, 139, 250, 0.12) 0%, rgba(129, 140, 248, 0.08) 100%);
+            border: 1px solid rgba(167, 139, 250, 0.25);
+            color: rgba(255, 255, 255, 0.85);
             padding: 15px 30px;
             font-size: 13px;
             font-weight: 500;
@@ -72,44 +102,62 @@
             border-radius: 14px;
             font-family: 'Inter', sans-serif;
         }
-        button:hover, .file-upload:hover {
-            background: linear-gradient(135deg, rgba(167,139,250,0.25) 0%, rgba(129,140,248,0.2) 100%);
-            border-color: rgba(167,139,250,0.45);
+
+        button:hover,
+        .file-upload:hover {
+            background: linear-gradient(135deg, rgba(167, 139, 250, 0.25) 0%, rgba(129, 140, 248, 0.2) 100%);
+            border-color: rgba(167, 139, 250, 0.45);
             transform: translateY(-2px);
-            box-shadow: 0 12px 35px rgba(139,92,246,0.2);
+            box-shadow: 0 12px 35px rgba(139, 92, 246, 0.2);
         }
-        input[type="file"] { display: none; }
+
+        input[type="file"] {
+            display: none;
+        }
+
         #status-bar {
             position: absolute;
             bottom: 80px;
             left: 28px;
-            color: rgba(255,255,255,0.3);
+            color: rgba(255, 255, 255, 0.3);
             font-size: 10px;
             letter-spacing: 0.5px;
-            z-index: 20;
+            z-index: 200;
+            pointer-events: none;
         }
-        #status-bar span { color: rgba(196,181,253,0.7); font-weight: 500; }
+
+        #status-bar span {
+            color: rgba(196, 181, 253, 0.7);
+            font-weight: 500;
+        }
+
         #interaction-hint {
             position: absolute;
             top: 28px;
             width: 100%;
             text-align: center;
-            color: rgba(255,255,255,0.2);
+            color: rgba(255, 255, 255, 0.2);
             font-size: 10px;
             letter-spacing: 3px;
             pointer-events: none;
             z-index: 9;
             text-transform: lowercase;
         }
+
         #zoom-indicator {
             position: absolute;
             bottom: 80px;
             right: 28px;
-            color: rgba(255,255,255,0.3);
+            color: rgba(255, 255, 255, 0.3);
             font-size: 10px;
             z-index: 20;
+            pointer-events: none;
         }
-        #zoom-indicator span { color: rgba(196,181,253,0.7); }
+
+        #zoom-indicator span {
+            color: rgba(196, 181, 253, 0.7);
+        }
+
         #audio-controls {
             position: fixed;
             bottom: 24px;
@@ -119,90 +167,357 @@
             gap: 10px;
             align-items: center;
             padding: 12px 20px;
-            background: linear-gradient(180deg, rgba(35,28,50,0.88) 0%, rgba(22,20,38,0.92) 100%);
-            border: 1px solid rgba(255,255,255,0.05);
+            background: linear-gradient(180deg, rgba(35, 28, 50, 0.88) 0%, rgba(22, 20, 38, 0.92) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 18px;
-            z-index: 100;
+            z-index: 200;
             opacity: 0;
             pointer-events: none;
             transition: all 0.4s ease;
             backdrop-filter: blur(25px);
         }
-        #audio-controls.visible { opacity: 1; pointer-events: auto; }
-        #audio-controls button, #audio-controls .file-upload {
+
+        #audio-controls.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #audio-controls button,
+        #audio-controls .file-upload {
             padding: 9px 14px;
             font-size: 11px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.07);
-            color: rgba(255,255,255,0.65);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            color: rgba(255, 255, 255, 0.65);
             border-radius: 10px;
         }
+
         #play-pause-btn {
             min-width: 78px;
-            background: linear-gradient(135deg, rgba(167,139,250,0.18) 0%, rgba(129,140,248,0.12) 100%) !important;
-            border-color: rgba(167,139,250,0.28) !important;
+            background: linear-gradient(135deg, rgba(167, 139, 250, 0.18) 0%, rgba(129, 140, 248, 0.12) 100%) !important;
+            border-color: rgba(167, 139, 250, 0.28) !important;
             color: #e9d5ff !important;
         }
+
         #play-pause-btn.playing {
-            background: linear-gradient(135deg, rgba(251,113,133,0.18) 0%, rgba(244,114,182,0.12) 100%) !important;
-            border-color: rgba(251,113,133,0.35) !important;
+            background: linear-gradient(135deg, rgba(251, 113, 133, 0.18) 0%, rgba(244, 114, 182, 0.12) 100%) !important;
+            border-color: rgba(251, 113, 133, 0.35) !important;
         }
+
         #progress-container {
             width: 85px;
             height: 4px;
-            background: rgba(255,255,255,0.06);
+            background: rgba(255, 255, 255, 0.06);
             border-radius: 4px;
             cursor: pointer;
         }
+
         #progress-bar {
             height: 100%;
             background: linear-gradient(90deg, #a78bfa, #c084fc, #e879f9);
             border-radius: 4px;
             width: 0%;
         }
+
         #time-display {
-            color: rgba(255,255,255,0.35);
+            color: rgba(255, 255, 255, 0.35);
             font-size: 10px;
             min-width: 62px;
             text-align: center;
         }
+
         #track-name {
-            color: rgba(255,255,255,0.3);
+            color: rgba(255, 255, 255, 0.3);
             font-size: 10px;
             max-width: 85px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+
+        /* --- lil-gui Customization --- */
+        .lil-gui {
+            --background-color: rgba(15, 10, 25, 0.9);
+            --text-color: #e2e8f0;
+            --title-background-color: rgba(167, 139, 250, 0.1);
+            --widget-color: #475569;
+            --hover-color: #64748b;
+            --focus-color: #a78bfa;
+            --number-color: #a78bfa;
+            --string-color: #a78bfa;
+            --width: 280px;
+        }
+
+        .lil-gui.root {
+            position: absolute;
+            top: 70px;
+            /* Below the Configure button */
+            right: 24px;
+            z-index: 1000;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .lil-gui.root.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-10px);
+        }
+
+        .lil-gui .title {
+            height: 36px;
+            line-height: 36px;
+            font-weight: 600;
+            background: transparent;
+            color: #d8b4fe;
+            border-bottom: 1px solid rgba(167, 139, 250, 0.15);
+        }
+
+        .lil-gui>.children {
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            /* Purple glass border */
+            border-radius: 16px;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            background: var(--background-color);
+        }
+
+        /* Compact Rows */
+        .lil-gui .controller {
+            height: 30px;
+            line-height: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .lil-gui .name {
+            width: 45%;
+            font-size: 11px;
+            font-weight: 500;
+            color: #cbd5e1;
+        }
+
+        /* Stylized Inputs */
+        .lil-gui input[type="text"],
+        .lil-gui input[type="number"] {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            height: 22px;
+            margin-top: 4px;
+            color: #a78bfa;
+        }
+
+        .lil-gui input:focus {
+            border-color: #a78bfa;
+        }
+
+        /* Sliders */
+        .lil-gui .slider {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        .lil-gui .slider-fg {
+            background: #a78bfa;
+            /* Purple accent */
+            box-shadow: 0 0 10px rgba(167, 139, 250, 0.4);
+        }
+
+        /* Checkboxes */
+        .lil-gui .checkbox {
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .lil-gui .checkbox.checked {
+            background: #a78bfa;
+            border-color: #a78bfa;
+        }
+
+        .lil-gui .checkbox.checked:before {
+            color: #fff;
+        }
+
+        /* Folders */
+        .lil-gui .folder>.title {
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.02);
+            color: #e2e8f0;
+            font-weight: 600;
+            margin-top: 1px;
+        }
+
+        .lil-gui .folder>.title:hover {
+            background: rgba(167, 139, 250, 0.08);
+            color: #fff;
+        }
+
+        .lil-gui .folder.closed>.title {
+            opacity: 0.8;
+        }
+
+        /* Hide "Controls" label if unnecessary or style it */
+
+        /* --- New GUI Toggle --- */
+        #gui-toggle {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 1001;
+            background: linear-gradient(135deg, rgba(167, 139, 250, 0.15) 0%, rgba(129, 140, 248, 0.1) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            color: #d8b4fe;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            text-transform: uppercase;
+        }
+
+        #gui-toggle:hover {
+            background: linear-gradient(135deg, rgba(167, 139, 250, 0.25) 0%, rgba(129, 140, 248, 0.2) 100%);
+            box-shadow: 0 6px 20px rgba(167, 139, 250, 0.25);
+            transform: translateY(-1px);
+            color: #fff;
+        }
+
+        #dashboard-btn {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            z-index: 1001;
+            background: linear-gradient(135deg, rgba(167, 139, 250, 0.15) 0%, rgba(129, 140, 248, 0.1) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            color: #d8b4fe;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            text-transform: uppercase;
+        }
+
+        #dashboard-btn:hover {
+            background: linear-gradient(135deg, rgba(167, 139, 250, 0.25) 0%, rgba(129, 140, 248, 0.2) 100%);
+            box-shadow: 0 6px 20px rgba(167, 139, 250, 0.25);
+            transform: translateY(-1px);
+            color: #fff;
+        }
+
+        /* --- Center Panel Refinement --- */
+        .hud-panel {
+            background: rgba(15, 10, 25, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            /* Darkened container */
+            padding: 24px;
+            /* Reduced padding */
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(40px);
+            min-width: 420px;
+            /* Wider for buttons */
+        }
+
+        .hud-panel h1,
+        .hud-panel p {
+            display: none;
+            /* Hide title as per screenshot showing only buttons */
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .btn-group button {
+            flex: 1;
+            background: transparent;
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            color: #e9d5ff;
+            padding: 14px 0;
+            border-radius: 12px;
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-group button:hover {
+            background: rgba(167, 139, 250, 0.1);
+            border-color: #a78bfa;
+            box-shadow: 0 0 20px rgba(167, 139, 250, 0.2);
+        }
     </style>
 </head>
+
 <body>
-<div id="scanlines"></div>
-<div id="interaction-hint">space · play/pause    scroll · zoom    drag · rotate    F · focus mode</div>
-<div id="overlay">
-    <div class="hud-panel">
-        <h1>Quantum Fields</h1>
-        <p>Audio-reactive particle simulation</p>
-        <div class="btn-group">
-            <label class="file-upload">♫ Choose Audio<input type="file" id="file-input" accept="audio/*"></label>
-            <button id="mic-btn">🎙 Microphone</button>
+    <div id="scanlines"></div>
+    <div id="interaction-hint">space · play/pause scroll · zoom drag · rotate F · focus mode</div>
+    <button id="dashboard-btn">↩ Dashboard</button>
+    <button id="gui-toggle" onclick="document.querySelector('.lil-gui').classList.toggle('hidden')">✦ Configure</button>
+    <div id="overlay">
+        <div class="hud-panel">
+            <h1>Quantum Fields</h1>
+            <p>Audio-reactive particle simulation</p>
+            <div class="btn-group">
+                <button id="sys-audio-btn">⚡ Controls</button>
+                <button id="mic-btn">🚀 Boost</button>
+            </div>
         </div>
     </div>
-</div>
-<div id="audio-controls">
-    <button id="play-pause-btn" class="playing">⏸ pause</button>
-    <div id="progress-container"><div id="progress-bar"></div></div>
-    <span id="time-display">0:00 / 0:00</span>
-    <span id="track-name">no track</span>
-    <label class="file-upload" title="Load audio">📁<input type="file" id="file-input-2" accept="audio/*"></label>
-    <button id="mic-btn-2" title="Microphone">🎙</button>
-    <button id="screenshot-btn" title="Screenshot">📷</button>
-    <button id="fullscreen-btn" title="Fullscreen">⛶</button>
-</div>
-<div id="status-bar"><span>ready</span> · awaiting input</div>
-<div id="zoom-indicator">zoom <span id="zoom-level">100%</span></div>
+    <div id="audio-controls">
+        <button id="play-pause-btn" class="playing">⏸ pause</button>
+        <div id="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+        <span id="time-display">0:00 / 0:00</span>
+        <span id="track-name">no track</span>
+        <label class="file-upload" title="Load audio">📁<input type="file" id="file-input-2" accept="audio/*"></label>
+        <button id="mic-btn-2" title="Microphone">🎙</button>
+        <button id="screenshot-btn" title="Screenshot">📷</button>
+        <button id="fullscreen-btn" title="Fullscreen">⛶</button>
+    </div>
+    <div id="status-bar"><span>ready</span> · awaiting input</div>
+    <div id="zoom-indicator">zoom <span id="zoom-level">100%</span></div>
 
-<script type="importmap">
+    <!-- Global Error Handler (Must be before module imports) -->
+    <script>
+        window.onerror = function (msg, url, lineNo, columnNo, error) {
+            const status = document.getElementById('status-bar');
+            if (status) {
+                status.innerHTML = `ERROR: <span style="color:#ff6b6b">${msg}</span>`;
+                status.style.opacity = 1;
+            }
+            console.error('Global Error:', msg, url, lineNo, error);
+            return false;
+        };
+        // Catch unhandled promise rejections
+        window.onunhandledrejection = function (event) {
+            const status = document.getElementById('status-bar');
+            if (status) {
+                status.innerHTML = `ERROR: <span style="color:#ff6b6b">${event.reason}</span>`;
+                status.style.opacity = 1;
+            }
+            console.error('Unhandled Rejection:', event.reason);
+        };
+    </script>
+
+    <script type="importmap">
 {
     "imports": {
         "three": "https://unpkg.com/three@0.182.0/build/three.module.js",
@@ -212,341 +527,395 @@
 }
 </script>
 
-<script type="module">
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-import { AfterimagePass } from 'three/addons/postprocessing/AfterimagePass.js';
-import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
-// BokehPass removed - using custom DOF shader
-import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { Lensflare, LensflareElement } from 'three/addons/objects/Lensflare.js';
-import GUI from 'lil-gui';
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+        import { AfterimagePass } from 'three/addons/postprocessing/AfterimagePass.js';
+        import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+        // BokehPass removed - using custom DOF shader
+        import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+        import { Lensflare, LensflareElement } from 'three/addons/objects/Lensflare.js';
+        import GUI from 'lil-gui';
 
-const CONFIG = {
-    maxParticles: 250000,
-    secondaryParticles: 35000,
-    initialDensity: 0.078,
-    fieldRadius: 75,
-    minZoom: 1,
-    maxZoom: 250,
-    defaultZoom: 45
-};
+        const CONFIG = {
+            maxParticles: 250000,
+            secondaryParticles: 35000,
+            initialDensity: 0.043,
+            fieldRadius: 75,
+            minZoom: 1,
+            maxZoom: 250,
+            defaultZoom: 200
+        };
 
-const STATE = {
-    field: 'Gluon (Strong)',
-    density: CONFIG.initialDensity,
-    sensitivity: 1,
-    trails: 0.66144,
-    bloom: 0.2,
-    timeScale: 2,
-    pixelRatio: Math.min(window.devicePixelRatio, 2),
-    chromaticAberration: 0.004,
-    filmGrain: 0.001,
-    cameraShake: 0.066,
-    vortexStrength: 0.666,
-    pulseIntensity: 0.6,
-    anamorphicStretch: 0.1,
-    bassGateThreshold: 0.2605,
-    bassGateAttack: 0.029,
-    bassGateRelease: 0.5,
-    bassGateRatio: 2.142,
-    bassGateEnabled: true,
-    // NEW EFFECTS
-    godRaysEnabled: false,
-    godRaysIntensity: 0.078,
-    godRaysDecay: 0.92,
-    dofEnabled: false,
-    dofFocus: 0.05,
-    dofFocalLength: 0.5,
-    dofBokehStrength: 0.304,
-    lensFlareEnabled: true,
-    lensFlareIntensity: 0.5,
-    particleTrailsEnabled: true,
-    particleTrailOpacity: 0.75,
-    nebulaEnabled: true,
-    nebulaIntensity: 0.568,
-    connectionsEnabled: true,
-    connectionThreshold: 20.0,
-    connectionOpacity: 1.0,
-    // === ENHANCEMENT PACK v2.0 ===
-    // 1. Motion Blur
-    motionBlurEnabled: true,
-    motionBlurStrength: 0.15,
-    // 2. Adaptive Quality
-    adaptiveQualityEnabled: true,
-    targetFPS: 55,
-    qualityLevel: 1.0,
-    // 3. Onset Detection
-    onsetSensitivity: 1.5,
-    onsetDecay: 0.92,
-    // 4. Audio-Reactive Camera
-    audioCameraEnabled: true,
-    audioCameraSmoothing: 0.08,
-    audioCameraIntensity: 0.3,
-    // 5. Waveform Terrain
-    waveformTerrainScale: 1.0,
-    waveformTerrainHeight: 15.0
-};
+        const STATE = {
+            field: 'Gluon (Strong)',
+            density: CONFIG.initialDensity,
+            sensitivity: 1,
+            trails: 0.66144,
+            bloom: 0.2,
+            timeScale: 2,
+            pixelRatio: Math.min(window.devicePixelRatio, 2),
+            chromaticAberration: 0.004,
+            filmGrain: 0.001,
+            cameraShake: 0.066,
+            vortexStrength: 0.666,
+            pulseIntensity: 0.35,
+            anamorphicStretch: 0.1,
+            bassGateThreshold: 0.2605,
+            bassGateAttack: 0.029,
+            bassGateRelease: 0.5,
+            bassGateRatio: 2.142,
+            bassGateEnabled: true,
+            // NEW EFFECTS
+            godRaysEnabled: false,
+            godRaysIntensity: 0.078,
+            godRaysDecay: 0.92,
+            dofEnabled: false,
+            dofFocus: 0.05,
+            dofFocalLength: 0.25,
+            dofBokehStrength: 0.5,
+            lensFlareEnabled: true,
+            lensFlareIntensity: 0.5,
+            particleTrailsEnabled: true,
+            particleTrailOpacity: 0.75,
+            nebulaEnabled: true,
+            nebulaIntensity: 0.4,
+            connectionsEnabled: true,
+            connectionThreshold: 20.0,
+            connectionOpacity: 1.0,
+            // === ENHANCEMENT PACK v2.0 ===
+            // 1. Motion Blur
+            motionBlurEnabled: true,
+            motionBlurStrength: 0.5,
+            // 2. Adaptive Quality
+            adaptiveQualityEnabled: true,
+            targetFPS: 55,
+            qualityLevel: 1.0,
+            // 3. Onset Detection
+            onsetSensitivity: 1.5,
+            onsetDecay: 0.92,
+            // 4. Audio-Reactive Camera
+            audioCameraEnabled: true,
+            audioCameraSmoothing: 0.08,
+            audioCameraIntensity: 0.3,
+            // 5. Waveform Terrain
+            waveformTerrainScale: 1.0,
+            waveformTerrainHeight: 15.0
+        };
 
-// --- AUDIO SYSTEM ---
-const AUDIO = {
-    ctx: null, analyser: null, source: null, data: null,
-    audioBuffer: null, isPlaying: false, isPaused: false,
-    startTime: 0, pauseTime: 0, currentTrackName: 'No Track',
-    mode: null, micStream: null,
-    bands: { subBass: 0, bass: 0, lowMid: 0, mid: 0, highMid: 0, high: 0, ultraHigh: 0 },
-    gatedBands: { subBass: 0, bass: 0, lowMid: 0, mid: 0, highMid: 0, high: 0, ultraHigh: 0 },
-    beatThreshold: 0.1, beatDecay: 0.97, beatEnergy: 0,
-    lastBeatTime: 0, beatDetected: false, peakHistory: [],
-    spectralCentroid: 0, spectralFlux: 0, prevSpectrum: null, active: false,
-    // === ENHANCEMENT: Onset Detection ===
-    onsetEnergy: 0, onsetDetected: false, onsetHistory: [], onsetThreshold: 0,
-    // === ENHANCEMENT: Waveform Data ===
-    waveformData: new Float32Array(128), waveformSmoothed: new Float32Array(128),
-    gateState: { isOpen: false, envelope: 0, holdTime: 0, noiseFloor: 0.05,
-        calibrationSamples: [], isCalibrating: true, calibrationFrames: 60 },
+        // --- AUDIO SYSTEM ---
+        const AUDIO = {
+            ctx: null, analyser: null, source: null, data: null,
+            audioBuffer: null, isPlaying: false, isPaused: false,
+            startTime: 0, pauseTime: 0, currentTrackName: 'No Track',
+            mode: null, micStream: null,
+            bands: { subBass: 0, bass: 0, lowMid: 0, mid: 0, highMid: 0, high: 0, ultraHigh: 0 },
+            gatedBands: { subBass: 0, bass: 0, lowMid: 0, mid: 0, highMid: 0, high: 0, ultraHigh: 0 },
+            beatThreshold: 0.1, beatDecay: 0.97, beatEnergy: 0,
+            lastBeatTime: 0, beatDetected: false, peakHistory: [],
+            spectralCentroid: 0, spectralFlux: 0, prevSpectrum: null, active: false,
+            // === ENHANCEMENT: Onset Detection ===
+            onsetEnergy: 0, onsetDetected: false, onsetHistory: [], onsetThreshold: 0,
+            // === ENHANCEMENT: Waveform Data ===
+            waveformData: new Float32Array(128), waveformSmoothed: new Float32Array(128),
+            gateState: {
+                isOpen: false, envelope: 0, holdTime: 0, noiseFloor: 0.05,
+                calibrationSamples: [], isCalibrating: true, calibrationFrames: 60
+            },
 
-    init() {
-        if(this.ctx) return;
-        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-        this.analyser = this.ctx.createAnalyser();
-        this.analyser.fftSize = 4096;
-        this.analyser.smoothingTimeConstant = 0.72;
-        this.data = new Uint8Array(this.analyser.frequencyBinCount);
-        this.prevSpectrum = new Float32Array(this.analyser.frequencyBinCount);
-        this.active = true;
-    },
+            init() {
+                if (this.ctx) return;
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                this.analyser = this.ctx.createAnalyser();
+                this.analyser.fftSize = 4096;
+                this.analyser.smoothingTimeConstant = 0.72;
+                this.data = new Uint8Array(this.analyser.frequencyBinCount);
+                this.prevSpectrum = new Float32Array(this.analyser.frequencyBinCount);
+                this.active = true;
+            },
 
-    loadTrack(arrayBuffer, fileName) {
-        return new Promise((resolve, reject) => {
-            this.ctx.decodeAudioData(arrayBuffer, (buffer) => {
-                this.stopCurrentSource();
-                this.audioBuffer = buffer;
-                this.currentTrackName = fileName || 'Unknown';
-                this.mode = 'file';
-                this.pauseTime = 0;
-                this.resetCalibration();
-                resolve(buffer);
-            }, reject);
+            loadTrack(arrayBuffer, fileName) {
+                return new Promise((resolve, reject) => {
+                    this.ctx.decodeAudioData(arrayBuffer, (buffer) => {
+                        this.stopCurrentSource();
+                        this.audioBuffer = buffer;
+                        this.currentTrackName = fileName || 'Unknown';
+                        this.mode = 'file';
+                        this.pauseTime = 0;
+                        this.resetCalibration();
+                        resolve(buffer);
+                    }, reject);
+                });
+            },
+
+            play() {
+                if (!this.audioBuffer || this.mode !== 'file' || this.isPlaying) return;
+                this.source = this.ctx.createBufferSource();
+                this.source.buffer = this.audioBuffer;
+                this.source.loop = true;
+                this.source.connect(this.analyser);
+                this.analyser.connect(this.ctx.destination);
+                this.source.start(0, this.pauseTime);
+                this.startTime = this.ctx.currentTime - this.pauseTime;
+                this.isPlaying = true;
+                this.isPaused = false;
+            },
+
+            pause() {
+                if (!this.isPlaying || this.mode !== 'file') return;
+                this.pauseTime = this.getCurrentTime();
+                this.isPaused = true;
+                this.isPlaying = false;
+                if (this.source) { try { this.source.stop(); } catch (e) { } this.source.disconnect(); this.source = null; }
+            },
+
+            togglePlayPause() {
+                if (this.mode === 'mic') return false;
+                if (this.isPlaying) { this.pause(); return false; }
+                else { this.play(); return true; }
+            },
+
+            getCurrentTime() {
+                if (!this.isPlaying) return this.pauseTime;
+                if (!this.audioBuffer) return 0;
+                return (this.ctx.currentTime - this.startTime) % this.audioBuffer.duration;
+            },
+
+            getDuration() { return this.audioBuffer ? this.audioBuffer.duration : 0; },
+
+            seek(time) {
+                if (this.mode !== 'file' || !this.audioBuffer) return;
+                const wasPlaying = this.isPlaying;
+                if (wasPlaying) this.pause();
+                this.pauseTime = Math.max(0, Math.min(time, this.audioBuffer.duration));
+                if (wasPlaying) this.play();
+            },
+
+            stopCurrentSource() {
+                if (this.source) { try { this.source.stop(); this.source.disconnect(); } catch (e) { } this.source = null; }
+                if (this.micStream) { this.micStream.getTracks().forEach(t => t.stop()); this.micStream = null; }
+                this.isPlaying = false; this.isPaused = false; this.pauseTime = 0;
+            },
+
+            async startMic(preferredLabel = null) {
+                console.log('startMic called with preferredLabel:', preferredLabel);
+                const status = document.getElementById('status-bar');
+                if (status) status.innerHTML = 'SYSTEM: <span>REQUESTING ACCESS...</span>';
+
+                try {
+                    // Ensure context is running
+                    if (this.ctx.state === 'suspended') {
+                        console.log('Resuming AudioContext...');
+                        await this.ctx.resume();
+                    }
+
+                    // 1. Get initial stream (activates permissions so labels are visible)
+                    console.log('Requesting initial getUserMedia...');
+                    let stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    console.log('Initial stream obtained:', stream.id);
+
+                    // 2. Search for preferred device (loopback)
+                    let target = null;
+                    if (preferredLabel) {
+                        const devices = await navigator.mediaDevices.enumerateDevices();
+                        console.log("Audio Devices Found:", devices.length, devices.map(d => `${d.label} (${d.kind})`));
+
+                        target = devices.find(d => d.kind === 'audioinput' &&
+                            d.label.toLowerCase().includes(preferredLabel.toLowerCase()));
+                    }
+
+                    if (target) {
+                        console.log(`Switching audio input to: ${target.label} [${target.deviceId}]`);
+                        stream.getTracks().forEach(t => t.stop()); // Stop generic stream
+
+                        // Request specific device - being explicit with constraints
+                        stream = await navigator.mediaDevices.getUserMedia({
+                            audio: {
+                                deviceId: { exact: target.deviceId },
+                                echoCancellation: false,
+                                noiseSuppression: false,
+                                autoGainControl: false,
+                                channelCount: 2
+                            }
+                        });
+                        this.currentTrackName = target.label;
+                    } else {
+                        if (preferredLabel) console.warn(`Preferred device '${preferredLabel}' not found. Using default.`);
+                        // Keep the initial stream
+                        this.currentTrackName = stream.getAudioTracks()[0]?.label || 'Live Microphone';
+                    }
+
+                    this.stopCurrentSource();
+                    this.micStream = stream;
+                    this.source = this.ctx.createMediaStreamSource(stream);
+                    this.source.connect(this.analyser);
+                    this.mode = 'mic';
+                    this.isPlaying = true;
+                    this.resetCalibration();
+
+                    if (status) status.innerHTML = 'SYSTEM: <span>LISTENING (' + (preferredLabel ? 'Loopback' : 'Mic') + ')</span>';
+                    updateUI();
+
+                    return stream;
+                } catch (e) {
+                    console.error("AUDIO.startMic failed:", e);
+                    throw e;
+                }
+            },
+
+            resetCalibration() { this.gateState.isCalibrating = true; this.gateState.calibrationSamples = []; },
+
+            applyBassGate(rawValue) {
+                if (!STATE.bassGateEnabled) return rawValue;
+                const { bassGateThreshold: threshold, bassGateAttack: attack, bassGateRelease: release, bassGateRatio: ratio } = STATE;
+                if (this.gateState.isCalibrating) {
+                    this.gateState.calibrationSamples.push(rawValue);
+                    if (this.gateState.calibrationSamples.length >= this.gateState.calibrationFrames) {
+                        const sorted = [...this.gateState.calibrationSamples].sort((a, b) => a - b);
+                        this.gateState.noiseFloor = sorted.slice(0, Math.floor(sorted.length * 0.2)).reduce((a, b) => a + b, 0) / Math.floor(sorted.length * 0.2);
+                        this.gateState.isCalibrating = false;
+                    }
+                }
+                const effectiveThreshold = Math.max(threshold, this.gateState.noiseFloor * 1.5);
+                if (rawValue > effectiveThreshold) { this.gateState.isOpen = true; this.gateState.holdTime = 10; }
+                else if (rawValue < effectiveThreshold * 0.7 && this.gateState.holdTime <= 0) { this.gateState.isOpen = false; }
+                if (this.gateState.holdTime > 0) this.gateState.holdTime--;
+                this.gateState.envelope += ((this.gateState.isOpen ? 1.0 : 0.0) - this.gateState.envelope) * (this.gateState.isOpen ? attack : release);
+                let output = rawValue;
+                if (this.gateState.isOpen && rawValue > effectiveThreshold) {
+                    output = effectiveThreshold + (rawValue - effectiveThreshold) / ratio;
+                }
+                return output * this.gateState.envelope;
+            },
+
+            update() {
+                if (!this.active) return;
+                this.analyser.getByteFrequencyData(this.data);
+                const len = this.data.length, nyquist = this.ctx.sampleRate / 2;
+                const getFreqIndex = (freq) => Math.round(freq / nyquist * len);
+                const ranges = { subBass: [20, 60], bass: [60, 250], lowMid: [250, 500], mid: [500, 2000], highMid: [2000, 4000], high: [4000, 8000], ultraHigh: [8000, 16000] };
+                let totalEnergy = 0, weightedFreqSum = 0;
+                for (const [band, [low, high]] of Object.entries(ranges)) {
+                    const lowIdx = getFreqIndex(low), highIdx = getFreqIndex(high);
+                    let sum = 0;
+                    for (let i = lowIdx; i < highIdx && i < len; i++) {
+                        const v = this.data[i] / 255.0;
+                        sum += v; totalEnergy += v; weightedFreqSum += v * i;
+                    }
+                    const rawBand = sum / (highIdx - lowIdx);
+                    this.bands[band] = rawBand;
+                    this.gatedBands[band] = (band === 'subBass' || band === 'bass' || band === 'lowMid') ? this.applyBassGate(rawBand) : rawBand;
+                }
+                this.spectralCentroid = totalEnergy > 0 ? weightedFreqSum / totalEnergy / len : 0;
+                let flux = 0;
+                for (let i = 0; i < len; i++) {
+                    const current = this.data[i] / 255.0, diff = current - this.prevSpectrum[i];
+                    flux += diff > 0 ? diff * diff : 0;
+                    this.prevSpectrum[i] = current;
+                }
+                this.spectralFlux = Math.sqrt(flux / len);
+                const currentEnergy = this.gatedBands.bass * 0.6 + this.gatedBands.subBass * 0.4;
+                this.peakHistory.push(currentEnergy);
+                if (this.peakHistory.length > 50) this.peakHistory.shift();
+                const avgEnergy = this.peakHistory.reduce((a, b) => a + b, 0) / this.peakHistory.length;
+                const variance = this.peakHistory.reduce((a, b) => a + Math.pow(b - avgEnergy, 2), 0) / this.peakHistory.length;
+                const dynamicThreshold = avgEnergy + Math.sqrt(variance) * 1.8;
+                const now = performance.now();
+                if (currentEnergy > dynamicThreshold && currentEnergy > this.beatThreshold && now - this.lastBeatTime > 120) {
+                    this.beatDetected = true; this.beatEnergy = 1.0; this.lastBeatTime = now;
+                } else { this.beatDetected = false; }
+                this.beatEnergy *= this.beatDecay;
+
+                // === ENHANCEMENT: Improved Onset Detection ===
+                // Uses spectral flux derivative for sharper transient response
+                const onsetSens = STATE.onsetSensitivity;
+                this.onsetHistory.push(this.spectralFlux);
+                if (this.onsetHistory.length > 8) this.onsetHistory.shift();
+                const recentAvg = this.onsetHistory.slice(-4).reduce((a, b) => a + b, 0) / 4;
+                const olderAvg = this.onsetHistory.slice(0, 4).reduce((a, b) => a + b, 0) / Math.max(1, this.onsetHistory.slice(0, 4).length);
+                const onsetDelta = (recentAvg - olderAvg) * onsetSens;
+                this.onsetDetected = onsetDelta > 0.015 && now - this.lastBeatTime > 50;
+                this.onsetEnergy = this.onsetDetected ? 1.0 : this.onsetEnergy * STATE.onsetDecay;
+
+                // === ENHANCEMENT: Waveform Data for Terrain Field ===
+                const waveformBins = 128;
+                const binSize = Math.floor(len / waveformBins);
+                for (let i = 0; i < waveformBins; i++) {
+                    let sum = 0;
+                    for (let j = 0; j < binSize; j++) {
+                        sum += this.data[i * binSize + j] / 255.0;
+                    }
+                    const target = sum / binSize;
+                    this.waveformSmoothed[i] += (target - this.waveformSmoothed[i]) * 0.3;
+                    this.waveformData[i] = this.waveformSmoothed[i];
+                }
+            }
+        };
+
+        // --- SCENE SETUP ---
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x000508, 0.005);
+        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 800);
+        camera.position.set(0, 12, CONFIG.defaultZoom);
+        const cameraShakeOffset = new THREE.Vector3();
+        const baseCameraPos = camera.position.clone();
+        const zoomIndicator = document.getElementById('zoom-level');
+
+        const renderer = new THREE.WebGLRenderer({ powerPreference: "high-performance", antialias: false });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(STATE.pixelRatio);
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 2.1;
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.06;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.3;
+        controls.minDistance = CONFIG.minZoom;
+        controls.maxDistance = CONFIG.maxZoom;
+        controls.maxPolarAngle = Math.PI * 0.85;
+        controls.minPolarAngle = Math.PI * 0.15;
+
+        controls.addEventListener('change', () => {
+            const dist = camera.position.length();
+            const zoomPercent = Math.round((1 - (dist - CONFIG.minZoom) / (CONFIG.maxZoom - CONFIG.minZoom)) * 100);
+            zoomIndicator.textContent = Math.max(0, Math.min(100, zoomPercent)) + '%';
+            baseCameraPos.copy(camera.position);
         });
-    },
 
-    play() {
-        if (!this.audioBuffer || this.mode !== 'file' || this.isPlaying) return;
-        this.source = this.ctx.createBufferSource();
-        this.source.buffer = this.audioBuffer;
-        this.source.loop = true;
-        this.source.connect(this.analyser);
-        this.analyser.connect(this.ctx.destination);
-        this.source.start(0, this.pauseTime);
-        this.startTime = this.ctx.currentTime - this.pauseTime;
-        this.isPlaying = true;
-        this.isPaused = false;
-    },
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2(9999, 9999);
+        const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+        const mouseWorldPos = new THREE.Vector3();
+        let mouseVelocity = new THREE.Vector2();
+        let prevMouse = new THREE.Vector2();
 
-    pause() {
-        if (!this.isPlaying || this.mode !== 'file') return;
-        this.pauseTime = this.getCurrentTime();
-        this.isPaused = true;
-        this.isPlaying = false;
-        if (this.source) { try { this.source.stop(); } catch(e) {} this.source.disconnect(); this.source = null; }
-    },
-
-    togglePlayPause() {
-        if (this.mode === 'mic') return false;
-        if (this.isPlaying) { this.pause(); return false; }
-        else { this.play(); return true; }
-    },
-
-    getCurrentTime() {
-        if (!this.isPlaying) return this.pauseTime;
-        if (!this.audioBuffer) return 0;
-        return (this.ctx.currentTime - this.startTime) % this.audioBuffer.duration;
-    },
-
-    getDuration() { return this.audioBuffer ? this.audioBuffer.duration : 0; },
-
-    seek(time) {
-        if (this.mode !== 'file' || !this.audioBuffer) return;
-        const wasPlaying = this.isPlaying;
-        if (wasPlaying) this.pause();
-        this.pauseTime = Math.max(0, Math.min(time, this.audioBuffer.duration));
-        if (wasPlaying) this.play();
-    },
-
-    stopCurrentSource() {
-        if (this.source) { try { this.source.stop(); this.source.disconnect(); } catch(e) {} this.source = null; }
-        if (this.micStream) { this.micStream.getTracks().forEach(t => t.stop()); this.micStream = null; }
-        this.isPlaying = false; this.isPaused = false; this.pauseTime = 0;
-    },
-
-    startMic() {
-        return navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-            this.stopCurrentSource();
-            this.micStream = stream;
-            this.source = this.ctx.createMediaStreamSource(stream);
-            this.source.connect(this.analyser);
-            this.mode = 'mic';
-            this.isPlaying = true;
-            this.currentTrackName = 'Live Microphone';
-            this.resetCalibration();
-            return stream;
+        window.addEventListener('mousemove', (e) => {
+            const newMouse = new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+            mouseVelocity.subVectors(newMouse, prevMouse);
+            prevMouse.copy(newMouse);
+            mouse.copy(newMouse);
+            raycaster.setFromCamera(mouse, camera);
+            const target = new THREE.Vector3();
+            raycaster.ray.intersectPlane(plane, target);
+            if (target) mouseWorldPos.copy(target);
         });
-    },
 
-    resetCalibration() { this.gateState.isCalibrating = true; this.gateState.calibrationSamples = []; },
+        window.addEventListener('keydown', (e) => {
+            if (e.key === '+' || e.key === '=') { camera.position.multiplyScalar(0.9); controls.update(); }
+            else if (e.key === '-' || e.key === '_') { camera.position.multiplyScalar(1.1); controls.update(); }
+            else if (e.key === '0') { camera.position.normalize().multiplyScalar(CONFIG.defaultZoom); controls.update(); }
+            else if (e.key === ' ') { e.preventDefault(); togglePlayPause(); }
+            else if (e.key === 'f' || e.key === 'F') { STATE.dofEnabled = !STATE.dofEnabled; bokehPass.enabled = STATE.dofEnabled; }
+        });
 
-    applyBassGate(rawValue) {
-        if (!STATE.bassGateEnabled) return rawValue;
-        const { bassGateThreshold: threshold, bassGateAttack: attack, bassGateRelease: release, bassGateRatio: ratio } = STATE;
-        if (this.gateState.isCalibrating) {
-            this.gateState.calibrationSamples.push(rawValue);
-            if (this.gateState.calibrationSamples.length >= this.gateState.calibrationFrames) {
-                const sorted = [...this.gateState.calibrationSamples].sort((a,b) => a-b);
-                this.gateState.noiseFloor = sorted.slice(0, Math.floor(sorted.length * 0.2)).reduce((a,b) => a+b, 0) / Math.floor(sorted.length * 0.2);
-                this.gateState.isCalibrating = false;
-            }
-        }
-        const effectiveThreshold = Math.max(threshold, this.gateState.noiseFloor * 1.5);
-        if (rawValue > effectiveThreshold) { this.gateState.isOpen = true; this.gateState.holdTime = 10; }
-        else if (rawValue < effectiveThreshold * 0.7 && this.gateState.holdTime <= 0) { this.gateState.isOpen = false; }
-        if (this.gateState.holdTime > 0) this.gateState.holdTime--;
-        this.gateState.envelope += ((this.gateState.isOpen ? 1.0 : 0.0) - this.gateState.envelope) * (this.gateState.isOpen ? attack : release);
-        let output = rawValue;
-        if (this.gateState.isOpen && rawValue > effectiveThreshold) {
-            output = effectiveThreshold + (rawValue - effectiveThreshold) / ratio;
-        }
-        return output * this.gateState.envelope;
-    },
-
-    update() {
-        if(!this.active) return;
-        this.analyser.getByteFrequencyData(this.data);
-        const len = this.data.length, nyquist = this.ctx.sampleRate / 2;
-        const getFreqIndex = (freq) => Math.round(freq / nyquist * len);
-        const ranges = { subBass: [20,60], bass: [60,250], lowMid: [250,500], mid: [500,2000], highMid: [2000,4000], high: [4000,8000], ultraHigh: [8000,16000] };
-        let totalEnergy = 0, weightedFreqSum = 0;
-        for (const [band, [low, high]] of Object.entries(ranges)) {
-            const lowIdx = getFreqIndex(low), highIdx = getFreqIndex(high);
-            let sum = 0;
-            for (let i = lowIdx; i < highIdx && i < len; i++) {
-                const v = this.data[i] / 255.0;
-                sum += v; totalEnergy += v; weightedFreqSum += v * i;
-            }
-            const rawBand = sum / (highIdx - lowIdx);
-            this.bands[band] = rawBand;
-            this.gatedBands[band] = (band === 'subBass' || band === 'bass' || band === 'lowMid') ? this.applyBassGate(rawBand) : rawBand;
-        }
-        this.spectralCentroid = totalEnergy > 0 ? weightedFreqSum / totalEnergy / len : 0;
-        let flux = 0;
-        for (let i = 0; i < len; i++) {
-            const current = this.data[i] / 255.0, diff = current - this.prevSpectrum[i];
-            flux += diff > 0 ? diff * diff : 0;
-            this.prevSpectrum[i] = current;
-        }
-        this.spectralFlux = Math.sqrt(flux / len);
-        const currentEnergy = this.gatedBands.bass * 0.6 + this.gatedBands.subBass * 0.4;
-        this.peakHistory.push(currentEnergy);
-        if (this.peakHistory.length > 50) this.peakHistory.shift();
-        const avgEnergy = this.peakHistory.reduce((a,b) => a+b, 0) / this.peakHistory.length;
-        const variance = this.peakHistory.reduce((a,b) => a + Math.pow(b - avgEnergy, 2), 0) / this.peakHistory.length;
-        const dynamicThreshold = avgEnergy + Math.sqrt(variance) * 1.8;
-        const now = performance.now();
-        if (currentEnergy > dynamicThreshold && currentEnergy > this.beatThreshold && now - this.lastBeatTime > 120) {
-            this.beatDetected = true; this.beatEnergy = 1.0; this.lastBeatTime = now;
-        } else { this.beatDetected = false; }
-        this.beatEnergy *= this.beatDecay;
-        
-        // === ENHANCEMENT: Improved Onset Detection ===
-        // Uses spectral flux derivative for sharper transient response
-        const onsetSens = STATE.onsetSensitivity;
-        this.onsetHistory.push(this.spectralFlux);
-        if (this.onsetHistory.length > 8) this.onsetHistory.shift();
-        const recentAvg = this.onsetHistory.slice(-4).reduce((a,b) => a+b, 0) / 4;
-        const olderAvg = this.onsetHistory.slice(0, 4).reduce((a,b) => a+b, 0) / Math.max(1, this.onsetHistory.slice(0, 4).length);
-        const onsetDelta = (recentAvg - olderAvg) * onsetSens;
-        this.onsetDetected = onsetDelta > 0.015 && now - this.lastBeatTime > 50;
-        this.onsetEnergy = this.onsetDetected ? 1.0 : this.onsetEnergy * STATE.onsetDecay;
-        
-        // === ENHANCEMENT: Waveform Data for Terrain Field ===
-        const waveformBins = 128;
-        const binSize = Math.floor(len / waveformBins);
-        for (let i = 0; i < waveformBins; i++) {
-            let sum = 0;
-            for (let j = 0; j < binSize; j++) {
-                sum += this.data[i * binSize + j] / 255.0;
-            }
-            const target = sum / binSize;
-            this.waveformSmoothed[i] += (target - this.waveformSmoothed[i]) * 0.3;
-            this.waveformData[i] = this.waveformSmoothed[i];
-        }
-    }
-};
-
-// --- SCENE SETUP ---
-const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x000508, 0.005);
-const camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.1, 800);
-camera.position.set(0, 12, CONFIG.defaultZoom);
-const cameraShakeOffset = new THREE.Vector3();
-const baseCameraPos = camera.position.clone();
-const zoomIndicator = document.getElementById('zoom-level');
-
-const renderer = new THREE.WebGLRenderer({ powerPreference: "high-performance", antialias: false });
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(STATE.pixelRatio);
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 2.1;
-document.body.appendChild(renderer.domElement);
-
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.06;
-controls.autoRotate = true;
-controls.autoRotateSpeed = 0.3;
-controls.minDistance = CONFIG.minZoom;
-controls.maxDistance = CONFIG.maxZoom;
-controls.maxPolarAngle = Math.PI * 0.85;
-controls.minPolarAngle = Math.PI * 0.15;
-
-controls.addEventListener('change', () => {
-    const dist = camera.position.length();
-    const zoomPercent = Math.round((1 - (dist - CONFIG.minZoom) / (CONFIG.maxZoom - CONFIG.minZoom)) * 100);
-    zoomIndicator.textContent = Math.max(0, Math.min(100, zoomPercent)) + '%';
-    baseCameraPos.copy(camera.position);
-});
-
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2(9999, 9999);
-const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-const mouseWorldPos = new THREE.Vector3();
-let mouseVelocity = new THREE.Vector2();
-let prevMouse = new THREE.Vector2();
-
-window.addEventListener('mousemove', (e) => {
-    const newMouse = new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
-    mouseVelocity.subVectors(newMouse, prevMouse);
-    prevMouse.copy(newMouse);
-    mouse.copy(newMouse);
-    raycaster.setFromCamera(mouse, camera);
-    const target = new THREE.Vector3();
-    raycaster.ray.intersectPlane(plane, target);
-    if(target) mouseWorldPos.copy(target);
-});
-
-window.addEventListener('keydown', (e) => {
-    if (e.key === '+' || e.key === '=') { camera.position.multiplyScalar(0.9); controls.update(); }
-    else if (e.key === '-' || e.key === '_') { camera.position.multiplyScalar(1.1); controls.update(); }
-    else if (e.key === '0') { camera.position.normalize().multiplyScalar(CONFIG.defaultZoom); controls.update(); }
-    else if (e.key === ' ') { e.preventDefault(); togglePlayPause(); }
-    else if (e.key === 'f' || e.key === 'F') { STATE.dofEnabled = !STATE.dofEnabled; bokehPass.enabled = STATE.dofEnabled; }
-});
-
-// --- PARTICLE VERTEX SHADER ---
-const vertexShader = `
+        // --- PARTICLE VERTEX SHADER ---
+        const vertexShader = `
 uniform float uTime, uPixelRatio, uSizeBase, uNoiseScale, uCurlStrength, uRadius;
 uniform vec3 uColor1, uColor2, uColor3;
 uniform float uSubBass, uBass, uLowMid, uMid, uHighMid, uHigh, uUltraHigh;
@@ -707,7 +1076,7 @@ void main() {
     vAlpha = alpha * sparkle * (0.7 + uMid * 0.35) * layerMod;
 }`;
 
-const fragmentShader = `
+        const fragmentShader = `
 varying vec3 vColor;
 varying float vAlpha, vEnergy, vDepth, vRimLight;
 
@@ -728,19 +1097,19 @@ void main() {
     gl_FragColor = vec4(finalColor, finalAlpha);
 }`;
 
-// ═══════ POST-PROCESSING SHADERS ═══════
+        // ═══════ POST-PROCESSING SHADERS ═══════
 
-// GOD RAYS SHADER (Radial Light Scattering)
-const GodRaysShader = {
-    uniforms: {
-        tDiffuse: { value: null },
-        uCenter: { value: new THREE.Vector2(0.5, 0.5) },
-        uIntensity: { value: 0.35 },
-        uDecay: { value: 0.94 },
-        uBeatEnergy: { value: 0.0 }
-    },
-    vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-    fragmentShader: `
+        // GOD RAYS SHADER (Radial Light Scattering)
+        const GodRaysShader = {
+            uniforms: {
+                tDiffuse: { value: null },
+                uCenter: { value: new THREE.Vector2(0.5, 0.5) },
+                uIntensity: { value: 0.35 },
+                uDecay: { value: 0.94 },
+                uBeatEnergy: { value: 0.0 }
+            },
+            vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+            fragmentShader: `
         uniform sampler2D tDiffuse;
         uniform vec2 uCenter;
         uniform float uIntensity, uDecay, uBeatEnergy;
@@ -768,18 +1137,18 @@ const GodRaysShader = {
 
             gl_FragColor = vec4(color.rgb + rays * uIntensity * (1.0 + uBeatEnergy * 0.8), 1.0);
         }`
-};
+        };
 
-// LENS FLARE POST-PROCESS SHADER (Cinematic)
-const LensFlareShader = {
-    uniforms: {
-        tDiffuse: { value: null },
-        uIntensity: { value: 1.0 },
-        uBeatEnergy: { value: 0.0 },
-        uTime: { value: 0.0 }
-    },
-    vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-    fragmentShader: `
+        // LENS FLARE POST-PROCESS SHADER (Cinematic)
+        const LensFlareShader = {
+            uniforms: {
+                tDiffuse: { value: null },
+                uIntensity: { value: 1.0 },
+                uBeatEnergy: { value: 0.0 },
+                uTime: { value: 0.0 }
+            },
+            vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+            fragmentShader: `
         uniform sampler2D tDiffuse;
         uniform float uIntensity, uBeatEnergy, uTime;
         varying vec2 vUv;
@@ -836,18 +1205,18 @@ const LensFlareShader = {
             
             gl_FragColor = vec4(color.rgb + flare * uIntensity * (1.0 + uBeatEnergy * 0.3), 1.0);
         }`
-};
+        };
 
-// ANAMORPHIC FLARE SHADER
-const AnamorphicShader = {
-    uniforms: {
-        tDiffuse: { value: null },
-        uStretch: { value: 0.1 },
-        uThreshold: { value: 0.7 },
-        uIntensity: { value: 0.4 }
-    },
-    vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-    fragmentShader: `
+        // ANAMORPHIC FLARE SHADER
+        const AnamorphicShader = {
+            uniforms: {
+                tDiffuse: { value: null },
+                uStretch: { value: 0.1 },
+                uThreshold: { value: 0.7 },
+                uIntensity: { value: 0.4 }
+            },
+            vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+            fragmentShader: `
         uniform sampler2D tDiffuse;
         uniform float uStretch, uThreshold, uIntensity;
         varying vec2 vUv;
@@ -864,17 +1233,17 @@ const AnamorphicShader = {
             }
             gl_FragColor = vec4(color.rgb + streak / 7.5 * vec3(0.6, 0.8, 1.0) * uIntensity, color.a);
         }`
-};
+        };
 
-// CHROMATIC ABERRATION SHADER
-const ChromaticShader = {
-    uniforms: {
-        tDiffuse: { value: null },
-        uIntensity: { value: 0.004 },
-        uBeatEnergy: { value: 0.0 }
-    },
-    vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-    fragmentShader: `
+        // CHROMATIC ABERRATION SHADER
+        const ChromaticShader = {
+            uniforms: {
+                tDiffuse: { value: null },
+                uIntensity: { value: 0.004 },
+                uBeatEnergy: { value: 0.0 }
+            },
+            vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+            fragmentShader: `
         uniform sampler2D tDiffuse;
         uniform float uIntensity, uBeatEnergy;
         varying vec2 vUv;
@@ -889,17 +1258,17 @@ const ChromaticShader = {
                 1.0
             );
         }`
-};
+        };
 
-// FILM GRAIN SHADER
-const GrainShader = {
-    uniforms: {
-        tDiffuse: { value: null },
-        uTime: { value: 0.0 },
-        uIntensity: { value: 0.0 }
-    },
-    vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-    fragmentShader: `
+        // FILM GRAIN SHADER
+        const GrainShader = {
+            uniforms: {
+                tDiffuse: { value: null },
+                uTime: { value: 0.0 },
+                uIntensity: { value: 0.0 }
+            },
+            vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+            fragmentShader: `
         uniform sampler2D tDiffuse;
         uniform float uTime, uIntensity;
         varying vec2 vUv;
@@ -909,26 +1278,26 @@ const GrainShader = {
             float grain = (rand(vUv + fract(uTime)) * 2.0 - 1.0) * uIntensity;
             gl_FragColor = vec4(color.rgb + grain * (1.0 - dot(color.rgb, vec3(0.299, 0.587, 0.114)) * 0.5), color.a);
         }`
-};
+        };
 
-// CUSTOM DEPTH OF FIELD SHADER (Radial + Edge blur)
-const CustomDOFShader = {
-    uniforms: {
-        tDiffuse: { value: null },
-        uFocus: { value: 0.05 },
-        uFocalLength: { value: 0.25 },
-        uBokehStrength: { value: 0.5 },
-        uResolution: { value: new THREE.Vector2() },
-        uBeatEnergy: { value: 0.0 }
-    },
-    vertexShader: `
+        // CUSTOM DEPTH OF FIELD SHADER (Radial + Edge blur)
+        const CustomDOFShader = {
+            uniforms: {
+                tDiffuse: { value: null },
+                uFocus: { value: 0.05 },
+                uFocalLength: { value: 0.25 },
+                uBokehStrength: { value: 0.5 },
+                uResolution: { value: new THREE.Vector2() },
+                uBeatEnergy: { value: 0.0 }
+            },
+            vertexShader: `
         varying vec2 vUv;
         void main() {
             vUv = uv;
             gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         }
     `,
-    fragmentShader: `
+            fragmentShader: `
         uniform sampler2D tDiffuse;
         uniform float uFocus;
         uniform float uFocalLength;
@@ -976,16 +1345,16 @@ const CustomDOFShader = {
             gl_FragColor = vec4(color / total, 1.0);
         }
     `
-};
+        };
 
-// VIGNETTE + GLOW SHADER
-const VignetteShader = {
-    uniforms: {
-        tDiffuse: { value: null },
-        uBeatEnergy: { value: 0.0 }
-    },
-    vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-    fragmentShader: `
+        // VIGNETTE + GLOW SHADER
+        const VignetteShader = {
+            uniforms: {
+                tDiffuse: { value: null },
+                uBeatEnergy: { value: 0.0 }
+            },
+            vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+            fragmentShader: `
         uniform sampler2D tDiffuse;
         uniform float uBeatEnergy;
         varying vec2 vUv;
@@ -997,150 +1366,150 @@ const VignetteShader = {
             float glow = smoothstep(0.5, 0.9, lum) * 0.1 * (1.0 + uBeatEnergy * 0.5);
             gl_FragColor = vec4(color.rgb * vig * (1.0 + glow), color.a);
         }`
-};
+        };
 
-// ═══════ GEOMETRY ═══════
-const geometry = new THREE.BufferGeometry();
-const pos = [], rnd = [], phase = [], layer = [];
-const vec = new THREE.Vector3();
+        // ═══════ GEOMETRY ═══════
+        const geometry = new THREE.BufferGeometry();
+        const pos = [], rnd = [], phase = [], layer = [];
+        const vec = new THREE.Vector3();
 
-for(let i = 0; i < CONFIG.maxParticles; i++) {
-    vec.setFromSphericalCoords(
-        CONFIG.fieldRadius * Math.pow(Math.random(), 0.33),
-        Math.acos(2 * Math.random() - 1),
-        Math.random() * Math.PI * 2
-    );
-    pos.push(vec.x, vec.y, vec.z);
-    rnd.push(Math.random(), Math.random(), Math.random());
-    phase.push(Math.random() * Math.PI * 2);
-    layer.push(0);
-}
+        for (let i = 0; i < CONFIG.maxParticles; i++) {
+            vec.setFromSphericalCoords(
+                CONFIG.fieldRadius * Math.pow(Math.random(), 0.33),
+                Math.acos(2 * Math.random() - 1),
+                Math.random() * Math.PI * 2
+            );
+            pos.push(vec.x, vec.y, vec.z);
+            rnd.push(Math.random(), Math.random(), Math.random());
+            phase.push(Math.random() * Math.PI * 2);
+            layer.push(0);
+        }
 
-// Secondary particles now use separate instanced system below
+        // Secondary particles now use separate instanced system below
 
-geometry.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-geometry.setAttribute('aRandom', new THREE.Float32BufferAttribute(rnd, 3));
-geometry.setAttribute('aPhase', new THREE.Float32BufferAttribute(phase, 1));
-geometry.setAttribute('aLayer', new THREE.Float32BufferAttribute(layer, 1));
-geometry.setDrawRange(0, Math.floor(CONFIG.maxParticles * STATE.density));
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+        geometry.setAttribute('aRandom', new THREE.Float32BufferAttribute(rnd, 3));
+        geometry.setAttribute('aPhase', new THREE.Float32BufferAttribute(phase, 1));
+        geometry.setAttribute('aLayer', new THREE.Float32BufferAttribute(layer, 1));
+        geometry.setDrawRange(0, Math.floor(CONFIG.maxParticles * STATE.density));
 
-const FIELD_TYPES = {
-    'Photon (EM)': { c1:'#00f2ff', c2:'#0051ff', c3:'#ffffff', s:1.0, curl:1.0, sz:1.4, sc1:'#66d9ff', sc2:'#99eeff' },
-    'Gluon (Strong)': { c1:'#ff0055', c2:'#7000ff', c3:'#ff8800', s:2.5, curl:2.4, sz:1.7, sc1:'#cc66ff', sc2:'#ff6699' },
-    'Higgs (Mass)': { c1:'#ffae00', c2:'#ff4800', c3:'#ffff00', s:0.6, curl:0.3, sz:2.3, sc1:'#ffcc66', sc2:'#ffdd99' },
-    'Gravity': { c1:'#ffffff', c2:'#4466ff', c3:'#8844ff', s:0.75, curl:0.18, sz:1.2, sc1:'#aabbff', sc2:'#ccaaff' },
-    'Dark Energy': { c1:'#1a0033', c2:'#6600ff', c3:'#ff00ff', s:1.9, curl:1.6, sz:1.5, sc1:'#9933ff', sc2:'#cc66ff' },
-    'Neutrino': { c1:'#00ff88', c2:'#00ffcc', c3:'#88ffff', s:3.0, curl:3.0, sz:1.0, sc1:'#66ffbb', sc2:'#99ffdd' },
-    // === ENHANCEMENT: Waveform Terrain Field ===
-    'Waveform Terrain': { c1:'#ff3366', c2:'#33ff99', c3:'#6633ff', s:0.4, curl:0.15, sz:1.8, sc1:'#ff6699', sc2:'#66ffcc', terrain: true }
-};
+        const FIELD_TYPES = {
+            'Photon (EM)': { c1: '#00f2ff', c2: '#0051ff', c3: '#ffffff', s: 1.0, curl: 1.0, sz: 1.4, sc1: '#66d9ff', sc2: '#99eeff' },
+            'Gluon (Strong)': { c1: '#ff0055', c2: '#7000ff', c3: '#ff8800', s: 2.5, curl: 2.4, sz: 1.7, sc1: '#cc66ff', sc2: '#ff6699' },
+            'Higgs (Mass)': { c1: '#ffae00', c2: '#ff4800', c3: '#ffff00', s: 0.6, curl: 0.3, sz: 2.3, sc1: '#ffcc66', sc2: '#ffdd99' },
+            'Gravity': { c1: '#ffffff', c2: '#4466ff', c3: '#8844ff', s: 0.75, curl: 0.18, sz: 1.2, sc1: '#aabbff', sc2: '#ccaaff' },
+            'Dark Energy': { c1: '#1a0033', c2: '#6600ff', c3: '#ff00ff', s: 1.9, curl: 1.6, sz: 1.5, sc1: '#9933ff', sc2: '#cc66ff' },
+            'Neutrino': { c1: '#00ff88', c2: '#00ffcc', c3: '#88ffff', s: 3.0, curl: 3.0, sz: 1.0, sc1: '#66ffbb', sc2: '#99ffdd' },
+            // === ENHANCEMENT: Waveform Terrain Field ===
+            'Waveform Terrain': { c1: '#ff3366', c2: '#33ff99', c3: '#6633ff', s: 0.4, curl: 0.15, sz: 1.8, sc1: '#ff6699', sc2: '#66ffcc', terrain: true }
+        };
 
-// === ENHANCEMENT: Adaptive Quality System ===
-const QUALITY_SYSTEM = {
-    frameCount: 0,
-    frameTimes: [],
-    lastAdjustTime: 0,
-    currentFPS: 60,
-    
-    update(deltaTime) {
-        this.frameCount++;
-        this.frameTimes.push(deltaTime);
-        if (this.frameTimes.length > 30) this.frameTimes.shift();
-        
-        if (this.frameCount % 30 === 0) {
-            const avgDelta = this.frameTimes.reduce((a,b) => a+b, 0) / this.frameTimes.length;
-            this.currentFPS = 1000 / avgDelta;
-            
-            if (STATE.adaptiveQualityEnabled && performance.now() - this.lastAdjustTime > 2000) {
-                if (this.currentFPS < STATE.targetFPS - 10 && STATE.qualityLevel > 0.3) {
-                    STATE.qualityLevel = Math.max(0.3, STATE.qualityLevel - 0.1);
-                    this.applyQuality();
-                    this.lastAdjustTime = performance.now();
-                } else if (this.currentFPS > STATE.targetFPS + 5 && STATE.qualityLevel < 1.0) {
-                    STATE.qualityLevel = Math.min(1.0, STATE.qualityLevel + 0.05);
-                    this.applyQuality();
-                    this.lastAdjustTime = performance.now();
+        // === ENHANCEMENT: Adaptive Quality System ===
+        const QUALITY_SYSTEM = {
+            frameCount: 0,
+            frameTimes: [],
+            lastAdjustTime: 0,
+            currentFPS: 60,
+
+            update(deltaTime) {
+                this.frameCount++;
+                this.frameTimes.push(deltaTime);
+                if (this.frameTimes.length > 30) this.frameTimes.shift();
+
+                if (this.frameCount % 30 === 0) {
+                    const avgDelta = this.frameTimes.reduce((a, b) => a + b, 0) / this.frameTimes.length;
+                    this.currentFPS = 1000 / avgDelta;
+
+                    if (STATE.adaptiveQualityEnabled && performance.now() - this.lastAdjustTime > 2000) {
+                        if (this.currentFPS < STATE.targetFPS - 10 && STATE.qualityLevel > 0.3) {
+                            STATE.qualityLevel = Math.max(0.3, STATE.qualityLevel - 0.1);
+                            this.applyQuality();
+                            this.lastAdjustTime = performance.now();
+                        } else if (this.currentFPS > STATE.targetFPS + 5 && STATE.qualityLevel < 1.0) {
+                            STATE.qualityLevel = Math.min(1.0, STATE.qualityLevel + 0.05);
+                            this.applyQuality();
+                            this.lastAdjustTime = performance.now();
+                        }
+                    }
+                }
+            },
+
+            applyQuality() {
+                const q = STATE.qualityLevel;
+                geometry.setDrawRange(0, Math.floor(CONFIG.maxParticles * STATE.density * q));
+                renderer.setPixelRatio(Math.max(1, STATE.pixelRatio * q));
+            }
+        };
+
+        // === ENHANCEMENT: Audio-Reactive Camera System ===
+        const AUDIO_CAMERA = {
+            targetOffset: new THREE.Vector3(),
+            currentOffset: new THREE.Vector3(),
+            targetFOV: 55,
+            baseFOV: 55,
+            breathPhase: 0,
+
+            update(deltaTime) {
+                if (!STATE.audioCameraEnabled || !AUDIO.active) return;
+
+                const bass = AUDIO.gatedBands.bass;
+                const mid = AUDIO.gatedBands.mid;
+                const high = AUDIO.gatedBands.high;
+                const intensity = STATE.audioCameraIntensity;
+                const smooth = STATE.audioCameraSmoothing;
+
+                // Bass-driven zoom pulse
+                this.targetFOV = this.baseFOV - bass * 8 * intensity + AUDIO.beatEnergy * 5 * intensity;
+                camera.fov += (this.targetFOV - camera.fov) * smooth;
+                camera.updateProjectionMatrix();
+
+                // Subtle sway based on mid frequencies
+                this.breathPhase += deltaTime * 0.001 * (1 + mid * 2);
+                this.targetOffset.x = Math.sin(this.breathPhase * 0.7) * mid * 3 * intensity;
+                this.targetOffset.y = Math.cos(this.breathPhase * 0.5) * high * 2 * intensity;
+                this.targetOffset.z = Math.sin(this.breathPhase * 0.3) * bass * 4 * intensity;
+
+                // Smooth interpolation
+                this.currentOffset.lerp(this.targetOffset, smooth);
+
+                // Apply onset punch
+                if (AUDIO.onsetDetected) {
+                    this.currentOffset.z -= AUDIO.onsetEnergy * 2 * intensity;
                 }
             }
-        }
-    },
-    
-    applyQuality() {
-        const q = STATE.qualityLevel;
-        geometry.setDrawRange(0, Math.floor(CONFIG.maxParticles * STATE.density * q));
-        renderer.setPixelRatio(Math.max(1, STATE.pixelRatio * q));
-    }
-};
+        };
 
-// === ENHANCEMENT: Audio-Reactive Camera System ===
-const AUDIO_CAMERA = {
-    targetOffset: new THREE.Vector3(),
-    currentOffset: new THREE.Vector3(),
-    targetFOV: 55,
-    baseFOV: 55,
-    breathPhase: 0,
-    
-    update(deltaTime) {
-        if (!STATE.audioCameraEnabled || !AUDIO.active) return;
-        
-        const bass = AUDIO.gatedBands.bass;
-        const mid = AUDIO.gatedBands.mid;
-        const high = AUDIO.gatedBands.high;
-        const intensity = STATE.audioCameraIntensity;
-        const smooth = STATE.audioCameraSmoothing;
-        
-        // Bass-driven zoom pulse
-        this.targetFOV = this.baseFOV - bass * 8 * intensity + AUDIO.beatEnergy * 5 * intensity;
-        camera.fov += (this.targetFOV - camera.fov) * smooth;
-        camera.updateProjectionMatrix();
-        
-        // Subtle sway based on mid frequencies
-        this.breathPhase += deltaTime * 0.001 * (1 + mid * 2);
-        this.targetOffset.x = Math.sin(this.breathPhase * 0.7) * mid * 3 * intensity;
-        this.targetOffset.y = Math.cos(this.breathPhase * 0.5) * high * 2 * intensity;
-        this.targetOffset.z = Math.sin(this.breathPhase * 0.3) * bass * 4 * intensity;
-        
-        // Smooth interpolation
-        this.currentOffset.lerp(this.targetOffset, smooth);
-        
-        // Apply onset punch
-        if (AUDIO.onsetDetected) {
-            this.currentOffset.z -= AUDIO.onsetEnergy * 2 * intensity;
-        }
-    }
-};
+        const def = FIELD_TYPES[STATE.field];
+        const material = new THREE.ShaderMaterial({
+            vertexShader, fragmentShader,
+            uniforms: {
+                uTime: { value: 0 },
+                uPixelRatio: { value: STATE.pixelRatio },
+                uSizeBase: { value: def.sz },
+                uNoiseScale: { value: def.s },
+                uCurlStrength: { value: def.curl },
+                uRadius: { value: CONFIG.fieldRadius },
+                uColor1: { value: new THREE.Color(def.c1) },
+                uColor2: { value: new THREE.Color(def.c2) },
+                uColor3: { value: new THREE.Color(def.c3) },
+                uSubBass: { value: 0 }, uBass: { value: 0 }, uLowMid: { value: 0 },
+                uMid: { value: 0 }, uHighMid: { value: 0 }, uHigh: { value: 0 }, uUltraHigh: { value: 0 },
+                uBeatEnergy: { value: 0 }, uSpectralCentroid: { value: 0 }, uSpectralFlux: { value: 0 },
+                uOnsetEnergy: { value: 0 }, uTerrainMode: { value: 0 }, uTerrainHeight: { value: 15.0 },
+                uVortexStrength: { value: STATE.vortexStrength },
+                uPulseIntensity: { value: STATE.pulseIntensity },
+                uZoomFactor: { value: 1.0 },
+                uMousePos: { value: new THREE.Vector3(999, 999, 999) },
+                uMouseVelocity: { value: new THREE.Vector2(0, 0) }
+            },
+            transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+        });
 
-const def = FIELD_TYPES[STATE.field];
-const material = new THREE.ShaderMaterial({
-    vertexShader, fragmentShader,
-    uniforms: {
-        uTime: { value: 0 },
-        uPixelRatio: { value: STATE.pixelRatio },
-        uSizeBase: { value: def.sz },
-        uNoiseScale: { value: def.s },
-        uCurlStrength: { value: def.curl },
-        uRadius: { value: CONFIG.fieldRadius },
-        uColor1: { value: new THREE.Color(def.c1) },
-        uColor2: { value: new THREE.Color(def.c2) },
-        uColor3: { value: new THREE.Color(def.c3) },
-        uSubBass: { value: 0 }, uBass: { value: 0 }, uLowMid: { value: 0 },
-        uMid: { value: 0 }, uHighMid: { value: 0 }, uHigh: { value: 0 }, uUltraHigh: { value: 0 },
-        uBeatEnergy: { value: 0 }, uSpectralCentroid: { value: 0 }, uSpectralFlux: { value: 0 },
-        uOnsetEnergy: { value: 0 }, uTerrainMode: { value: 0 }, uTerrainHeight: { value: 15.0 },
-        uVortexStrength: { value: STATE.vortexStrength },
-        uPulseIntensity: { value: STATE.pulseIntensity },
-        uZoomFactor: { value: 1.0 },
-        uMousePos: { value: new THREE.Vector3(999,999,999) },
-        uMouseVelocity: { value: new THREE.Vector2(0, 0) }
-    },
-    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
-});
+        const points = new THREE.Points(geometry, material);
+        scene.add(points);
 
-const points = new THREE.Points(geometry, material);
-scene.add(points);
-
-// ═══════ INSTANCED SECONDARY PARTICLES ═══════
-const secondaryVertexShader = `
+        // ═══════ INSTANCED SECONDARY PARTICLES ═══════
+        const secondaryVertexShader = `
 uniform float uTime, uPixelRatio;
 uniform float uBass, uMid, uHigh, uBeatEnergy;
 uniform vec3 uColor1, uColor2;
@@ -1244,7 +1613,7 @@ void main() {
 }
 `;
 
-const secondaryFragmentShader = `
+        const secondaryFragmentShader = `
 varying vec3 vColor;
 varying float vAlpha;
 
@@ -1264,149 +1633,149 @@ void main() {
 }
 `;
 
-// Create instanced geometry for secondary particles
-const secondaryGeometry = new THREE.InstancedBufferGeometry();
+        // Create instanced geometry for secondary particles
+        const secondaryGeometry = new THREE.InstancedBufferGeometry();
 
-// Base geometry (single point)
-const basePositions = new Float32Array([0, 0, 0]);
-secondaryGeometry.setAttribute('position', new THREE.BufferAttribute(basePositions, 3));
+        // Base geometry (single point)
+        const basePositions = new Float32Array([0, 0, 0]);
+        secondaryGeometry.setAttribute('position', new THREE.BufferAttribute(basePositions, 3));
 
-// Instance attributes
-const instancePositions = new Float32Array(CONFIG.secondaryParticles * 3);
-const instanceRandoms = new Float32Array(CONFIG.secondaryParticles * 3);
-const instancePhases = new Float32Array(CONFIG.secondaryParticles);
+        // Instance attributes
+        const instancePositions = new Float32Array(CONFIG.secondaryParticles * 3);
+        const instanceRandoms = new Float32Array(CONFIG.secondaryParticles * 3);
+        const instancePhases = new Float32Array(CONFIG.secondaryParticles);
 
-for(let i = 0; i < CONFIG.secondaryParticles; i++) {
-    // Distribute in outer shell
-    const r = CONFIG.fieldRadius * (0.65 + Math.random() * 0.45);
-    const theta = Math.acos(2 * Math.random() - 1);
-    const phi = Math.random() * Math.PI * 2;
-    
-    instancePositions[i * 3] = r * Math.sin(theta) * Math.cos(phi);
-    instancePositions[i * 3 + 1] = r * Math.sin(theta) * Math.sin(phi);
-    instancePositions[i * 3 + 2] = r * Math.cos(theta);
-    
-    instanceRandoms[i * 3] = Math.random();
-    instanceRandoms[i * 3 + 1] = Math.random();
-    instanceRandoms[i * 3 + 2] = Math.random();
-    
-    instancePhases[i] = Math.random() * Math.PI * 2;
-}
+        for (let i = 0; i < CONFIG.secondaryParticles; i++) {
+            // Distribute in outer shell
+            const r = CONFIG.fieldRadius * (0.65 + Math.random() * 0.45);
+            const theta = Math.acos(2 * Math.random() - 1);
+            const phi = Math.random() * Math.PI * 2;
 
-secondaryGeometry.setAttribute('instancePosition', new THREE.InstancedBufferAttribute(instancePositions, 3));
-secondaryGeometry.setAttribute('instanceRandom', new THREE.InstancedBufferAttribute(instanceRandoms, 3));
-secondaryGeometry.setAttribute('instancePhase', new THREE.InstancedBufferAttribute(instancePhases, 1));
+            instancePositions[i * 3] = r * Math.sin(theta) * Math.cos(phi);
+            instancePositions[i * 3 + 1] = r * Math.sin(theta) * Math.sin(phi);
+            instancePositions[i * 3 + 2] = r * Math.cos(theta);
 
-const secondaryMaterial = new THREE.ShaderMaterial({
-    vertexShader: secondaryVertexShader,
-    fragmentShader: secondaryFragmentShader,
-    uniforms: {
-        uTime: { value: 0 },
-        uPixelRatio: { value: STATE.pixelRatio },
-        uBass: { value: 0 },
-        uMid: { value: 0 },
-        uHigh: { value: 0 },
-        uBeatEnergy: { value: 0 },
-        uColor1: { value: new THREE.Color(def.sc1) },  // Use dedicated secondary colors
-        uColor2: { value: new THREE.Color(def.sc2) },
-        uRadius: { value: CONFIG.fieldRadius }
-    },
-    transparent: true,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending
-});
+            instanceRandoms[i * 3] = Math.random();
+            instanceRandoms[i * 3 + 1] = Math.random();
+            instanceRandoms[i * 3 + 2] = Math.random();
 
-const secondaryPoints = new THREE.Points(secondaryGeometry, secondaryMaterial);
-scene.add(secondaryPoints);
-
-// Add to STATE for GUI control
-STATE.secondaryEnabled = true;
-STATE.secondaryOpacity = 1.0;
-
-// ═══════ PARTICLE TRAIL SYSTEM ═══════
-class TrailSystem {
-    constructor(count, length) {
-        this.trails = [];
-        this.meshes = [];
-
-        for(let i = 0; i < count; i++) {
-            const trail = {
-                positions: Array(length).fill().map(() => new THREE.Vector3(
-                    (Math.random() - 0.5) * 80,
-                    (Math.random() - 0.5) * 80,
-                    (Math.random() - 0.5) * 80
-                )),
-                phase: Math.random() * Math.PI * 2,
-                speed: 0.3 + Math.random() * 0.7,
-                color: new THREE.Color().setHSL(Math.random(), 0.7, 0.6)
-            };
-            this.trails.push(trail);
-
-            const geom = new THREE.BufferGeometry();
-            const positions = new Float32Array(length * 3);
-            const alphas = new Float32Array(length);
-            for(let j = 0; j < length; j++) alphas[j] = 1.0 - j / length;
-
-            geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            geom.setAttribute('alpha', new THREE.BufferAttribute(alphas, 1));
-
-            const mat = new THREE.ShaderMaterial({
-                vertexShader: `attribute float alpha; varying float vAlpha; void main() { vAlpha = alpha; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-                fragmentShader: `uniform vec3 uColor; uniform float uOpacity, uBeat; varying float vAlpha; void main() { gl_FragColor = vec4(uColor * (1.0 + uBeat * 0.3), vAlpha * uOpacity * 0.6 * (1.0 + uBeat * 0.5)); }`,
-                uniforms: { uColor: { value: trail.color }, uOpacity: { value: 0.4 }, uBeat: { value: 0 } },
-                transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
-            });
-
-            const line = new THREE.Line(geom, mat);
-            this.meshes.push(line);
-            scene.add(line);
+            instancePhases[i] = Math.random() * Math.PI * 2;
         }
-    }
 
-    update(time, audio, fieldColor) {
-        for(let i = 0; i < this.trails.length; i++) {
-            const trail = this.trails[i], mesh = this.meshes[i];
-            mesh.visible = STATE.particleTrailsEnabled;
-            if(!mesh.visible) continue;
+        secondaryGeometry.setAttribute('instancePosition', new THREE.InstancedBufferAttribute(instancePositions, 3));
+        secondaryGeometry.setAttribute('instanceRandom', new THREE.InstancedBufferAttribute(instanceRandoms, 3));
+        secondaryGeometry.setAttribute('instancePhase', new THREE.InstancedBufferAttribute(instancePhases, 1));
 
-            const angle = time * 0.5 * trail.speed + trail.phase;
-            const radius = 30 + audio.bass * 20;
-            const newPos = new THREE.Vector3(
-                Math.cos(angle) * radius + Math.sin(time * trail.speed + trail.phase) * (10 + audio.bass * 15),
-                Math.sin(time * 0.3 + trail.phase) * 20 + Math.cos(time * trail.speed * 0.7 + trail.phase) * (8 + audio.mid * 12),
-                Math.sin(angle) * radius + Math.sin(time * trail.speed * 0.5 + trail.phase * 2) * (10 + audio.high * 10)
-            );
+        const secondaryMaterial = new THREE.ShaderMaterial({
+            vertexShader: secondaryVertexShader,
+            fragmentShader: secondaryFragmentShader,
+            uniforms: {
+                uTime: { value: 0 },
+                uPixelRatio: { value: STATE.pixelRatio },
+                uBass: { value: 0 },
+                uMid: { value: 0 },
+                uHigh: { value: 0 },
+                uBeatEnergy: { value: 0 },
+                uColor1: { value: new THREE.Color(def.sc1) },  // Use dedicated secondary colors
+                uColor2: { value: new THREE.Color(def.sc2) },
+                uRadius: { value: CONFIG.fieldRadius }
+            },
+            transparent: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending
+        });
 
-            for(let j = trail.positions.length - 1; j > 0; j--) trail.positions[j].copy(trail.positions[j-1]);
-            trail.positions[0].copy(newPos);
+        const secondaryPoints = new THREE.Points(secondaryGeometry, secondaryMaterial);
+        scene.add(secondaryPoints);
 
-            const posAttr = mesh.geometry.getAttribute('position');
-            for(let j = 0; j < trail.positions.length; j++) {
-                posAttr.setXYZ(j, trail.positions[j].x, trail.positions[j].y, trail.positions[j].z);
+        // Add to STATE for GUI control
+        STATE.secondaryEnabled = true;
+        STATE.secondaryOpacity = 1.0;
+
+        // ═══════ PARTICLE TRAIL SYSTEM ═══════
+        class TrailSystem {
+            constructor(count, length) {
+                this.trails = [];
+                this.meshes = [];
+
+                for (let i = 0; i < count; i++) {
+                    const trail = {
+                        positions: Array(length).fill().map(() => new THREE.Vector3(
+                            (Math.random() - 0.5) * 80,
+                            (Math.random() - 0.5) * 80,
+                            (Math.random() - 0.5) * 80
+                        )),
+                        phase: Math.random() * Math.PI * 2,
+                        speed: 0.3 + Math.random() * 0.7,
+                        color: new THREE.Color().setHSL(Math.random(), 0.7, 0.6)
+                    };
+                    this.trails.push(trail);
+
+                    const geom = new THREE.BufferGeometry();
+                    const positions = new Float32Array(length * 3);
+                    const alphas = new Float32Array(length);
+                    for (let j = 0; j < length; j++) alphas[j] = 1.0 - j / length;
+
+                    geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                    geom.setAttribute('alpha', new THREE.BufferAttribute(alphas, 1));
+
+                    const mat = new THREE.ShaderMaterial({
+                        vertexShader: `attribute float alpha; varying float vAlpha; void main() { vAlpha = alpha; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+                        fragmentShader: `uniform vec3 uColor; uniform float uOpacity, uBeat; varying float vAlpha; void main() { gl_FragColor = vec4(uColor * (1.0 + uBeat * 0.3), vAlpha * uOpacity * 0.6 * (1.0 + uBeat * 0.5)); }`,
+                        uniforms: { uColor: { value: trail.color }, uOpacity: { value: 0.4 }, uBeat: { value: 0 } },
+                        transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+                    });
+
+                    const line = new THREE.Line(geom, mat);
+                    this.meshes.push(line);
+                    scene.add(line);
+                }
             }
-            posAttr.needsUpdate = true;
 
-            mesh.material.uniforms.uBeat.value = audio.beat;
-            mesh.material.uniforms.uOpacity.value = STATE.particleTrailOpacity;
-            if(fieldColor) trail.color.lerp(fieldColor, 0.01);
+            update(time, audio, fieldColor) {
+                for (let i = 0; i < this.trails.length; i++) {
+                    const trail = this.trails[i], mesh = this.meshes[i];
+                    mesh.visible = STATE.particleTrailsEnabled;
+                    if (!mesh.visible) continue;
+
+                    const angle = time * 0.5 * trail.speed + trail.phase;
+                    const radius = 30 + audio.bass * 20;
+                    const newPos = new THREE.Vector3(
+                        Math.cos(angle) * radius + Math.sin(time * trail.speed + trail.phase) * (10 + audio.bass * 15),
+                        Math.sin(time * 0.3 + trail.phase) * 20 + Math.cos(time * trail.speed * 0.7 + trail.phase) * (8 + audio.mid * 12),
+                        Math.sin(angle) * radius + Math.sin(time * trail.speed * 0.5 + trail.phase * 2) * (10 + audio.high * 10)
+                    );
+
+                    for (let j = trail.positions.length - 1; j > 0; j--) trail.positions[j].copy(trail.positions[j - 1]);
+                    trail.positions[0].copy(newPos);
+
+                    const posAttr = mesh.geometry.getAttribute('position');
+                    for (let j = 0; j < trail.positions.length; j++) {
+                        posAttr.setXYZ(j, trail.positions[j].x, trail.positions[j].y, trail.positions[j].z);
+                    }
+                    posAttr.needsUpdate = true;
+
+                    mesh.material.uniforms.uBeat.value = audio.beat;
+                    mesh.material.uniforms.uOpacity.value = STATE.particleTrailOpacity;
+                    if (fieldColor) trail.color.lerp(fieldColor, 0.01);
+                }
+            }
         }
-    }
-}
 
-const trailSystem = new TrailSystem(50, 12);
+        const trailSystem = new TrailSystem(50, 12);
 
-// ═══════ PARTICLE CONNECTIONS (Force Network) ═══════
-const connectionCount = 300;  // Number of particles to check for connections
-const maxConnections = 500;   // Maximum line segments
-const connectionGeometry = new THREE.BufferGeometry();
-const connectionPositions = new Float32Array(maxConnections * 6);  // 2 points per line, 3 coords each
-const connectionAlphas = new Float32Array(maxConnections * 2);     // Alpha per vertex
-connectionGeometry.setAttribute('position', new THREE.BufferAttribute(connectionPositions, 3));
-connectionGeometry.setAttribute('alpha', new THREE.BufferAttribute(connectionAlphas, 1));
-connectionGeometry.setDrawRange(0, 0);
+        // ═══════ PARTICLE CONNECTIONS (Force Network) ═══════
+        const connectionCount = 300;  // Number of particles to check for connections
+        const maxConnections = 500;   // Maximum line segments
+        const connectionGeometry = new THREE.BufferGeometry();
+        const connectionPositions = new Float32Array(maxConnections * 6);  // 2 points per line, 3 coords each
+        const connectionAlphas = new Float32Array(maxConnections * 2);     // Alpha per vertex
+        connectionGeometry.setAttribute('position', new THREE.BufferAttribute(connectionPositions, 3));
+        connectionGeometry.setAttribute('alpha', new THREE.BufferAttribute(connectionAlphas, 1));
+        connectionGeometry.setDrawRange(0, 0);
 
-const connectionMaterial = new THREE.ShaderMaterial({
-    vertexShader: `
+        const connectionMaterial = new THREE.ShaderMaterial({
+            vertexShader: `
         attribute float alpha;
         varying float vAlpha;
         void main() {
@@ -1414,7 +1783,7 @@ const connectionMaterial = new THREE.ShaderMaterial({
             gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         }
     `,
-    fragmentShader: `
+            fragmentShader: `
         uniform vec3 uColor;
         uniform float uOpacity;
         uniform float uBeatEnergy;
@@ -1425,75 +1794,75 @@ const connectionMaterial = new THREE.ShaderMaterial({
             gl_FragColor = vec4(color * glow, vAlpha * uOpacity * (0.6 + uBeatEnergy * 0.4));
         }
     `,
-    uniforms: {
-        uColor: { value: new THREE.Color(def.c2) },
-        uOpacity: { value: 1.0 },
-        uBeatEnergy: { value: 0 }
-    },
-    transparent: true,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending
-});
+            uniforms: {
+                uColor: { value: new THREE.Color(def.c2) },
+                uOpacity: { value: 1.0 },
+                uBeatEnergy: { value: 0 }
+            },
+            transparent: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending
+        });
 
-const connectionMesh = new THREE.LineSegments(connectionGeometry, connectionMaterial);
-scene.add(connectionMesh);
+        const connectionMesh = new THREE.LineSegments(connectionGeometry, connectionMaterial);
+        scene.add(connectionMesh);
 
-// Particle indices to track for connections (randomly sampled)
-const trackedParticles = [];
-for(let i = 0; i < connectionCount; i++) {
-    trackedParticles.push(Math.floor(Math.random() * CONFIG.maxParticles));
-}
-
-function updateConnections(threshold, bassBoost) {
-    const posAttr = geometry.getAttribute('position');
-    const positions = [];
-    
-    // Get current positions of tracked particles
-    for(let i = 0; i < trackedParticles.length; i++) {
-        const idx = trackedParticles[i];
-        positions.push(new THREE.Vector3(
-            posAttr.getX(idx),
-            posAttr.getY(idx),
-            posAttr.getZ(idx)
-        ));
-    }
-    
-    // Find connections
-    let connIdx = 0;
-    const effectiveThreshold = threshold * (1.0 + bassBoost * 0.5);
-    const thresholdSq = effectiveThreshold * effectiveThreshold;
-    
-    for(let i = 0; i < positions.length && connIdx < maxConnections; i++) {
-        for(let j = i + 1; j < positions.length && connIdx < maxConnections; j++) {
-            const distSq = positions[i].distanceToSquared(positions[j]);
-            if(distSq < thresholdSq && distSq > 0.1) {
-                const alpha = 1.0 - Math.sqrt(distSq) / effectiveThreshold;
-                
-                // Line start
-                connectionPositions[connIdx * 6 + 0] = positions[i].x;
-                connectionPositions[connIdx * 6 + 1] = positions[i].y;
-                connectionPositions[connIdx * 6 + 2] = positions[i].z;
-                // Line end
-                connectionPositions[connIdx * 6 + 3] = positions[j].x;
-                connectionPositions[connIdx * 6 + 4] = positions[j].y;
-                connectionPositions[connIdx * 6 + 5] = positions[j].z;
-                
-                // Alpha (fades with distance)
-                connectionAlphas[connIdx * 2 + 0] = alpha;
-                connectionAlphas[connIdx * 2 + 1] = alpha;
-                
-                connIdx++;
-            }
+        // Particle indices to track for connections (randomly sampled)
+        const trackedParticles = [];
+        for (let i = 0; i < connectionCount; i++) {
+            trackedParticles.push(Math.floor(Math.random() * CONFIG.maxParticles));
         }
-    }
-    
-    connectionGeometry.attributes.position.needsUpdate = true;
-    connectionGeometry.attributes.alpha.needsUpdate = true;
-    connectionGeometry.setDrawRange(0, connIdx * 2);
-}
 
-// ═══════ NEBULA BACKGROUND ═══════
-const nebulaVertexShader = `
+        function updateConnections(threshold, bassBoost) {
+            const posAttr = geometry.getAttribute('position');
+            const positions = [];
+
+            // Get current positions of tracked particles
+            for (let i = 0; i < trackedParticles.length; i++) {
+                const idx = trackedParticles[i];
+                positions.push(new THREE.Vector3(
+                    posAttr.getX(idx),
+                    posAttr.getY(idx),
+                    posAttr.getZ(idx)
+                ));
+            }
+
+            // Find connections
+            let connIdx = 0;
+            const effectiveThreshold = threshold * (1.0 + bassBoost * 0.5);
+            const thresholdSq = effectiveThreshold * effectiveThreshold;
+
+            for (let i = 0; i < positions.length && connIdx < maxConnections; i++) {
+                for (let j = i + 1; j < positions.length && connIdx < maxConnections; j++) {
+                    const distSq = positions[i].distanceToSquared(positions[j]);
+                    if (distSq < thresholdSq && distSq > 0.1) {
+                        const alpha = 1.0 - Math.sqrt(distSq) / effectiveThreshold;
+
+                        // Line start
+                        connectionPositions[connIdx * 6 + 0] = positions[i].x;
+                        connectionPositions[connIdx * 6 + 1] = positions[i].y;
+                        connectionPositions[connIdx * 6 + 2] = positions[i].z;
+                        // Line end
+                        connectionPositions[connIdx * 6 + 3] = positions[j].x;
+                        connectionPositions[connIdx * 6 + 4] = positions[j].y;
+                        connectionPositions[connIdx * 6 + 5] = positions[j].z;
+
+                        // Alpha (fades with distance)
+                        connectionAlphas[connIdx * 2 + 0] = alpha;
+                        connectionAlphas[connIdx * 2 + 1] = alpha;
+
+                        connIdx++;
+                    }
+                }
+            }
+
+            connectionGeometry.attributes.position.needsUpdate = true;
+            connectionGeometry.attributes.alpha.needsUpdate = true;
+            connectionGeometry.setDrawRange(0, connIdx * 2);
+        }
+
+        // ═══════ NEBULA BACKGROUND ═══════
+        const nebulaVertexShader = `
 varying vec3 vWorldPosition;
 varying vec2 vUv;
 void main() {
@@ -1504,7 +1873,7 @@ void main() {
 }
 `;
 
-const nebulaFragmentShader = `
+        const nebulaFragmentShader = `
 uniform float uTime;
 uniform vec3 uColor1;
 uniform vec3 uColor2;
@@ -1627,432 +1996,467 @@ void main() {
 }
 `;
 
-const nebulaMaterial = new THREE.ShaderMaterial({
-    vertexShader: nebulaVertexShader,
-    fragmentShader: nebulaFragmentShader,
-    uniforms: {
-        uTime: { value: 0 },
-        uColor1: { value: new THREE.Color(def.c1) },
-        uColor2: { value: new THREE.Color(def.c2) },
-        uColor3: { value: new THREE.Color(def.c3) },
-        uBass: { value: 0 },
-        uMid: { value: 0 },
-        uHigh: { value: 0 },
-        uBeatEnergy: { value: 0 },
-        uIntensity: { value: STATE.nebulaIntensity }
-    },
-    side: THREE.BackSide,
-    depthWrite: false
-});
+        const nebulaMaterial = new THREE.ShaderMaterial({
+            vertexShader: nebulaVertexShader,
+            fragmentShader: nebulaFragmentShader,
+            uniforms: {
+                uTime: { value: 0 },
+                uColor1: { value: new THREE.Color(def.c1) },
+                uColor2: { value: new THREE.Color(def.c2) },
+                uColor3: { value: new THREE.Color(def.c3) },
+                uBass: { value: 0 },
+                uMid: { value: 0 },
+                uHigh: { value: 0 },
+                uBeatEnergy: { value: 0 },
+                uIntensity: { value: STATE.nebulaIntensity }
+            },
+            side: THREE.BackSide,
+            depthWrite: false
+        });
 
-const nebulaSphere = new THREE.Mesh(
-    new THREE.SphereGeometry(500, 64, 64),
-    nebulaMaterial
-);
-scene.add(nebulaSphere);
+        const nebulaSphere = new THREE.Mesh(
+            new THREE.SphereGeometry(500, 64, 64),
+            nebulaMaterial
+        );
+        scene.add(nebulaSphere);
 
-// ═══════ LENS FLARE (3D Object - Cinematic) ═══════
-function createSoftGlow(size) {
-    const canvas = document.createElement('canvas');
-    canvas.width = canvas.height = size;
-    const ctx = canvas.getContext('2d');
-    const grad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
-    grad.addColorStop(0, 'rgba(255,250,240,0.9)');
-    grad.addColorStop(0.1, 'rgba(255,240,230,0.6)');
-    grad.addColorStop(0.3, 'rgba(200,180,255,0.3)');
-    grad.addColorStop(0.6, 'rgba(150,120,255,0.1)');
-    grad.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, size, size);
-    return new THREE.CanvasTexture(canvas);
-}
+        // ═══════ LENS FLARE (3D Object - Cinematic) ═══════
+        function createSoftGlow(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            const grad = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+            grad.addColorStop(0, 'rgba(255,250,240,0.9)');
+            grad.addColorStop(0.1, 'rgba(255,240,230,0.6)');
+            grad.addColorStop(0.3, 'rgba(200,180,255,0.3)');
+            grad.addColorStop(0.6, 'rgba(150,120,255,0.1)');
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, size, size);
+            return new THREE.CanvasTexture(canvas);
+        }
 
-function createSoftRing(size) {
-    const canvas = document.createElement('canvas');
-    canvas.width = canvas.height = size;
-    const ctx = canvas.getContext('2d');
-    const grad = ctx.createRadialGradient(size/2, size/2, size*0.3, size/2, size/2, size*0.45);
-    grad.addColorStop(0, 'rgba(0,0,0,0)');
-    grad.addColorStop(0.4, 'rgba(180,160,255,0.15)');
-    grad.addColorStop(0.6, 'rgba(140,120,220,0.2)');
-    grad.addColorStop(0.8, 'rgba(100,80,180,0.1)');
-    grad.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, size, size);
-    return new THREE.CanvasTexture(canvas);
-}
+        function createSoftRing(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            const grad = ctx.createRadialGradient(size / 2, size / 2, size * 0.3, size / 2, size / 2, size * 0.45);
+            grad.addColorStop(0, 'rgba(0,0,0,0)');
+            grad.addColorStop(0.4, 'rgba(180,160,255,0.15)');
+            grad.addColorStop(0.6, 'rgba(140,120,220,0.2)');
+            grad.addColorStop(0.8, 'rgba(100,80,180,0.1)');
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, size, size);
+            return new THREE.CanvasTexture(canvas);
+        }
 
-function createHexagon(size) {
-    const canvas = document.createElement('canvas');
-    canvas.width = canvas.height = size;
-    const ctx = canvas.getContext('2d');
-    ctx.translate(size/2, size/2);
-    ctx.beginPath();
-    for(let i = 0; i < 6; i++) {
-        const angle = i * Math.PI / 3 - Math.PI / 6;
-        const x = Math.cos(angle) * size * 0.35;
-        const y = Math.sin(angle) * size * 0.35;
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    }
-    ctx.closePath();
-    const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, size*0.4);
-    grad.addColorStop(0, 'rgba(150,200,255,0.25)');
-    grad.addColorStop(0.7, 'rgba(100,150,255,0.1)');
-    grad.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = grad;
-    ctx.fill();
-    return new THREE.CanvasTexture(canvas);
-}
+        function createHexagon(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            ctx.translate(size / 2, size / 2);
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                const angle = i * Math.PI / 3 - Math.PI / 6;
+                const x = Math.cos(angle) * size * 0.35;
+                const y = Math.sin(angle) * size * 0.35;
+                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 0.4);
+            grad.addColorStop(0, 'rgba(150,200,255,0.25)');
+            grad.addColorStop(0.7, 'rgba(100,150,255,0.1)');
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = grad;
+            ctx.fill();
+            return new THREE.CanvasTexture(canvas);
+        }
 
-const flareGlow = createSoftGlow(256);
-const flareRing = createSoftRing(256);
-const flareHex = createHexagon(128);
+        const flareGlow = createSoftGlow(256);
+        const flareRing = createSoftRing(256);
+        const flareHex = createHexagon(128);
 
-const lensflare = new Lensflare();
-lensflare.addElement(new LensflareElement(flareGlow, 180, 0, new THREE.Color(0xffffff)));
-lensflare.addElement(new LensflareElement(flareRing, 280, 0, new THREE.Color(0xaaaaff)));
-lensflare.addElement(new LensflareElement(flareHex, 60, 0.2, new THREE.Color(0x9999ff)));
-lensflare.addElement(new LensflareElement(flareHex, 40, 0.4, new THREE.Color(0xaabbff)));
-lensflare.addElement(new LensflareElement(flareGlow, 25, 0.6, new THREE.Color(0x8888ff)));
-lensflare.position.set(0, 0, 0);
-scene.add(lensflare);
+        const lensflare = new Lensflare();
+        lensflare.addElement(new LensflareElement(flareGlow, 180, 0, new THREE.Color(0xffffff)));
+        lensflare.addElement(new LensflareElement(flareRing, 280, 0, new THREE.Color(0xaaaaff)));
+        lensflare.addElement(new LensflareElement(flareHex, 60, 0.2, new THREE.Color(0x9999ff)));
+        lensflare.addElement(new LensflareElement(flareHex, 40, 0.4, new THREE.Color(0xaabbff)));
+        lensflare.addElement(new LensflareElement(flareGlow, 25, 0.6, new THREE.Color(0x8888ff)));
+        lensflare.position.set(0, 0, 0);
+        scene.add(lensflare);
 
-// ═══════ POST-PROCESSING COMPOSER ═══════
-const composer = new EffectComposer(renderer);
-composer.addPass(new RenderPass(scene, camera));
+        // ═══════ POST-PROCESSING COMPOSER ═══════
+        const composer = new EffectComposer(renderer);
+        composer.addPass(new RenderPass(scene, camera));
 
-const afterimagePass = new AfterimagePass();
-afterimagePass.uniforms['damp'].value = STATE.trails;
-composer.addPass(afterimagePass);
+        const afterimagePass = new AfterimagePass();
+        afterimagePass.uniforms['damp'].value = STATE.trails;
+        composer.addPass(afterimagePass);
 
-const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-bloomPass.threshold = 0.1;
-bloomPass.strength = STATE.bloom;
-bloomPass.radius = 0.32;
-composer.addPass(bloomPass);
+        const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+        bloomPass.threshold = 0.1;
+        bloomPass.strength = STATE.bloom;
+        bloomPass.radius = 0.32;
+        composer.addPass(bloomPass);
 
-const godRaysPass = new ShaderPass(GodRaysShader);
-godRaysPass.enabled = false;
-composer.addPass(godRaysPass);
+        const godRaysPass = new ShaderPass(GodRaysShader);
+        godRaysPass.enabled = false;
+        composer.addPass(godRaysPass);
 
-const lensFlarePass = new ShaderPass(LensFlareShader);
-lensFlarePass.enabled = STATE.lensFlareEnabled;
-composer.addPass(lensFlarePass);
+        const lensFlarePass = new ShaderPass(LensFlareShader);
+        lensFlarePass.enabled = STATE.lensFlareEnabled;
+        composer.addPass(lensFlarePass);
 
-const anamorphicPass = new ShaderPass(AnamorphicShader);
-composer.addPass(anamorphicPass);
+        const anamorphicPass = new ShaderPass(AnamorphicShader);
+        composer.addPass(anamorphicPass);
 
-const chromaticPass = new ShaderPass(ChromaticShader);
-composer.addPass(chromaticPass);
+        const chromaticPass = new ShaderPass(ChromaticShader);
+        composer.addPass(chromaticPass);
 
-// Custom DOF pass (radial focus)
-const customDOFPass = new ShaderPass(CustomDOFShader);
-customDOFPass.uniforms.uFocus.value = STATE.dofFocus;
-customDOFPass.uniforms.uFocalLength.value = STATE.dofFocalLength;
-customDOFPass.uniforms.uBokehStrength.value = STATE.dofBokehStrength;
-customDOFPass.uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
-customDOFPass.enabled = STATE.dofEnabled;
-composer.addPass(customDOFPass);
+        // Custom DOF pass (radial focus)
+        const customDOFPass = new ShaderPass(CustomDOFShader);
+        customDOFPass.uniforms.uFocus.value = STATE.dofFocus;
+        customDOFPass.uniforms.uFocalLength.value = STATE.dofFocalLength;
+        customDOFPass.uniforms.uBokehStrength.value = STATE.dofBokehStrength;
+        customDOFPass.uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
+        customDOFPass.enabled = STATE.dofEnabled;
+        composer.addPass(customDOFPass);
 
-const vignettePass = new ShaderPass(VignetteShader);
-composer.addPass(vignettePass);
+        const vignettePass = new ShaderPass(VignetteShader);
+        composer.addPass(vignettePass);
 
-const grainPass = new ShaderPass(GrainShader);
-composer.addPass(grainPass);
+        const grainPass = new ShaderPass(GrainShader);
+        composer.addPass(grainPass);
 
-composer.addPass(new OutputPass());
+        composer.addPass(new OutputPass());
 
-// ═══════ GUI ═══════
-const gui = new GUI({ title: '✦ Quantum Fields', width: 280 });
+        // ═══════ GUI ═══════
+        const gui = new GUI({ title: '✦ Quantum Fields', width: 280 });
+        gui.domElement.classList.add('hidden'); // Default closed
 
-// === MAIN CONTROLS (always visible) ===
-gui.add(STATE, 'field', Object.keys(FIELD_TYPES)).name('⚡ Field Type').onChange(val => {
-    const d = FIELD_TYPES[val];
-    const c1 = new THREE.Color(d.c1), c2 = new THREE.Color(d.c2), c3 = new THREE.Color(d.c3);
-    const sc1 = new THREE.Color(d.sc1), sc2 = new THREE.Color(d.sc2);
-    function step() {
-        material.uniforms.uColor1.value.lerp(c1, 0.05);
-        material.uniforms.uColor2.value.lerp(c2, 0.05);
-        material.uniforms.uColor3.value.lerp(c3, 0.05);
-        secondaryMaterial.uniforms.uColor1.value.lerp(sc1, 0.05);
-        secondaryMaterial.uniforms.uColor2.value.lerp(sc2, 0.05);
-        nebulaMaterial.uniforms.uColor1.value.lerp(c1, 0.03);
-        nebulaMaterial.uniforms.uColor2.value.lerp(c2, 0.03);
-        nebulaMaterial.uniforms.uColor3.value.lerp(c3, 0.03);
-        connectionMaterial.uniforms.uColor.value.lerp(c2, 0.05);
-        material.uniforms.uNoiseScale.value = THREE.MathUtils.lerp(material.uniforms.uNoiseScale.value, d.s, 0.04);
-        material.uniforms.uCurlStrength.value = THREE.MathUtils.lerp(material.uniforms.uCurlStrength.value, d.curl, 0.04);
-        material.uniforms.uSizeBase.value = THREE.MathUtils.lerp(material.uniforms.uSizeBase.value, d.sz, 0.04);
-        if(Math.abs(material.uniforms.uNoiseScale.value - d.s) > 0.01) requestAnimationFrame(step);
-    }
-    step();
-});
-gui.add(STATE, 'sensitivity', 0.1, 3.0).name('🎧 Audio Sensitivity');
-gui.add(STATE, 'density', 0.017, 0.14).name('⭐ Density').onChange(v => geometry.setDrawRange(0, Math.floor((CONFIG.maxParticles + CONFIG.secondaryParticles)*v)));
-gui.add(STATE, 'timeScale', 0.0, 3.0).name('⏱ Time Flow');
+        // Dashboard Button Logic
+        document.getElementById('dashboard-btn').addEventListener('click', () => {
+            window.parent.postMessage('show-ui', '*');
+            // document.getElementById('overlay').style.display = 'flex'; // Optional: Reset overlay?
+        });
 
-// === ENVIRONMENT ===
-const f_env = gui.addFolder('🌌 Environment');
-f_env.add(STATE, 'nebulaEnabled').name('Space Nebula').onChange(v => nebulaSphere.visible = v);
-f_env.add(STATE, 'nebulaIntensity', 0.0, 2.0).name('Nebula Intensity').onChange(v => nebulaMaterial.uniforms.uIntensity.value = v);
-f_env.add(STATE, 'connectionsEnabled').name('Force Network');
-f_env.add(STATE, 'connectionThreshold', 5.0, 25.0).name('Network Range');
-f_env.add(STATE, 'connectionOpacity', 0.1, 1.0).name('Network Opacity');
-f_env.add(STATE, 'particleTrailsEnabled').name('Particle Trails');
-f_env.add(STATE, 'particleTrailOpacity', 0.0, 1.0).name('Trail Opacity');
-f_env.close();
+        // === MAIN CONTROLS (always visible) ===
+        gui.add(STATE, 'field', Object.keys(FIELD_TYPES)).name('⚡ Field Type').onChange(val => {
+            const d = FIELD_TYPES[val];
+            const c1 = new THREE.Color(d.c1), c2 = new THREE.Color(d.c2), c3 = new THREE.Color(d.c3);
+            const sc1 = new THREE.Color(d.sc1), sc2 = new THREE.Color(d.sc2);
+            function step() {
+                material.uniforms.uColor1.value.lerp(c1, 0.05);
+                material.uniforms.uColor2.value.lerp(c2, 0.05);
+                material.uniforms.uColor3.value.lerp(c3, 0.05);
+                secondaryMaterial.uniforms.uColor1.value.lerp(sc1, 0.05);
+                secondaryMaterial.uniforms.uColor2.value.lerp(sc2, 0.05);
+                nebulaMaterial.uniforms.uColor1.value.lerp(c1, 0.03);
+                nebulaMaterial.uniforms.uColor2.value.lerp(c2, 0.03);
+                nebulaMaterial.uniforms.uColor3.value.lerp(c3, 0.03);
+                connectionMaterial.uniforms.uColor.value.lerp(c2, 0.05);
+                material.uniforms.uNoiseScale.value = THREE.MathUtils.lerp(material.uniforms.uNoiseScale.value, d.s, 0.04);
+                material.uniforms.uCurlStrength.value = THREE.MathUtils.lerp(material.uniforms.uCurlStrength.value, d.curl, 0.04);
+                material.uniforms.uSizeBase.value = THREE.MathUtils.lerp(material.uniforms.uSizeBase.value, d.sz, 0.04);
+                if (Math.abs(material.uniforms.uNoiseScale.value - d.s) > 0.01) requestAnimationFrame(step);
+            }
+            step();
+        });
+        gui.add(STATE, 'sensitivity', 0.1, 3.0).name('🎧 Audio Sensitivity');
+        gui.add(STATE, 'density', 0.017, 0.14).name('⭐ Density').onChange(v => geometry.setDrawRange(0, Math.floor((CONFIG.maxParticles + CONFIG.secondaryParticles) * v)));
+        gui.add(STATE, 'timeScale', 0.0, 3.0).name('⏱ Time Flow');
 
-// === CAMERA & LENS ===
-const f_lens = gui.addFolder('🎥 Camera & Lens');
-f_lens.add(STATE, 'lensFlareEnabled').name('Lens Flare').onChange(v => { lensFlarePass.enabled = v; lensflare.visible = v; });
-f_lens.add(STATE, 'lensFlareIntensity', 0.0, 2.0).name('Flare Intensity').onChange(v => lensFlarePass.uniforms.uIntensity.value = v);
-f_lens.add(STATE, 'dofEnabled').name('Depth of Field').onChange(v => customDOFPass.enabled = v);
-f_lens.add(STATE, 'dofFocus', 0.0, 0.1015).name('Focus Ring').onChange(v => customDOFPass.uniforms.uFocus.value = v);
-f_lens.add(STATE, 'dofFocalLength', 0.05, 0.5).name('Focus Falloff').onChange(v => customDOFPass.uniforms.uFocalLength.value = v);
-f_lens.add(STATE, 'dofBokehStrength', 0.0, 1.0).name('Blur Amount').onChange(v => customDOFPass.uniforms.uBokehStrength.value = v);
-f_lens.add(STATE, 'cameraShake', 0.0, 2.0).name('Camera Shake');
-f_lens.close();
+        // === ENVIRONMENT ===
+        const f_env = gui.addFolder('🌌 Environment');
+        f_env.add(STATE, 'nebulaEnabled').name('Space Nebula').onChange(v => nebulaSphere.visible = v);
+        f_env.add(STATE, 'nebulaIntensity', 0.0, 2.0).name('Nebula Intensity').onChange(v => nebulaMaterial.uniforms.uIntensity.value = v);
+        f_env.add(STATE, 'connectionsEnabled').name('Force Network');
+        f_env.add(STATE, 'connectionThreshold', 5.0, 25.0).name('Network Range');
+        f_env.add(STATE, 'connectionOpacity', 0.1, 1.0).name('Network Opacity');
+        f_env.add(STATE, 'particleTrailsEnabled').name('Particle Trails');
+        f_env.add(STATE, 'particleTrailOpacity', 0.0, 1.0).name('Trail Opacity');
+        f_env.close();
 
-// === POST FX ===
-const f_post = gui.addFolder('✨ Post Processing');
-f_post.add(bloomPass, 'strength', 0.0, 3.0).name('Bloom');
-f_post.add(afterimagePass.uniforms['damp'], 'value', 0.5, 0.98).name('Motion Blur');
-f_post.add(STATE, 'chromaticAberration', 0.0, 0.025).name('Chromatic').onChange(v => chromaticPass.uniforms.uIntensity.value = v);
-f_post.add(STATE, 'anamorphicStretch', 0.0, 1.0).name('Anamorphic').onChange(v => anamorphicPass.uniforms.uStretch.value = v);
-f_post.add(STATE, 'godRaysEnabled').name('God Rays').onChange(v => godRaysPass.enabled = v);
-f_post.add(STATE, 'godRaysIntensity', 0.0, 1.0).name('Rays Intensity').onChange(v => godRaysPass.uniforms.uIntensity.value = v);
-f_post.add(STATE, 'filmGrain', 0.0, 0.2).name('Film Grain').onChange(v => grainPass.uniforms.uIntensity.value = v);
-f_post.close();
+        // === CAMERA & LENS ===
+        const f_lens = gui.addFolder('🎥 Camera & Lens');
+        f_lens.add(STATE, 'lensFlareEnabled').name('Lens Flare').onChange(v => { lensFlarePass.enabled = v; lensflare.visible = v; });
+        f_lens.add(STATE, 'lensFlareIntensity', 0.0, 2.0).name('Flare Intensity').onChange(v => lensFlarePass.uniforms.uIntensity.value = v);
+        f_lens.add(STATE, 'dofEnabled').name('Depth of Field').onChange(v => customDOFPass.enabled = v);
+        f_lens.add(STATE, 'dofFocus', 0.0, 0.1015).name('Focus Ring').onChange(v => customDOFPass.uniforms.uFocus.value = v);
+        f_lens.add(STATE, 'dofFocalLength', 0.05, 0.5).name('Focus Falloff').onChange(v => customDOFPass.uniforms.uFocalLength.value = v);
+        f_lens.add(STATE, 'dofBokehStrength', 0.0, 1.0).name('Blur Amount').onChange(v => customDOFPass.uniforms.uBokehStrength.value = v);
+        f_lens.add(STATE, 'cameraShake', 0.0, 2.0).name('Camera Shake');
+        f_lens.close();
 
-// === PHYSICS (Advanced) ===
-const f_phys = gui.addFolder('⚙️ Physics');
-f_phys.add(STATE, 'vortexStrength', 0.0, 1.0).name('Vortex').onChange(v => material.uniforms.uVortexStrength.value = v);
-f_phys.add(STATE, 'pulseIntensity', 0.0, 2.5).name('Pulse').onChange(v => material.uniforms.uPulseIntensity.value = v);
-f_phys.close();
+        // === POST FX ===
+        const f_post = gui.addFolder('✨ Post Processing');
+        f_post.add(bloomPass, 'strength', 0.0, 3.0).name('Bloom');
+        f_post.add(afterimagePass.uniforms['damp'], 'value', 0.5, 0.98).name('Motion Blur');
+        f_post.add(STATE, 'chromaticAberration', 0.0, 0.025).name('Chromatic').onChange(v => chromaticPass.uniforms.uIntensity.value = v);
+        f_post.add(STATE, 'anamorphicStretch', 0.0, 1.0).name('Anamorphic').onChange(v => anamorphicPass.uniforms.uStretch.value = v);
+        f_post.add(STATE, 'godRaysEnabled').name('God Rays').onChange(v => godRaysPass.enabled = v);
+        f_post.add(STATE, 'godRaysIntensity', 0.0, 1.0).name('Rays Intensity').onChange(v => godRaysPass.uniforms.uIntensity.value = v);
+        f_post.add(STATE, 'filmGrain', 0.0, 0.2).name('Film Grain').onChange(v => grainPass.uniforms.uIntensity.value = v);
+        f_post.close();
 
-// === AUDIO (Advanced) ===
-const f_gate = gui.addFolder('🎤 Audio Gate');
-f_gate.add(STATE, 'bassGateEnabled').name('Enable');
-f_gate.add(STATE, 'bassGateThreshold', 0.0, 0.5).name('Threshold');
-f_gate.add(STATE, 'bassGateAttack', 0.01, 0.3).name('Attack');
-f_gate.add(STATE, 'bassGateRelease', 0.05, 0.5).name('Release');
-f_gate.close();
+        // === PHYSICS (Advanced) ===
+        const f_phys = gui.addFolder('⚙️ Physics');
+        f_phys.add(STATE, 'vortexStrength', 0.0, 1.0).name('Vortex').onChange(v => material.uniforms.uVortexStrength.value = v);
+        f_phys.add(STATE, 'pulseIntensity', 0.0, 2.5).name('Pulse').onChange(v => material.uniforms.uPulseIntensity.value = v);
+        f_phys.close();
 
-// === ENHANCEMENT PACK v2.0 ===
-const f_enhance = gui.addFolder('🚀 Enhancement Pack');
-f_enhance.add(STATE, 'onsetSensitivity', 0.5, 3.0).name('Onset Punch');
-f_enhance.add(STATE, 'audioCameraEnabled').name('Audio Camera');
-f_enhance.add(STATE, 'audioCameraIntensity', 0.0, 1.0).name('Camera React');
-f_enhance.add(STATE, 'waveformTerrainHeight', 5.0, 30.0).name('Terrain Height');
-f_enhance.add(STATE, 'adaptiveQualityEnabled').name('Auto Quality');
-f_enhance.add(STATE, 'targetFPS', 30, 60).name('Target FPS');
-f_enhance.add({ fps: () => QUALITY_SYSTEM.currentFPS.toFixed(1) }, 'fps').name('Current FPS').listen();
-f_enhance.close();
+        // === AUDIO (Advanced) ===
+        const f_gate = gui.addFolder('🎤 Audio Gate');
+        f_gate.add(STATE, 'bassGateEnabled').name('Enable');
+        f_gate.add(STATE, 'bassGateThreshold', 0.0, 0.5).name('Threshold');
+        f_gate.add(STATE, 'bassGateAttack', 0.01, 0.3).name('Attack');
+        f_gate.add(STATE, 'bassGateRelease', 0.05, 0.5).name('Release');
+        f_gate.close();
 
-// ═══════ UI & EVENTS ═══════
-const overlay = document.getElementById('overlay');
-const audioControls = document.getElementById('audio-controls');
-const playPauseBtn = document.getElementById('play-pause-btn');
-const progressBar = document.getElementById('progress-bar');
-const progressContainer = document.getElementById('progress-container');
-const timeDisplay = document.getElementById('time-display');
-const trackName = document.getElementById('track-name');
-const status = document.getElementById('status-bar');
+        // === ENHANCEMENT PACK v2.0 ===
+        const f_enhance = gui.addFolder('🚀 Enhancement Pack');
+        f_enhance.add(STATE, 'onsetSensitivity', 0.5, 3.0).name('Onset Punch');
+        f_enhance.add(STATE, 'audioCameraEnabled').name('Audio Camera');
+        f_enhance.add(STATE, 'audioCameraIntensity', 0.0, 1.0).name('Camera React');
+        f_enhance.add(STATE, 'waveformTerrainHeight', 5.0, 30.0).name('Terrain Height');
+        f_enhance.add(STATE, 'adaptiveQualityEnabled').name('Auto Quality');
+        f_enhance.add(STATE, 'targetFPS', 30, 60).name('Target FPS');
+        f_enhance.add({ fps: () => QUALITY_SYSTEM.currentFPS.toFixed(1) }, 'fps').name('Current FPS').listen();
+        f_enhance.close();
 
-const formatTime = s => `${Math.floor(s/60)}:${Math.floor(s%60).toString().padStart(2,'0')}`;
+        // ═══════ UI & EVENTS ═══════
+        const overlay = document.getElementById('overlay');
+        const audioControls = document.getElementById('audio-controls');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const progressContainer = document.getElementById('progress-container');
+        const timeDisplay = document.getElementById('time-display');
+        const trackName = document.getElementById('track-name');
+        const status = document.getElementById('status-bar');
 
-function updateUI() {
-    if (AUDIO.mode === 'mic') {
-        playPauseBtn.textContent = '🎙 live';
-        playPauseBtn.disabled = true;
-    } else {
-        playPauseBtn.textContent = AUDIO.isPlaying ? '⏸ pause' : '▶ play';
-        playPauseBtn.classList.toggle('playing', AUDIO.isPlaying);
-        playPauseBtn.disabled = false;
-    }
-    if (AUDIO.mode === 'file' && AUDIO.audioBuffer) {
-        const cur = AUDIO.getCurrentTime(), dur = AUDIO.getDuration();
-        progressBar.style.width = (cur/dur*100) + '%';
-        timeDisplay.textContent = `${formatTime(cur)} / ${formatTime(dur)}`;
-    } else {
-        progressBar.style.width = '0%';
-        timeDisplay.textContent = AUDIO.mode === 'mic' ? 'LIVE' : '0:00 / 0:00';
-    }
-}
+        const formatTime = s => `${Math.floor(s / 60)}:${Math.floor(s % 60).toString().padStart(2, '0')}`;
 
-function togglePlayPause() {
-    if (AUDIO.mode !== 'file') return;
-    AUDIO.togglePlayPause();
-    updateUI();
-    status.innerHTML = AUDIO.isPlaying ? 'SYSTEM: <span>PLAYING</span>' : 'SYSTEM: <span>PAUSED</span>';
-}
+        function updateUI() {
+            if (AUDIO.mode === 'mic') {
+                playPauseBtn.textContent = '🎙 live';
+                playPauseBtn.disabled = true;
+            } else {
+                playPauseBtn.textContent = AUDIO.isPlaying ? '⏸ pause' : '▶ play';
+                playPauseBtn.classList.toggle('playing', AUDIO.isPlaying);
+                playPauseBtn.disabled = false;
+            }
+            if (AUDIO.mode === 'file' && AUDIO.audioBuffer) {
+                const cur = AUDIO.getCurrentTime(), dur = AUDIO.getDuration();
+                progressBar.style.width = (cur / dur * 100) + '%';
+                timeDisplay.textContent = `${formatTime(cur)} / ${formatTime(dur)}`;
+            } else {
+                progressBar.style.width = '0%';
+                timeDisplay.textContent = AUDIO.mode === 'mic' ? 'LIVE' : '0:00 / 0:00';
+            }
+        }
 
-function activate() {
-    AUDIO.init();
-    if(AUDIO.ctx.state === 'suspended') AUDIO.ctx.resume();
-    overlay.style.opacity = 0;
-    setTimeout(() => overlay.style.display = 'none', 800);
-    audioControls.classList.add('visible');
-}
+        function togglePlayPause() {
+            if (AUDIO.mode !== 'file') return;
+            AUDIO.togglePlayPause();
+            updateUI();
+            status.innerHTML = AUDIO.isPlaying ? 'SYSTEM: <span>PLAYING</span>' : 'SYSTEM: <span>PAUSED</span>';
+        }
 
-async function loadTrack(file) {
-    activate();
-    await AUDIO.loadTrack(await file.arrayBuffer(), file.name);
-    AUDIO.play();
-    trackName.textContent = file.name.length > 25 ? file.name.slice(0,22) + '...' : file.name;
-    updateUI();
-    status.innerHTML = 'SYSTEM: <span>PLAYING</span>';
-}
+        function activate() {
+            AUDIO.init();
+            if (AUDIO.ctx.state === 'suspended') AUDIO.ctx.resume();
+            overlay.style.opacity = 0;
+            setTimeout(() => overlay.style.display = 'none', 800);
+            audioControls.classList.add('visible');
+        }
 
-async function startMic() {
-    activate();
-    await AUDIO.startMic();
-    trackName.textContent = 'Live Mic';
-    updateUI();
-    status.innerHTML = 'SYSTEM: <span>LISTENING</span>';
-}
+        async function loadTrack(file) {
+            activate();
+            await AUDIO.loadTrack(await file.arrayBuffer(), file.name);
+            AUDIO.play();
+            trackName.textContent = file.name.length > 25 ? file.name.slice(0, 22) + '...' : file.name;
+            updateUI();
+            status.innerHTML = 'SYSTEM: <span>PLAYING</span>';
+        }
 
-document.getElementById('file-input').onchange = e => e.target.files[0] && loadTrack(e.target.files[0]);
-document.getElementById('file-input-2').onchange = e => { if(e.target.files[0]) loadTrack(e.target.files[0]); e.target.value = ''; };
-document.getElementById('mic-btn').onclick = startMic;
-document.getElementById('mic-btn-2').onclick = startMic;
-playPauseBtn.onclick = togglePlayPause;
-progressContainer.onclick = e => {
-    if (AUDIO.mode !== 'file' || !AUDIO.audioBuffer) return;
-    const rect = progressContainer.getBoundingClientRect();
-    AUDIO.seek((e.clientX - rect.left) / rect.width * AUDIO.getDuration());
-};
-document.getElementById('screenshot-btn')?.addEventListener('click', () => {
-    composer.render();
-    const a = document.createElement('a');
-    a.download = 'quantum-' + Date.now() + '.png';
-    a.href = renderer.domElement.toDataURL('image/png');
-    a.click();
-});
-document.getElementById('fullscreen-btn')?.addEventListener('click', () => {
-    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
-});
+        async function startMic(preferredLabel = null) {
+            console.log('Global startMic requested:', preferredLabel);
+            try {
+                activate();
+                await AUDIO.startMic(preferredLabel);
+                trackName.textContent = AUDIO.currentTrackName;
+                updateUI();
+                // status update handled in AUDIO.startMic
+            } catch (e) {
+                console.error("Global startMic failed:", e);
+                const status = document.getElementById('status-bar');
+                status.innerHTML = `ERROR: <span style="color:#ff6b6b">${e.message}</span>`;
+            }
+        }
 
-// ═══════ ANIMATION LOOP ═══════
-const clock = new THREE.Clock();
+        // Using optional chaining/checks because one input was replaced by a button
+        const sysBtn = document.getElementById('sys-audio-btn');
+        if (sysBtn) sysBtn.onclick = () => startMic('BlackHole');
 
-function animate() {
-    requestAnimationFrame(animate);
-    const dt = clock.getDelta(), elapsed = clock.getElapsedTime();
+        const micBtn = document.getElementById('mic-btn');
+        if (micBtn) micBtn.onclick = () => startMic(null);
 
-    material.uniforms.uTime.value += dt * STATE.timeScale;
-    grainPass.uniforms.uTime.value = elapsed;
-    lensFlarePass.uniforms.uTime.value = elapsed;
+        const fileInput = document.getElementById('file-input');
+        if (fileInput) fileInput.onchange = e => e.target.files[0] && loadTrack(e.target.files[0]);
 
-    material.uniforms.uZoomFactor.value = camera.position.length() / CONFIG.defaultZoom;
-    material.uniforms.uMousePos.value.lerp(mouseWorldPos, 0.1);
-    material.uniforms.uMouseVelocity.value.lerp(mouseVelocity, 0.08);
+        document.getElementById('file-input-2').onchange = e => { if (e.target.files[0]) loadTrack(e.target.files[0]); e.target.value = ''; };
+        document.getElementById('mic-btn-2').onclick = () => startMic(null);
+        playPauseBtn.onclick = togglePlayPause;
+        progressContainer.onclick = e => {
+            if (AUDIO.mode !== 'file' || !AUDIO.audioBuffer) return;
+            const rect = progressContainer.getBoundingClientRect();
+            AUDIO.seek((e.clientX - rect.left) / rect.width * AUDIO.getDuration());
+        };
+        document.getElementById('screenshot-btn')?.addEventListener('click', () => {
+            composer.render();
+            const a = document.createElement('a');
+            a.download = 'quantum-' + Date.now() + '.png';
+            a.href = renderer.domElement.toDataURL('image/png');
+            a.click();
+        });
+        document.getElementById('fullscreen-btn')?.addEventListener('click', () => {
+            document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+        });
 
-    AUDIO.update();
-    updateUI();
+        // ═══════ ANIMATION LOOP ═══════
+        const clock = new THREE.Clock();
 
-    const s = STATE.sensitivity, lf = 0.16;
-    material.uniforms.uSubBass.value = THREE.MathUtils.lerp(material.uniforms.uSubBass.value, AUDIO.gatedBands.subBass*s, lf);
-    material.uniforms.uBass.value = THREE.MathUtils.lerp(material.uniforms.uBass.value, AUDIO.gatedBands.bass*s, lf);
-    material.uniforms.uLowMid.value = THREE.MathUtils.lerp(material.uniforms.uLowMid.value, AUDIO.gatedBands.lowMid*s, lf);
-    material.uniforms.uMid.value = THREE.MathUtils.lerp(material.uniforms.uMid.value, AUDIO.gatedBands.mid*s, lf);
-    material.uniforms.uHighMid.value = THREE.MathUtils.lerp(material.uniforms.uHighMid.value, AUDIO.gatedBands.highMid*s, lf);
-    material.uniforms.uHigh.value = THREE.MathUtils.lerp(material.uniforms.uHigh.value, AUDIO.gatedBands.high*s, lf);
-    material.uniforms.uUltraHigh.value = THREE.MathUtils.lerp(material.uniforms.uUltraHigh.value, AUDIO.gatedBands.ultraHigh*s, lf);
-    material.uniforms.uBeatEnergy.value = THREE.MathUtils.lerp(material.uniforms.uBeatEnergy.value, AUDIO.beatEnergy, 0.22);
-    material.uniforms.uSpectralCentroid.value = THREE.MathUtils.lerp(material.uniforms.uSpectralCentroid.value, AUDIO.spectralCentroid, lf);
-    material.uniforms.uSpectralFlux.value = THREE.MathUtils.lerp(material.uniforms.uSpectralFlux.value, AUDIO.spectralFlux*s, lf);
-    
-    // === ENHANCEMENT: Update new uniforms ===
-    material.uniforms.uOnsetEnergy.value = THREE.MathUtils.lerp(material.uniforms.uOnsetEnergy.value, AUDIO.onsetEnergy, 0.25);
-    material.uniforms.uTerrainMode.value = FIELD_TYPES[STATE.field]?.terrain ? 1.0 : 0.0;
-    material.uniforms.uTerrainHeight.value = STATE.waveformTerrainHeight;
+        function animate() {
+            requestAnimationFrame(animate);
+            const dt = clock.getDelta(), elapsed = clock.getElapsedTime();
 
-    // Update secondary particles
-    secondaryPoints.visible = STATE.secondaryEnabled;
-    secondaryMaterial.uniforms.uTime.value = material.uniforms.uTime.value;
-    secondaryMaterial.uniforms.uBass.value = material.uniforms.uBass.value;
-    secondaryMaterial.uniforms.uMid.value = material.uniforms.uMid.value;
-    secondaryMaterial.uniforms.uHigh.value = material.uniforms.uHigh.value;
-    secondaryMaterial.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
+            material.uniforms.uTime.value += dt * STATE.timeScale;
+            grainPass.uniforms.uTime.value = elapsed;
+            lensFlarePass.uniforms.uTime.value = elapsed;
 
-    // Update nebula background
-    nebulaSphere.visible = STATE.nebulaEnabled;
-    if(STATE.nebulaEnabled) {
-        nebulaMaterial.uniforms.uTime.value = material.uniforms.uTime.value;
-        nebulaMaterial.uniforms.uBass.value = material.uniforms.uBass.value;
-        nebulaMaterial.uniforms.uMid.value = material.uniforms.uMid.value;
-        nebulaMaterial.uniforms.uHigh.value = material.uniforms.uHigh.value;
-        nebulaMaterial.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
-    }
+            material.uniforms.uZoomFactor.value = camera.position.length() / CONFIG.defaultZoom;
+            material.uniforms.uMousePos.value.lerp(mouseWorldPos, 0.1);
+            material.uniforms.uMouseVelocity.value.lerp(mouseVelocity, 0.08);
 
-    // Update particle connections
-    connectionMesh.visible = STATE.connectionsEnabled;
-    if(STATE.connectionsEnabled) {
-        updateConnections(STATE.connectionThreshold, material.uniforms.uBass.value);
-        connectionMaterial.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
-        connectionMaterial.uniforms.uOpacity.value = STATE.connectionOpacity;
-    }
+            AUDIO.update();
+            updateUI();
 
-    // Update post-processing
-    chromaticPass.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
-    godRaysPass.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
-    lensFlarePass.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
-    vignettePass.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
-    customDOFPass.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
+            const s = STATE.sensitivity, lf = 0.16;
+            material.uniforms.uSubBass.value = THREE.MathUtils.lerp(material.uniforms.uSubBass.value, AUDIO.gatedBands.subBass * s, lf);
+            material.uniforms.uBass.value = THREE.MathUtils.lerp(material.uniforms.uBass.value, AUDIO.gatedBands.bass * s, lf);
+            material.uniforms.uLowMid.value = THREE.MathUtils.lerp(material.uniforms.uLowMid.value, AUDIO.gatedBands.lowMid * s, lf);
+            material.uniforms.uMid.value = THREE.MathUtils.lerp(material.uniforms.uMid.value, AUDIO.gatedBands.mid * s, lf);
+            material.uniforms.uHighMid.value = THREE.MathUtils.lerp(material.uniforms.uHighMid.value, AUDIO.gatedBands.highMid * s, lf);
+            material.uniforms.uHigh.value = THREE.MathUtils.lerp(material.uniforms.uHigh.value, AUDIO.gatedBands.high * s, lf);
+            material.uniforms.uUltraHigh.value = THREE.MathUtils.lerp(material.uniforms.uUltraHigh.value, AUDIO.gatedBands.ultraHigh * s, lf);
+            material.uniforms.uBeatEnergy.value = THREE.MathUtils.lerp(material.uniforms.uBeatEnergy.value, AUDIO.beatEnergy, 0.22);
+            material.uniforms.uSpectralCentroid.value = THREE.MathUtils.lerp(material.uniforms.uSpectralCentroid.value, AUDIO.spectralCentroid, lf);
+            material.uniforms.uSpectralFlux.value = THREE.MathUtils.lerp(material.uniforms.uSpectralFlux.value, AUDIO.spectralFlux * s, lf);
 
+            // === ENHANCEMENT: Update new uniforms ===
+            material.uniforms.uOnsetEnergy.value = THREE.MathUtils.lerp(material.uniforms.uOnsetEnergy.value, AUDIO.onsetEnergy, 0.25);
+            material.uniforms.uTerrainMode.value = FIELD_TYPES[STATE.field]?.terrain ? 1.0 : 0.0;
+            material.uniforms.uTerrainHeight.value = STATE.waveformTerrainHeight;
 
+            // Update secondary particles
+            secondaryPoints.visible = STATE.secondaryEnabled;
+            secondaryMaterial.uniforms.uTime.value = material.uniforms.uTime.value;
+            secondaryMaterial.uniforms.uBass.value = material.uniforms.uBass.value;
+            secondaryMaterial.uniforms.uMid.value = material.uniforms.uMid.value;
+            secondaryMaterial.uniforms.uHigh.value = material.uniforms.uHigh.value;
+            secondaryMaterial.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
 
-    // Update trails
-    trailSystem.update(elapsed, {
-        bass: material.uniforms.uBass.value,
-        mid: material.uniforms.uMid.value,
-        high: material.uniforms.uHigh.value,
-        beat: material.uniforms.uBeatEnergy.value
-    }, material.uniforms.uColor1.value);
+            // Update nebula background
+            nebulaSphere.visible = STATE.nebulaEnabled;
+            if (STATE.nebulaEnabled) {
+                nebulaMaterial.uniforms.uTime.value = material.uniforms.uTime.value;
+                nebulaMaterial.uniforms.uBass.value = material.uniforms.uBass.value;
+                nebulaMaterial.uniforms.uMid.value = material.uniforms.uMid.value;
+                nebulaMaterial.uniforms.uHigh.value = material.uniforms.uHigh.value;
+                nebulaMaterial.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
+            }
 
-    // Update lens flare
-    if(STATE.lensFlareEnabled) {
-        lensflare.visible = false;
-        lensflare.scale.setScalar((1.0 + AUDIO.beatEnergy * 0.5) * STATE.lensFlareIntensity);
-        lensflare.position.y = Math.sin(elapsed * 0.5) * 5 * material.uniforms.uBass.value;
-    } else {
-        lensflare.visible = false;
-    }
+            // Update particle connections
+            connectionMesh.visible = STATE.connectionsEnabled;
+            if (STATE.connectionsEnabled) {
+                updateConnections(STATE.connectionThreshold, material.uniforms.uBass.value);
+                connectionMaterial.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
+                connectionMaterial.uniforms.uOpacity.value = STATE.connectionOpacity;
+            }
+
+            // Update post-processing
+            chromaticPass.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
+            godRaysPass.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
+            lensFlarePass.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
+            vignettePass.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
+            customDOFPass.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
 
 
 
-    // === ENHANCEMENT: Adaptive Quality System ===
-    QUALITY_SYSTEM.update(dt * 1000);
-    
-    // === ENHANCEMENT: Audio-Reactive Camera ===
-    AUDIO_CAMERA.update(dt * 1000);
-    
-    // Camera shake
-    if (STATE.cameraShake > 0 && AUDIO.beatEnergy > 0.1) {
-        const shake = AUDIO.beatEnergy * STATE.cameraShake;
-        cameraShakeOffset.set((Math.random()-0.5)*shake*0.6, (Math.random()-0.5)*shake*0.4, (Math.random()-0.5)*shake*0.25);
-        camera.position.copy(baseCameraPos).add(cameraShakeOffset);
-    }
+            // Update trails
+            trailSystem.update(elapsed, {
+                bass: material.uniforms.uBass.value,
+                mid: material.uniforms.uMid.value,
+                high: material.uniforms.uHigh.value,
+                beat: material.uniforms.uBeatEnergy.value
+            }, material.uniforms.uColor1.value);
 
-    controls.autoRotateSpeed = 0.35 + material.uniforms.uMid.value * 2.0 + material.uniforms.uBeatEnergy.value * 2.0;
-    bloomPass.strength = STATE.bloom + (AUDIO.gatedBands.bass + AUDIO.gatedBands.mid + AUDIO.beatEnergy) / 6;
-    anamorphicPass.uniforms.uIntensity.value = 0.3 + AUDIO.gatedBands.bass * 0.4;
+            // Update lens flare
+            if (STATE.lensFlareEnabled) {
+                lensflare.visible = false;
+                lensflare.scale.setScalar((1.0 + AUDIO.beatEnergy * 0.5) * STATE.lensFlareIntensity);
+                lensflare.position.y = Math.sin(elapsed * 0.5) * 5 * material.uniforms.uBass.value;
+            } else {
+                lensflare.visible = false;
+            }
 
-    controls.update();
-    composer.render();
-}
 
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    composer.setSize(window.innerWidth, window.innerHeight);
-    customDOFPass.uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
-    baseCameraPos.copy(camera.position);
-});
 
-animate();
-</script>
+            // === ENHANCEMENT: Adaptive Quality System ===
+            QUALITY_SYSTEM.update(dt * 1000);
+
+            // === ENHANCEMENT: Audio-Reactive Camera ===
+            AUDIO_CAMERA.update(dt * 1000);
+
+            // Camera shake
+            if (STATE.cameraShake > 0 && AUDIO.beatEnergy > 0.1) {
+                const shake = AUDIO.beatEnergy * STATE.cameraShake;
+                cameraShakeOffset.set((Math.random() - 0.5) * shake * 0.6, (Math.random() - 0.5) * shake * 0.4, (Math.random() - 0.5) * shake * 0.25);
+                camera.position.copy(baseCameraPos).add(cameraShakeOffset);
+            }
+
+            controls.autoRotateSpeed = 0.35 + material.uniforms.uMid.value * 2.0 + material.uniforms.uBeatEnergy.value * 2.0;
+            bloomPass.strength = STATE.bloom + (AUDIO.gatedBands.bass + AUDIO.gatedBands.mid + AUDIO.beatEnergy) / 6;
+            anamorphicPass.uniforms.uIntensity.value = 0.3 + AUDIO.gatedBands.bass * 0.4;
+
+            controls.update();
+            composer.render();
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+            customDOFPass.uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
+            baseCameraPos.copy(camera.position);
+        });
+
+        // Auto-start System Audio (BlackHole)
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                console.log("Auto-starting System Audio...");
+                startMic('BlackHole').catch(e => {
+                    console.warn("Auto-start failed:", e);
+                    const status = document.getElementById('status-bar');
+                    if (status) status.innerHTML = "SYSTEM: <span>CLICK TO START</span>";
+                });
+            }, 1000);
+        });
+
+        animate();
+    </script>
 </body>
+
 </html>
