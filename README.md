@@ -262,6 +262,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
+- The Perplexity Team (https://perplexity.ai/blog)
+- The Anthropic Team (https://anthropic.com) 
+- George Nachman & Team (iTerm2)
 - [Three.js](https://threejs.org/) team for the incredible 3D library
 - [Stefan Gustavson](https://github.com/stegu/webgl-noise) for simplex noise implementation
 - The WebGL and creative coding community
