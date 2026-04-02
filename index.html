@@ -2321,14 +2321,51 @@ void main() {
         composer.addPass(new OutputPass());
 
         // ═══════ GUI ═══════
-        const gui = new GUI({ title: '✦ Quantum Fields', width: 280 });
+        const gui = new GUI({ title: '✦ Quantum Fields', width: 320 });
         gui.domElement.classList.add('hidden'); // Default closed
 
         // === MAIN CONTROLS (always visible) ===
+        // Animate lil-gui CSS vars toward target field colours
+        let guiTargetAccent = new THREE.Color(def.c1);
+        let guiTargetAccent2 = new THREE.Color(def.c2);
+        let guiCurrentAccent = new THREE.Color(def.c1);
+        let guiCurrentAccent2 = new THREE.Color(def.c2);
+
+        function applyGuiTheme(accent, accent2) {
+            const el = gui.domElement;
+            const a  = '#' + accent.getHexString();
+            const a2 = '#' + accent2.getHexString();
+            // Accent colour: focus ring, number/string values, title text
+            el.style.setProperty('--focus-color',            a);
+            el.style.setProperty('--number-color',           a);
+            el.style.setProperty('--string-color',           a);
+            // Title background: very dark tint of accent
+            el.style.setProperty('--title-background-color', `rgba(${Math.round(accent.r*255)},${Math.round(accent.g*255)},${Math.round(accent.b*255)},0.12)`);
+            // Widget (slider track): mid blend of both field colours, desaturated
+            const wR = Math.round((accent.r * 0.4 + accent2.r * 0.3) * 180 + 30);
+            const wG = Math.round((accent.g * 0.4 + accent2.g * 0.3) * 180 + 30);
+            const wB = Math.round((accent.b * 0.4 + accent2.b * 0.3) * 180 + 30);
+            el.style.setProperty('--widget-color', `rgb(${wR},${wG},${wB})`);
+            el.style.setProperty('--hover-color',  `rgb(${Math.min(wR+25,255)},${Math.min(wG+25,255)},${Math.min(wB+25,255)})`);
+        }
+
+        // Smooth GUI theme transition in animation loop — interpolates over time
+        function tickGuiTheme() {
+            guiCurrentAccent.lerp(guiTargetAccent, 0.04);
+            guiCurrentAccent2.lerp(guiTargetAccent2, 0.04);
+            applyGuiTheme(guiCurrentAccent, guiCurrentAccent2);
+        }
+
+        // Set initial theme
+        applyGuiTheme(guiCurrentAccent, guiCurrentAccent2);
+
         gui.add(STATE, 'field', Object.keys(FIELD_TYPES)).name('⚡ Field Type').onChange(val => {
             const d = FIELD_TYPES[val];
             const c1 = new THREE.Color(d.c1), c2 = new THREE.Color(d.c2), c3 = new THREE.Color(d.c3);
             const sc1 = new THREE.Color(d.sc1), sc2 = new THREE.Color(d.sc2);
+            // Queue GUI theme transition
+            guiTargetAccent.set(d.c1);
+            guiTargetAccent2.set(d.c2);
             function step() {
                 material.uniforms.uColor1.value.lerp(c1, 0.05);
                 material.uniforms.uColor2.value.lerp(c2, 0.05);
@@ -2600,6 +2637,9 @@ void main() {
                 );
                 crawlerMaterial.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
             }
+
+            // Tick GUI theme transition
+            tickGuiTheme();
 
             // Update post-processing
             chromaticPass.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
