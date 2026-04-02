@@ -2028,6 +2028,10 @@ void main() {
                 const to   = particlePos(c.toIdx);
                 const head = new THREE.Vector3().lerpVectors(from, to, c.t);
 
+                // Contain within field sphere — clamp head to max radius
+                const headDist = head.length();
+                if (headDist > CONFIG.fieldRadius) head.multiplyScalar(CONFIG.fieldRadius / headDist);
+
                 // Only record a tail point when head has moved far enough in world space
                 const distMoved = c.lastTailPos ? head.distanceTo(c.lastTailPos) : Infinity;
                 if (distMoved >= CRAWLER_MIN_STEP) {
