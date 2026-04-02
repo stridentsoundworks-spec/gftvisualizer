@@ -536,7 +536,7 @@
             vortexStrength: 0.666,
             pulseIntensity: 0.35,
             anamorphicStretch: 0.1,
-            bassGateThreshold: 0.32,
+            bassGateThreshold: 0.12,
             bassGateAttack: 0.3,
             bassGateRelease: 0.3,
             bassGateRatio: 2.142,
@@ -580,7 +580,7 @@
 
         // --- AUDIO SYSTEM ---
         const AUDIO = {
-            ctx: null, analyser: null, source: null, data: null,
+            ctx: null, analyser: null, source: null, gainNode: null, data: null,
             audioBuffer: null, isPlaying: false, isPaused: false,
             startTime: 0, pauseTime: 0, currentTrackName: 'No Track',
             mode: null, micStream: null,
@@ -668,6 +668,7 @@
 
             stopCurrentSource() {
                 if (this.source) { try { this.source.stop(); this.source.disconnect(); } catch (e) { } this.source = null; }
+                if (this.gainNode) { try { this.gainNode.disconnect(); } catch (e) { } this.gainNode = null; }
                 if (this.micStream) { this.micStream.getTracks().forEach(t => t.stop()); this.micStream = null; }
                 this.isPlaying = false; this.isPaused = false; this.pauseTime = 0;
             },
@@ -723,7 +724,10 @@
                     this.stopCurrentSource();
                     this.micStream = stream;
                     this.source = this.ctx.createMediaStreamSource(stream);
-                    this.source.connect(this.analyser);
+                    this.gainNode = this.ctx.createGain();
+                    this.gainNode.gain.value = 3.0; // Boost loopback/mic signal before FFT — tune via sensitivity slider
+                    this.source.connect(this.gainNode);
+                    this.gainNode.connect(this.analyser);
                     this.mode = 'mic';
                     this.isPlaying = true;
                     this.resetCalibration();
