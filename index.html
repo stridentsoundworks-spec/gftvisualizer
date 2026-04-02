@@ -475,8 +475,7 @@
             <h1>Quantum Fields</h1>
             <p>Audio-reactive particle simulation</p>
             <div class="btn-group">
-                <button id="sys-audio-btn">⚡ Controls</button>
-                <button id="mic-btn">🚀 Boost</button>
+                <button id="enter-btn">Enter</button>
             </div>
         </div>
     </div>
@@ -2296,11 +2295,8 @@ void main() {
         }
 
         // Using optional chaining/checks because one input was replaced by a button
-        const sysBtn = document.getElementById('sys-audio-btn');
-        if (sysBtn) sysBtn.onclick = () => startMic('BlackHole');
-
-        const micBtn = document.getElementById('mic-btn');
-        if (micBtn) micBtn.onclick = () => startMic(null);
+        const enterBtn = document.getElementById('enter-btn');
+        if (enterBtn) enterBtn.onclick = () => startMic(null);
 
         const fileInput = document.getElementById('file-input');
         if (fileInput) fileInput.onchange = e => e.target.files[0] && loadTrack(e.target.files[0]);
