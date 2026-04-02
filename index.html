@@ -1960,14 +1960,16 @@ void main() {
 
         // Initialise crawler agents
         const crawlers = [];
+        const CRAWLER_MIN_STEP = 1.2; // min world-space distance before adding a tail point
         for (let i = 0; i < CRAWLER_COUNT; i++) {
             crawlers.push({
-                fromIdx: Math.floor(Math.random() * connectionCount), // index into trackedParticles
-                toIdx:   Math.floor(Math.random() * connectionCount),
-                t:       Math.random(),           // interpolation progress 0→1
-                speed:   0.0008 + Math.random() * 0.0015,
-                tail:    [],                       // Vec3 history
-                hue:     Math.random()             // per-crawler hue offset
+                fromIdx:   Math.floor(Math.random() * connectionCount),
+                toIdx:     Math.floor(Math.random() * connectionCount),
+                t:         Math.random(),
+                speed:     0.0015 + Math.random() * 0.002,
+                tail:      [],
+                lastTailPos: null, // last world position a tail point was recorded
+                hue:       Math.random()
             });
         }
 
@@ -2014,9 +2016,10 @@ void main() {
                     c.toIdx   = nearestNeighbour(c.fromIdx, c.fromIdx);
                     // Occasionally teleport to keep crawlers spread across the field
                     if (Math.random() < 0.04) {
-                        c.fromIdx = Math.floor(Math.random() * trackedParticles.length);
-                        c.toIdx   = nearestNeighbour(c.fromIdx, c.fromIdx);
-                        c.tail    = [];
+                        c.fromIdx    = Math.floor(Math.random() * trackedParticles.length);
+                        c.toIdx      = nearestNeighbour(c.fromIdx, c.fromIdx);
+                        c.tail       = [];
+                        c.lastTailPos = null;
                     }
                 }
 
@@ -2025,9 +2028,13 @@ void main() {
                 const to   = particlePos(c.toIdx);
                 const head = new THREE.Vector3().lerpVectors(from, to, c.t);
 
-                // Push to tail, trim to CRAWLER_TAIL length
-                c.tail.push(head.clone());
-                if (c.tail.length > CRAWLER_TAIL) c.tail.shift();
+                // Only record a tail point when head has moved far enough in world space
+                const distMoved = c.lastTailPos ? head.distanceTo(c.lastTailPos) : Infinity;
+                if (distMoved >= CRAWLER_MIN_STEP) {
+                    c.tail.push(head.clone());
+                    if (c.tail.length > CRAWLER_TAIL) c.tail.shift();
+                    c.lastTailPos = head.clone();
+                }
 
                 // Write tail segments
                 const tailLen = c.tail.length;
