@@ -1962,7 +1962,7 @@ void main() {
                 fromIdx: Math.floor(Math.random() * connectionCount), // index into trackedParticles
                 toIdx:   Math.floor(Math.random() * connectionCount),
                 t:       Math.random(),           // interpolation progress 0→1
-                speed:   0.008 + Math.random() * 0.012,
+                speed:   0.003 + Math.random() * 0.005,
                 tail:    [],                       // Vec3 history
                 hue:     Math.random()             // per-crawler hue offset
             });
@@ -2001,7 +2001,7 @@ void main() {
                 const c = crawlers[i];
 
                 // Speed reacts to highMid (attack energy) and beat
-                const spd = c.speed * (1.0 + highMid * 3.0 + beatEnergy * 2.0);
+                const spd = c.speed * (1.0 + highMid * 1.5 + beatEnergy * 1.0);
                 c.t += spd;
 
                 // Reached target — advance to next node
