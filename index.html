@@ -2342,9 +2342,13 @@ void main() {
         let guiCurrentAccent2 = new THREE.Color(def.c2);
 
         function applyGuiTheme(accent, accent2) {
-            const r = Math.round(accent.r * 255);
-            const g = Math.round(accent.g * 255);
-            const b = Math.round(accent.b * 255);
+            // Ensure accent is always bright enough to read against the dark GUI
+            const minL = 0.35;
+            const lum = accent.r * 0.299 + accent.g * 0.587 + accent.b * 0.114;
+            const boost = lum < minL ? minL / Math.max(lum, 0.001) : 1.0;
+            const r = Math.min(Math.round(accent.r * boost * 255), 255);
+            const g = Math.min(Math.round(accent.g * boost * 255), 255);
+            const b = Math.min(Math.round(accent.b * boost * 255), 255);
 
             // Drive all CSS via :root vars — every purple element in the page recolours
             document.documentElement.style.setProperty('--ar', r);
