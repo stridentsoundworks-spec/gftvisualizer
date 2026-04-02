@@ -527,7 +527,7 @@
             density: CONFIG.initialDensity,
             sensitivity: 1,
             trails: 0.66144,
-            bloom: 0.2,
+            bloom: 0.6,
             timeScale: 1.2,
             pixelRatio: Math.min(window.devicePixelRatio, 2),
             chromaticAberration: 0.004,
@@ -836,7 +836,7 @@
         const baseCameraPos = camera.position.clone();
         const zoomIndicator = document.getElementById('zoom-level');
 
-        const renderer = new THREE.WebGLRenderer({ powerPreference: "high-performance", antialias: false });
+        const renderer = new THREE.WebGLRenderer({ powerPreference: "high-performance", antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(STATE.pixelRatio);
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -1366,14 +1366,14 @@ void main() {
         geometry.setDrawRange(0, Math.floor(CONFIG.maxParticles * STATE.density));
 
         const FIELD_TYPES = {
-            'Photon (EM)': { c1: '#00f2ff', c2: '#0051ff', c3: '#ffffff', s: 1.0, curl: 1.0, sz: 2.4, sc1: '#66d9ff', sc2: '#99eeff' },
-            'Gluon (Strong)': { c1: '#ff0055', c2: '#7000ff', c3: '#ff8800', s: 2.5, curl: 2.4, sz: 2.7, sc1: '#cc66ff', sc2: '#ff6699' },
-            'Higgs (Mass)': { c1: '#ffae00', c2: '#ff4800', c3: '#ffff00', s: 0.6, curl: 0.3, sz: 3.3, sc1: '#ffcc66', sc2: '#ffdd99' },
-            'Gravity': { c1: '#ffffff', c2: '#4466ff', c3: '#8844ff', s: 0.75, curl: 0.18, sz: 2.2, sc1: '#aabbff', sc2: '#ccaaff' },
-            'Dark Energy': { c1: '#1a0033', c2: '#6600ff', c3: '#ff00ff', s: 1.9, curl: 1.6, sz: 2.5, sc1: '#9933ff', sc2: '#cc66ff' },
-            'Neutrino': { c1: '#00ff88', c2: '#00ffcc', c3: '#88ffff', s: 3.0, curl: 3.0, sz: 2.0, sc1: '#66ffbb', sc2: '#99ffdd' },
+            'Photon (EM)': { c1: '#00f2ff', c2: '#0051ff', c3: '#ffffff', s: 1.0, curl: 1.0, sz: 3.0, sc1: '#66d9ff', sc2: '#99eeff' },
+            'Gluon (Strong)': { c1: '#ff0055', c2: '#7000ff', c3: '#ff8800', s: 2.5, curl: 2.4, sz: 3.4, sc1: '#cc66ff', sc2: '#ff6699' },
+            'Higgs (Mass)': { c1: '#ffae00', c2: '#ff4800', c3: '#ffff00', s: 0.6, curl: 0.3, sz: 4.0, sc1: '#ffcc66', sc2: '#ffdd99' },
+            'Gravity': { c1: '#ffffff', c2: '#4466ff', c3: '#8844ff', s: 0.75, curl: 0.18, sz: 2.8, sc1: '#aabbff', sc2: '#ccaaff' },
+            'Dark Energy': { c1: '#1a0033', c2: '#6600ff', c3: '#ff00ff', s: 1.9, curl: 1.6, sz: 3.1, sc1: '#9933ff', sc2: '#cc66ff' },
+            'Neutrino': { c1: '#00ff88', c2: '#00ffcc', c3: '#88ffff', s: 3.0, curl: 3.0, sz: 2.6, sc1: '#66ffbb', sc2: '#99ffdd' },
             // === ENHANCEMENT: Waveform Terrain Field ===
-            'Waveform Terrain': { c1: '#ff3366', c2: '#33ff99', c3: '#6633ff', s: 0.4, curl: 0.15, sz: 1.8, sc1: '#ff6699', sc2: '#66ffcc', terrain: true }
+            'Waveform Terrain': { c1: '#ff3366', c2: '#33ff99', c3: '#6633ff', s: 0.4, curl: 0.15, sz: 2.4, sc1: '#ff6699', sc2: '#66ffcc', terrain: true }
         };
 
         // === ENHANCEMENT: Adaptive Quality System ===
@@ -2067,9 +2067,9 @@ void main() {
         composer.addPass(afterimagePass);
 
         const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-        bloomPass.threshold = 0.1;
+        bloomPass.threshold = 0.25;
         bloomPass.strength = STATE.bloom;
-        bloomPass.radius = 0.32;
+        bloomPass.radius = 0.45;
         composer.addPass(bloomPass);
 
         const godRaysPass = new ShaderPass(GodRaysShader);
