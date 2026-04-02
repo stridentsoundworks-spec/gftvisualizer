@@ -535,7 +535,7 @@
             pixelRatio: Math.min(window.devicePixelRatio, 2),
             chromaticAberration: 0.004,
             filmGrain: 0.001,
-            cameraShake: 0.066,
+            cameraShake: 0.65,
             vortexStrength: 0.73,
             pulseIntensity: 0.35,
             anamorphicStretch: 0.1,
@@ -549,9 +549,9 @@
             godRaysIntensity: 0.078,
             godRaysDecay: 0.92,
             dofEnabled: false,
-            dofFocus: 0.05,
-            dofFocalLength: 0.25,
-            dofBokehStrength: 0.5,
+            dofFocus: 0.04,
+            dofFocalLength: 0.40,
+            dofBokehStrength: 0.36,
             lensFlareEnabled: true,
             lensFlareIntensity: 0.1,
             particleTrailsEnabled: true,
@@ -890,7 +890,7 @@
             else if (e.key === '-' || e.key === '_') { camera.position.multiplyScalar(1.1); controls.update(); }
             else if (e.key === '0') { camera.position.normalize().multiplyScalar(CONFIG.defaultZoom); controls.update(); }
             else if (e.key === ' ') { e.preventDefault(); togglePlayPause(); }
-            else if (e.key === 'f' || e.key === 'F') { STATE.dofEnabled = !STATE.dofEnabled; customDOFPass.enabled = STATE.dofEnabled; bokehPass.enabled = STATE.dofEnabled; if (dofController) dofController.updateDisplay(); }
+            else if (e.key === 'f' || e.key === 'F') { STATE.dofEnabled = !STATE.dofEnabled; customDOFPass.enabled = STATE.dofEnabled; if (dofController) dofController.updateDisplay(); }
         });
 
         // --- PARTICLE VERTEX SHADER ---
