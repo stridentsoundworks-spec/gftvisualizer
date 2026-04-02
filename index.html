@@ -2631,7 +2631,7 @@ void main() {
             }
 
             // Update crawlers
-            crawlerMesh.visible = STATE.crawlersEnabled && STATE.connectionsEnabled;
+            crawlerMesh.visible = STATE.crawlersEnabled && STATE.connectionsEnabled && AUDIO.active && (AUDIO.isPlaying || AUDIO.mode === 'mic');
             if (crawlerMesh.visible) {
                 updateCrawlers(
                     dt,
