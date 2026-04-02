@@ -18,7 +18,7 @@
 
 Quantum Fields is a real-time WebGL visualization that renders **285,000 particles** (250K primary + 35K secondary) simulating the behavior of quantum fields. Set against a procedural space nebula backdrop, the particles respond dynamically to audio input—either from uploaded music files or live microphone input—creating mesmerizing visual representations of sound through physics-inspired motion.
 
-**[▶ Launch Live Demo](https://qftvisualizer.netlify.app)**
+**[▶ Launch Live Demo](https://qftvisualizer.theobharvey.com)**
 
 ## ✨ Features
 
