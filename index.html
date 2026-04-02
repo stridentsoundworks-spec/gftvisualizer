@@ -2043,7 +2043,7 @@ void main() {
                     const p1 = c.tail[s + 1];
                     // Alpha: head is brightest, tail fades
                     const baseAlpha = ((s + 1) / (tailLen - 1));
-                    const alpha = baseAlpha * (0.25 + spectralCentroid * 0.2 + beatEnergy * 0.2);
+                    const alpha = baseAlpha * (0.45 + spectralCentroid * 0.3 + beatEnergy * 0.4);
 
                     crawlerPos[segIdx * 6 + 0] = p0.x; crawlerPos[segIdx * 6 + 1] = p0.y; crawlerPos[segIdx * 6 + 2] = p0.z;
                     crawlerPos[segIdx * 6 + 3] = p1.x; crawlerPos[segIdx * 6 + 4] = p1.y; crawlerPos[segIdx * 6 + 5] = p1.z;
