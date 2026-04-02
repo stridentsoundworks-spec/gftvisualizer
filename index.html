@@ -1487,9 +1487,10 @@ void main() {
         // ═══════ INSTANCED SECONDARY PARTICLES ═══════
         const secondaryVertexShader = `
 uniform float uTime, uPixelRatio;
-uniform float uBass, uMid, uHigh, uBeatEnergy;
+uniform float uSubBass, uBass, uLowMid, uMid, uHighMid, uHigh, uUltraHigh;
+uniform float uBeatEnergy, uSpectralCentroid, uSpectralFlux, uOnsetEnergy;
 uniform vec3 uColor1, uColor2;
-uniform float uRadius;
+uniform float uRadius, uVortexStrength;
 
 attribute vec3 instancePosition;
 attribute vec3 instanceRandom;
@@ -1497,6 +1498,8 @@ attribute float instancePhase;
 
 varying vec3 vColor;
 varying float vAlpha;
+varying float vEnergy;
+varying float vDepth;
 
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
 vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -1544,67 +1547,97 @@ float snoise(vec3 v) {
 }
 
 void main() {
-    float t = uTime * 0.6;
-    
-    // Gentler, flowing movement for secondary particles
-    vec3 noisePos = instancePosition * 0.04 + instanceRandom;
-    float n1 = snoise(noisePos + t * 0.08);
-    float n2 = snoise(noisePos * 1.2 - t * 0.06);
-    float n3 = snoise(noisePos * 0.6 + t * 0.05);
-    
-    vec3 offset = vec3(n1, n2, n3) * (4.0 + uHigh * 8.0 + uBeatEnergy * 12.0);
-    
-    // Slower orbital motion around center
-    float angle = uTime * (0.15 + instanceRandom.x * 0.2) + instancePhase;
-    float orbitRadius = length(instancePosition.xz) * (1.0 + uBass * 0.2);
+    // Secondary particles run at a slower timescale — they are the atmosphere, not the core
+    float t = uTime * 0.45;
+
+    // Multi-scale noise flow — low freqs drive large drift, high freqs add fine turbulence
+    vec3 noisePos = instancePosition * 0.035 + instanceRandom;
+    vec3 drift    = vec3(
+        snoise(noisePos + t * 0.06),
+        snoise(noisePos * 0.9 - t * 0.05),
+        snoise(noisePos * 1.1 + t * 0.04)
+    ) * (5.0 + uSubBass * 10.0 + uLowMid * 6.0);
+
+    vec3 turbulence = vec3(
+        snoise(noisePos * 2.5 + t * 0.18),
+        snoise(noisePos * 2.5 - t * 0.14),
+        snoise(noisePos * 2.5 + t * 0.12)
+    ) * (uHigh * 5.0 + uSpectralFlux * 8.0);
+
+    vec3 offset = drift + turbulence;
+
+    // Orbital drift — vortex-aware, modulated by bass
+    float orbitSpeed = 0.12 + instanceRandom.x * 0.15 + uBass * 0.08;
+    float angle = uTime * orbitSpeed + instancePhase;
+    float orbitRadius = length(instancePosition.xz) * (1.0 + uSubBass * 0.25);
+    // Vortex coupling — secondary shell rotates with the main field vortex
+    float vortexInfluence = uVortexStrength * uBass * 0.4;
+    float vAngle = angle + vortexInfluence;
     vec3 orbit = vec3(
-        cos(angle) * orbitRadius - instancePosition.x,
-        sin(uTime * 0.8 + instancePhase) * uMid * 3.0,
-        sin(angle) * orbitRadius - instancePosition.z
-    ) * 0.08;
-    
+        cos(vAngle) * orbitRadius - instancePosition.x,
+        sin(uTime * 0.5 + instancePhase) * (uMid * 4.0 + uLowMid * 2.0),
+        sin(vAngle) * orbitRadius - instancePosition.z
+    ) * 0.07;
+
     vec3 newPos = instancePosition + offset + orbit;
-    
-    // Gentler pulse outward on beats
+
+    // Onset scatter — transients push particles outward in a quick burst
     float dist = length(newPos);
     vec3 dir = normalize(newPos + 0.001);
-    newPos += dir * uBeatEnergy * 5.0 * exp(-dist * 0.03);
-    
+    newPos += dir * uOnsetEnergy * 14.0 * exp(-dist * 0.025);
+
+    // Beat breathing — sub-bass driven expansion
+    float breathe = sin(uTime * 1.2 + instancePhase) * uSubBass * 5.0;
+    newPos += dir * breathe * exp(-dist * 0.035);
+
     vec4 mvPosition = modelViewMatrix * vec4(newPos, 1.0);
     gl_Position = projectionMatrix * mvPosition;
-    
-    // Gentle size variation
-    float flicker = 1.0 + sin(uTime * 8.0 + instancePhase * 6.0) * uHigh * 0.25;
-    float size = (0.7 + uBeatEnergy * 0.4) * flicker;
-    gl_PointSize = clamp(size * uPixelRatio * (45.0 / -mvPosition.z), 0.5, 35.0);
-    
-    // Subtle color shifts
-    float colorMix = 0.5 + sin(uTime * 1.5 + instancePhase) * 0.4;
-    colorMix += uHigh * 0.3;
-    vColor = mix(uColor1, uColor2, clamp(colorMix, 0.0, 1.0));
-    vColor += vec3(0.1, 0.05, 0.15) * uBeatEnergy;
-    
-    // Fade at edges
-    vAlpha = (1.0 - smoothstep(uRadius * 0.6, uRadius * 1.1, dist)) * (0.6 + uMid * 0.4);
+
+    // Size: driven by different bands than the main system
+    // Sparkle on ultraHigh, swell on subBass, punch on beatEnergy
+    float sparkle = 1.0 + (instanceRandom.x > 0.85 ? sin(uTime * 15.0 + instanceRandom.y * 200.0) * uUltraHigh * 3.0 : 0.0);
+    float swell = 1.0 + uSubBass * 0.6 + uLowMid * 0.3;
+    float size = (1.1 + uBeatEnergy * 0.7) * swell * sparkle;
+    gl_PointSize = clamp(size * uPixelRatio * (55.0 / -mvPosition.z), 0.5, 55.0);
+
+    // Colour: spectral centroid shifts hue, highMid brightens toward white
+    float centroidMix = clamp(uSpectralCentroid * 2.2 + uHighMid * 0.4, 0.0, 1.0);
+    vColor = mix(uColor1, uColor2, centroidMix);
+    // SubBass warmth — hint of deep colour saturation on heavy lows
+    vColor = mix(vColor, vColor * 1.3, uSubBass * 0.4);
+    // Beat flash — brief white-hot core
+    vColor = mix(vColor, vec3(1.0), uBeatEnergy * 0.25);
+
+    // Alpha: outer shell fades at edge, mid-frequency presence sustains visibility
+    float edgeFade = 1.0 - smoothstep(uRadius * 0.6, uRadius * 1.15, dist);
+    vAlpha = edgeFade * (0.45 + uMid * 0.35 + uLowMid * 0.2) * sparkle;
+
+    vEnergy = uBeatEnergy * 0.4 + uHighMid * 0.3 + uOnsetEnergy * 0.3;
+    vDepth = clamp(-mvPosition.z / 160.0, 0.0, 1.0);
 }
 `;
 
         const secondaryFragmentShader = `
 varying vec3 vColor;
 varying float vAlpha;
+varying float vEnergy;
+varying float vDepth;
 
 void main() {
     vec2 xy = gl_PointCoord.xy - vec2(0.5);
     float r = length(xy);
-    if(r > 0.5) discard;
-    
-    // Softer, more diffuse glow
-    float glow = exp(-r * r * 12.0);
-    float core = smoothstep(0.2, 0.1, r);
-    
-    vec3 finalColor = mix(vColor, vec3(1.0), core * 0.5);
-    float finalAlpha = vAlpha * (glow * 0.7 + core * 0.3);
-    
+    if (r > 0.5) discard;
+
+    // Wider, softer glow than main particles — atmospheric haze
+    float glow     = exp(-r * r * 8.0);
+    float softGlow = exp(-r * r * 3.0) * 0.4;
+    float core     = smoothstep(0.18 - vEnergy * 0.06, 0.10, r);
+
+    vec3 finalColor = mix(vColor, vec3(1.0, 0.97, 0.92), core * 0.55);
+    // Depth haze — far particles shift slightly cooler/dimmer
+    finalColor = mix(finalColor, vec3(0.02, 0.03, 0.06), vDepth * 0.35);
+
+    float finalAlpha = clamp(vAlpha * (glow * 0.65 + softGlow + core * 0.35), 0.0, 1.0);
     gl_FragColor = vec4(finalColor, finalAlpha);
 }
 `;
@@ -1646,15 +1679,23 @@ void main() {
             vertexShader: secondaryVertexShader,
             fragmentShader: secondaryFragmentShader,
             uniforms: {
-                uTime: { value: 0 },
-                uPixelRatio: { value: STATE.pixelRatio },
-                uBass: { value: 0 },
-                uMid: { value: 0 },
-                uHigh: { value: 0 },
-                uBeatEnergy: { value: 0 },
-                uColor1: { value: new THREE.Color(def.sc1) },  // Use dedicated secondary colors
-                uColor2: { value: new THREE.Color(def.sc2) },
-                uRadius: { value: CONFIG.fieldRadius }
+                uTime:             { value: 0 },
+                uPixelRatio:       { value: STATE.pixelRatio },
+                uSubBass:          { value: 0 },
+                uBass:             { value: 0 },
+                uLowMid:           { value: 0 },
+                uMid:              { value: 0 },
+                uHighMid:          { value: 0 },
+                uHigh:             { value: 0 },
+                uUltraHigh:        { value: 0 },
+                uBeatEnergy:       { value: 0 },
+                uSpectralCentroid: { value: 0 },
+                uSpectralFlux:     { value: 0 },
+                uOnsetEnergy:      { value: 0 },
+                uVortexStrength:   { value: STATE.vortexStrength },
+                uColor1:           { value: new THREE.Color(def.sc1) },
+                uColor2:           { value: new THREE.Color(def.sc2) },
+                uRadius:           { value: CONFIG.fieldRadius }
             },
             transparent: true,
             depthWrite: false,
@@ -2364,11 +2405,19 @@ void main() {
 
             // Update secondary particles
             secondaryPoints.visible = STATE.secondaryEnabled;
-            secondaryMaterial.uniforms.uTime.value = material.uniforms.uTime.value;
-            secondaryMaterial.uniforms.uBass.value = material.uniforms.uBass.value;
-            secondaryMaterial.uniforms.uMid.value = material.uniforms.uMid.value;
-            secondaryMaterial.uniforms.uHigh.value = material.uniforms.uHigh.value;
-            secondaryMaterial.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
+            secondaryMaterial.uniforms.uTime.value             = material.uniforms.uTime.value;
+            secondaryMaterial.uniforms.uSubBass.value          = material.uniforms.uSubBass.value;
+            secondaryMaterial.uniforms.uBass.value             = material.uniforms.uBass.value;
+            secondaryMaterial.uniforms.uLowMid.value           = material.uniforms.uLowMid.value;
+            secondaryMaterial.uniforms.uMid.value              = material.uniforms.uMid.value;
+            secondaryMaterial.uniforms.uHighMid.value          = material.uniforms.uHighMid.value;
+            secondaryMaterial.uniforms.uHigh.value             = material.uniforms.uHigh.value;
+            secondaryMaterial.uniforms.uUltraHigh.value        = material.uniforms.uUltraHigh.value;
+            secondaryMaterial.uniforms.uBeatEnergy.value       = material.uniforms.uBeatEnergy.value;
+            secondaryMaterial.uniforms.uSpectralCentroid.value = material.uniforms.uSpectralCentroid.value;
+            secondaryMaterial.uniforms.uSpectralFlux.value     = material.uniforms.uSpectralFlux.value;
+            secondaryMaterial.uniforms.uOnsetEnergy.value      = material.uniforms.uOnsetEnergy.value;
+            secondaryMaterial.uniforms.uVortexStrength.value   = STATE.vortexStrength;
 
             // Update nebula background
             nebulaSphere.visible = STATE.nebulaEnabled;
