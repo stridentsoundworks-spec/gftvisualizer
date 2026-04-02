@@ -1741,8 +1741,8 @@ void main() {
         const trailSystem = new TrailSystem(50, 12);
 
         // ═══════ PARTICLE CONNECTIONS (Force Network) ═══════
-        const connectionCount = 300;  // Number of particles to check for connections
-        const maxConnections = 500;   // Maximum line segments
+        const connectionCount = 500;  // Number of particles to check for connections
+        const maxConnections = 800;   // Maximum line segments
         const connectionGeometry = new THREE.BufferGeometry();
         const connectionPositions = new Float32Array(maxConnections * 6);  // 2 points per line, 3 coords each
         const connectionAlphas = new Float32Array(maxConnections * 2);     // Alpha per vertex
@@ -1754,26 +1754,44 @@ void main() {
             vertexShader: `
         attribute float alpha;
         varying float vAlpha;
+        varying float vDist;
         void main() {
             vAlpha = alpha;
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+            vDist = length(position) / 90.0; // normalised distance from centre
+            gl_Position = projectionMatrix * mvPos;
         }
     `,
             fragmentShader: `
         uniform vec3 uColor;
+        uniform vec3 uColor2;
         uniform float uOpacity;
         uniform float uBeatEnergy;
+        uniform float uHighMid;
+        uniform float uSpectralCentroid;
         varying float vAlpha;
+        varying float vDist;
         void main() {
-            vec3 color = uColor * (1.0 + uBeatEnergy * 0.5);
-            float glow = 1.0 + uBeatEnergy * 0.8;
-            gl_FragColor = vec4(color * glow, vAlpha * uOpacity * (0.6 + uBeatEnergy * 0.4));
+            // Blend hue with spectral centroid (brighter/higher = more c2)
+            vec3 color = mix(uColor, uColor2, clamp(uSpectralCentroid * 2.0, 0.0, 1.0));
+            // Core lines are brighter
+            float coreBrightness = 1.0 + (1.0 - vDist) * 0.6;
+            color *= coreBrightness;
+            // Beat pulse flash
+            float beatFlash = 1.0 + uBeatEnergy * 1.2;
+            color *= beatFlash;
+            // Per-line alpha reacts to highMid (attack/presence energy)
+            float lineAlpha = vAlpha * uOpacity * (0.4 + uHighMid * 0.5 + uBeatEnergy * 0.4);
+            gl_FragColor = vec4(color, clamp(lineAlpha, 0.0, 1.0));
         }
     `,
             uniforms: {
-                uColor: { value: new THREE.Color(def.c2) },
+                uColor:  { value: new THREE.Color(def.c2) },
+                uColor2: { value: new THREE.Color(def.c1) },
                 uOpacity: { value: 1.0 },
-                uBeatEnergy: { value: 0 }
+                uBeatEnergy: { value: 0 },
+                uHighMid: { value: 0 },
+                uSpectralCentroid: { value: 0 }
             },
             transparent: true,
             depthWrite: false,
@@ -1783,13 +1801,27 @@ void main() {
         const connectionMesh = new THREE.LineSegments(connectionGeometry, connectionMaterial);
         scene.add(connectionMesh);
 
-        // Particle indices to track for connections (randomly sampled)
+        // Particle indices to track for connections — refreshed periodically
         const trackedParticles = [];
-        for (let i = 0; i < connectionCount; i++) {
-            trackedParticles.push(Math.floor(Math.random() * CONFIG.maxParticles));
-        }
+        let connectionRefreshCounter = 0;
+        const CONNECTION_REFRESH_INTERVAL = 120; // frames
 
-        function updateConnections(threshold, bassBoost) {
+        function refreshTrackedParticles() {
+            trackedParticles.length = 0;
+            for (let i = 0; i < connectionCount; i++) {
+                trackedParticles.push(Math.floor(Math.random() * CONFIG.maxParticles));
+            }
+        }
+        refreshTrackedParticles();
+
+        function updateConnections(threshold, bassBoost, highMid, mid) {
+            // Refresh particle selection every N frames — network evolves over time
+            connectionRefreshCounter++;
+            if (connectionRefreshCounter >= CONNECTION_REFRESH_INTERVAL) {
+                refreshTrackedParticles();
+                connectionRefreshCounter = 0;
+            }
+
             const posAttr = geometry.getAttribute('position');
             const positions = [];
 
@@ -1803,27 +1835,30 @@ void main() {
                 ));
             }
 
-            // Find connections
-            let connIdx = 0;
-            const effectiveThreshold = threshold * (1.0 + bassBoost * 0.5);
+            // Threshold breathes with bass, tightens on high energy
+            const effectiveThreshold = threshold * (1.0 + bassBoost * 0.6) * (1.0 - highMid * 0.15);
             const thresholdSq = effectiveThreshold * effectiveThreshold;
 
-            for (let i = 0; i < positions.length && connIdx < maxConnections; i++) {
-                for (let j = i + 1; j < positions.length && connIdx < maxConnections; j++) {
+            // Dynamic connection cap — expands with mid+highMid energy
+            const dynamicMax = Math.floor(maxConnections * (0.3 + (mid + highMid) * 0.7));
+
+            let connIdx = 0;
+            for (let i = 0; i < positions.length && connIdx < dynamicMax; i++) {
+                for (let j = i + 1; j < positions.length && connIdx < dynamicMax; j++) {
                     const distSq = positions[i].distanceToSquared(positions[j]);
                     if (distSq < thresholdSq && distSq > 0.1) {
-                        const alpha = 1.0 - Math.sqrt(distSq) / effectiveThreshold;
+                        const dist = Math.sqrt(distSq);
+                        // Alpha: fade with distance, boost near field centre
+                        const centreProximity = 1.0 - Math.min((positions[i].length() + positions[j].length()) * 0.5 / 90.0, 1.0);
+                        const alpha = (1.0 - dist / effectiveThreshold) * (0.6 + centreProximity * 0.4);
 
-                        // Line start
                         connectionPositions[connIdx * 6 + 0] = positions[i].x;
                         connectionPositions[connIdx * 6 + 1] = positions[i].y;
                         connectionPositions[connIdx * 6 + 2] = positions[i].z;
-                        // Line end
                         connectionPositions[connIdx * 6 + 3] = positions[j].x;
                         connectionPositions[connIdx * 6 + 4] = positions[j].y;
                         connectionPositions[connIdx * 6 + 5] = positions[j].z;
 
-                        // Alpha (fades with distance)
                         connectionAlphas[connIdx * 2 + 0] = alpha;
                         connectionAlphas[connIdx * 2 + 1] = alpha;
 
@@ -2126,6 +2161,7 @@ void main() {
                 nebulaMaterial.uniforms.uColor2.value.lerp(c2, 0.03);
                 nebulaMaterial.uniforms.uColor3.value.lerp(c3, 0.03);
                 connectionMaterial.uniforms.uColor.value.lerp(c2, 0.05);
+                connectionMaterial.uniforms.uColor2.value.lerp(c1, 0.05);
                 material.uniforms.uNoiseScale.value = THREE.MathUtils.lerp(material.uniforms.uNoiseScale.value, d.s, 0.04);
                 material.uniforms.uCurlStrength.value = THREE.MathUtils.lerp(material.uniforms.uCurlStrength.value, d.curl, 0.04);
                 material.uniforms.uSizeBase.value = THREE.MathUtils.lerp(material.uniforms.uSizeBase.value, d.sz, 0.04);
@@ -2347,8 +2383,15 @@ void main() {
             // Update particle connections
             connectionMesh.visible = STATE.connectionsEnabled;
             if (STATE.connectionsEnabled) {
-                updateConnections(STATE.connectionThreshold, material.uniforms.uBass.value);
+                updateConnections(
+                    STATE.connectionThreshold,
+                    material.uniforms.uBass.value,
+                    material.uniforms.uHighMid.value,
+                    material.uniforms.uMid.value
+                );
                 connectionMaterial.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
+                connectionMaterial.uniforms.uHighMid.value = material.uniforms.uHighMid.value;
+                connectionMaterial.uniforms.uSpectralCentroid.value = material.uniforms.uSpectralCentroid.value;
                 connectionMaterial.uniforms.uOpacity.value = STATE.connectionOpacity;
             }
 
