@@ -890,7 +890,7 @@
             else if (e.key === '-' || e.key === '_') { camera.position.multiplyScalar(1.1); controls.update(); }
             else if (e.key === '0') { camera.position.normalize().multiplyScalar(CONFIG.defaultZoom); controls.update(); }
             else if (e.key === ' ') { e.preventDefault(); togglePlayPause(); }
-            else if (e.key === 'f' || e.key === 'F') { STATE.dofEnabled = !STATE.dofEnabled; bokehPass.enabled = STATE.dofEnabled; }
+            else if (e.key === 'f' || e.key === 'F') { STATE.dofEnabled = !STATE.dofEnabled; customDOFPass.enabled = STATE.dofEnabled; bokehPass.enabled = STATE.dofEnabled; if (dofController) dofController.updateDisplay(); }
         });
 
         // --- PARTICLE VERTEX SHADER ---
@@ -2423,7 +2423,7 @@ void main() {
         const f_lens = gui.addFolder('🎥 Camera & Lens');
         f_lens.add(STATE, 'lensFlareEnabled').name('Lens Flare').onChange(v => { lensFlarePass.enabled = v; lensflare.visible = v; });
         f_lens.add(STATE, 'lensFlareIntensity', 0.0, 2.0).name('Flare Intensity').onChange(v => lensFlarePass.uniforms.uIntensity.value = v);
-        f_lens.add(STATE, 'dofEnabled').name('Depth of Field').onChange(v => customDOFPass.enabled = v);
+        const dofController = f_lens.add(STATE, 'dofEnabled').name('Depth of Field').onChange(v => customDOFPass.enabled = v);
         f_lens.add(STATE, 'dofFocus', 0.0, 0.1015).name('Focus Ring').onChange(v => customDOFPass.uniforms.uFocus.value = v);
         f_lens.add(STATE, 'dofFocalLength', 0.05, 0.5).name('Focus Falloff').onChange(v => customDOFPass.uniforms.uFocalLength.value = v);
         f_lens.add(STATE, 'dofBokehStrength', 0.0, 1.0).name('Blur Amount').onChange(v => customDOFPass.uniforms.uBokehStrength.value = v);
