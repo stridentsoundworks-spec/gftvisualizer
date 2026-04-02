@@ -11,6 +11,10 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --ar: 167; --ag: 139; --ab: 250;
+        }
+
         body {
             margin: 0;
             overflow: hidden;
@@ -68,7 +72,7 @@
             letter-spacing: 1px;
             font-size: 34px;
             margin: 0 0 8px 0;
-            background: linear-gradient(135deg, #ffffff 0%, #c4b5fd 40%, #a78bfa 100%);
+            background: linear-gradient(135deg, #ffffff 0%, rgba(var(--ar),var(--ag),var(--ab),0.75) 40%, rgb(var(--ar),var(--ag),var(--ab)) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -90,8 +94,8 @@
 
         button,
         .file-upload {
-            background: linear-gradient(135deg, rgba(167, 139, 250, 0.12) 0%, rgba(129, 140, 248, 0.08) 100%);
-            border: 1px solid rgba(167, 139, 250, 0.25);
+            background: linear-gradient(135deg, rgba(var(--ar),var(--ag),var(--ab),0.12) 0%, rgba(var(--ar),var(--ag),var(--ab),0.06) 100%);
+            border: 1px solid rgba(var(--ar),var(--ag),var(--ab),0.25);
             color: rgba(255, 255, 255, 0.85);
             padding: 15px 30px;
             font-size: 13px;
@@ -105,8 +109,8 @@
 
         button:hover,
         .file-upload:hover {
-            background: linear-gradient(135deg, rgba(167, 139, 250, 0.25) 0%, rgba(129, 140, 248, 0.2) 100%);
-            border-color: rgba(167, 139, 250, 0.45);
+            background: linear-gradient(135deg, rgba(var(--ar),var(--ag),var(--ab),0.25) 0%, rgba(var(--ar),var(--ag),var(--ab),0.18) 100%);
+            border-color: rgba(var(--ar),var(--ag),var(--ab),0.45);
             transform: translateY(-2px);
             box-shadow: 0 12px 35px rgba(139, 92, 246, 0.2);
         }
@@ -194,8 +198,8 @@
 
         #play-pause-btn {
             min-width: 78px;
-            background: linear-gradient(135deg, rgba(167, 139, 250, 0.18) 0%, rgba(129, 140, 248, 0.12) 100%) !important;
-            border-color: rgba(167, 139, 250, 0.28) !important;
+            background: linear-gradient(135deg, rgba(var(--ar),var(--ag),var(--ab),0.18) 0%, rgba(var(--ar),var(--ag),var(--ab),0.10) 100%) !important;
+            border-color: rgba(var(--ar),var(--ag),var(--ab),0.28) !important;
             color: #e9d5ff !important;
         }
 
@@ -214,7 +218,7 @@
 
         #progress-bar {
             height: 100%;
-            background: linear-gradient(90deg, #a78bfa, #c084fc, #e879f9);
+            background: linear-gradient(90deg, rgb(var(--ar),var(--ag),var(--ab)), rgba(var(--ar),var(--ag),var(--ab),0.6), rgba(var(--ar),var(--ag),var(--ab),0.3));
             border-radius: 4px;
             width: 0%;
         }
@@ -239,12 +243,12 @@
         .lil-gui {
             --background-color: rgba(15, 10, 25, 0.9);
             --text-color: #e2e8f0;
-            --title-background-color: rgba(167, 139, 250, 0.1);
+            --title-background-color: rgba(var(--ar),var(--ag),var(--ab),0.1);
             --widget-color: #475569;
             --hover-color: #64748b;
-            --focus-color: #a78bfa;
-            --number-color: #a78bfa;
-            --string-color: #a78bfa;
+            --focus-color: rgb(var(--ar),var(--ag),var(--ab));
+            --number-color: rgb(var(--ar),var(--ag),var(--ab));
+            --string-color: rgb(var(--ar),var(--ag),var(--ab));
             --width: 320px;
         }
 
@@ -268,12 +272,12 @@
             line-height: 36px;
             font-weight: 600;
             background: transparent;
-            color: #d8b4fe;
-            border-bottom: 1px solid rgba(167, 139, 250, 0.15);
+            color: rgb(var(--ar),var(--ag),var(--ab));
+            border-bottom: 1px solid rgba(var(--ar),var(--ag),var(--ab),0.15);
         }
 
         .lil-gui>.children {
-            border: 1px solid rgba(167, 139, 250, 0.3);
+            border: 1px solid rgba(var(--ar),var(--ag),var(--ab),0.3);
             /* Purple glass border */
             border-radius: 16px;
             overflow: hidden;
@@ -305,11 +309,11 @@
             border-radius: 6px;
             height: 22px;
             margin-top: 4px;
-            color: #a78bfa;
+            color: rgb(var(--ar),var(--ag),var(--ab));
         }
 
         .lil-gui input:focus {
-            border-color: #a78bfa;
+            border-color: rgb(var(--ar),var(--ag),var(--ab));
         }
 
         /* Sliders */
@@ -319,9 +323,8 @@
         }
 
         .lil-gui .slider-fg {
-            background: #a78bfa;
-            /* Purple accent */
-            box-shadow: 0 0 10px rgba(167, 139, 250, 0.4);
+            background: rgb(var(--ar),var(--ag),var(--ab));
+            box-shadow: 0 0 10px rgba(var(--ar),var(--ag),var(--ab),0.4);
         }
 
         /* Checkboxes */
@@ -332,8 +335,8 @@
         }
 
         .lil-gui .checkbox.checked {
-            background: #a78bfa;
-            border-color: #a78bfa;
+            background: rgb(var(--ar),var(--ag),var(--ab));
+            border-color: rgb(var(--ar),var(--ag),var(--ab));
         }
 
         .lil-gui .checkbox.checked:before {
@@ -351,7 +354,7 @@
         }
 
         .lil-gui .folder>.title:hover {
-            background: rgba(167, 139, 250, 0.08);
+            background: rgba(var(--ar),var(--ag),var(--ab),0.08);
             color: #fff;
         }
 
@@ -367,10 +370,10 @@
             top: 24px;
             right: 24px;
             z-index: 1001;
-            background: linear-gradient(135deg, rgba(167, 139, 250, 0.15) 0%, rgba(129, 140, 248, 0.1) 100%);
+            background: linear-gradient(135deg, rgba(var(--ar),var(--ag),var(--ab),0.15) 0%, rgba(var(--ar),var(--ag),var(--ab),0.08) 100%);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(167, 139, 250, 0.3);
-            color: #d8b4fe;
+            border: 1px solid rgba(var(--ar),var(--ag),var(--ab),0.3);
+            color: rgb(var(--ar),var(--ag),var(--ab));
             padding: 10px 20px;
             border-radius: 20px;
             font-size: 11px;
@@ -383,8 +386,8 @@
         }
 
         #gui-toggle:hover {
-            background: linear-gradient(135deg, rgba(167, 139, 250, 0.25) 0%, rgba(129, 140, 248, 0.2) 100%);
-            box-shadow: 0 6px 20px rgba(167, 139, 250, 0.25);
+            background: linear-gradient(135deg, rgba(var(--ar),var(--ag),var(--ab),0.25) 0%, rgba(var(--ar),var(--ag),var(--ab),0.18) 100%);
+            box-shadow: 0 6px 20px rgba(var(--ar),var(--ag),var(--ab),0.25);
             transform: translateY(-1px);
             color: #fff;
         }
@@ -420,8 +423,8 @@
         .btn-group button {
             flex: 1;
             background: transparent;
-            border: 1px solid rgba(167, 139, 250, 0.3);
-            color: #e9d5ff;
+            border: 1px solid rgba(var(--ar),var(--ag),var(--ab),0.3);
+            color: rgb(var(--ar),var(--ag),var(--ab));
             padding: 14px 0;
             border-radius: 12px;
             font-size: 12px;
@@ -432,9 +435,9 @@
         }
 
         .btn-group button:hover {
-            background: rgba(167, 139, 250, 0.1);
-            border-color: #a78bfa;
-            box-shadow: 0 0 20px rgba(167, 139, 250, 0.2);
+            background: rgba(var(--ar),var(--ag),var(--ab),0.1);
+            border-color: rgb(var(--ar),var(--ag),var(--ab));
+            box-shadow: 0 0 20px rgba(var(--ar),var(--ag),var(--ab),0.2);
         }
     </style>
 </head>
@@ -2332,16 +2335,17 @@ void main() {
         let guiCurrentAccent2 = new THREE.Color(def.c2);
 
         function applyGuiTheme(accent, accent2) {
+            const r = Math.round(accent.r * 255);
+            const g = Math.round(accent.g * 255);
+            const b = Math.round(accent.b * 255);
+
+            // Drive all CSS via :root vars — every purple element in the page recolours
+            document.documentElement.style.setProperty('--ar', r);
+            document.documentElement.style.setProperty('--ag', g);
+            document.documentElement.style.setProperty('--ab', b);
+
+            // Also update lil-gui widget/hover colours (these aren’t driven by :root vars)
             const el = gui.domElement;
-            const a  = '#' + accent.getHexString();
-            const a2 = '#' + accent2.getHexString();
-            // Accent colour: focus ring, number/string values, title text
-            el.style.setProperty('--focus-color',            a);
-            el.style.setProperty('--number-color',           a);
-            el.style.setProperty('--string-color',           a);
-            // Title background: very dark tint of accent
-            el.style.setProperty('--title-background-color', `rgba(${Math.round(accent.r*255)},${Math.round(accent.g*255)},${Math.round(accent.b*255)},0.12)`);
-            // Widget (slider track): mid blend of both field colours, desaturated
             const wR = Math.round((accent.r * 0.4 + accent2.r * 0.3) * 180 + 30);
             const wG = Math.round((accent.g * 0.4 + accent2.g * 0.3) * 180 + 30);
             const wB = Math.round((accent.b * 0.4 + accent2.b * 0.3) * 180 + 30);
