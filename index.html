@@ -1913,6 +1913,143 @@ void main() {
             connectionGeometry.setDrawRange(0, connIdx * 2);
         }
 
+        // ═══════ NETWORK CRAWLERS ═══════
+        const CRAWLER_COUNT    = 24;   // concurrent crawlers
+        const CRAWLER_TAIL     = 10;   // trail positions per crawler
+        const crawlerMaxSegs   = CRAWLER_COUNT * (CRAWLER_TAIL - 1);
+
+        const crawlerGeo = new THREE.BufferGeometry();
+        const crawlerPos = new Float32Array(crawlerMaxSegs * 6);
+        const crawlerAlp = new Float32Array(crawlerMaxSegs * 2);
+        crawlerGeo.setAttribute('position', new THREE.BufferAttribute(crawlerPos, 3));
+        crawlerGeo.setAttribute('alpha',    new THREE.BufferAttribute(crawlerAlp, 1));
+        crawlerGeo.setDrawRange(0, 0);
+
+        const crawlerMaterial = new THREE.ShaderMaterial({
+            vertexShader: `
+                attribute float alpha;
+                varying float vAlpha;
+                void main() {
+                    vAlpha = alpha;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform vec3 uColor;
+                uniform float uBeatEnergy;
+                varying float vAlpha;
+                void main() {
+                    vec3 c = uColor * (1.2 + uBeatEnergy * 1.5);
+                    gl_FragColor = vec4(c, vAlpha);
+                }
+            `,
+            uniforms: {
+                uColor:      { value: new THREE.Color(def.c1) },
+                uBeatEnergy: { value: 0 }
+            },
+            transparent: true,
+            depthWrite:  false,
+            blending:    THREE.AdditiveBlending
+        });
+
+        const crawlerMesh = new THREE.LineSegments(crawlerGeo, crawlerMaterial);
+        scene.add(crawlerMesh);
+
+        // Initialise crawler agents
+        const crawlers = [];
+        for (let i = 0; i < CRAWLER_COUNT; i++) {
+            crawlers.push({
+                fromIdx: Math.floor(Math.random() * connectionCount), // index into trackedParticles
+                toIdx:   Math.floor(Math.random() * connectionCount),
+                t:       Math.random(),           // interpolation progress 0→1
+                speed:   0.008 + Math.random() * 0.012,
+                tail:    [],                       // Vec3 history
+                hue:     Math.random()             // per-crawler hue offset
+            });
+        }
+
+        function updateCrawlers(dt, highMid, beatEnergy, spectralCentroid) {
+            const posAttr = geometry.getAttribute('position');
+
+            // Helper: world position of a tracked particle
+            function particlePos(idx) {
+                const pi = trackedParticles[idx % trackedParticles.length];
+                return new THREE.Vector3(posAttr.getX(pi), posAttr.getY(pi), posAttr.getZ(pi));
+            }
+
+            // Helper: find nearest neighbour within threshold
+            function nearestNeighbour(fromIdx, excludeIdx) {
+                const origin = particlePos(fromIdx);
+                const threshold = STATE.connectionThreshold * (1.2 + highMid * 0.4);
+                const threshSq  = threshold * threshold;
+                let bestDist = Infinity, bestIdx = -1;
+                const check = Math.min(trackedParticles.length, 80); // sample subset for perf
+                const start  = Math.floor(Math.random() * (trackedParticles.length - check));
+                for (let k = start; k < start + check; k++) {
+                    const ki = k % trackedParticles.length;
+                    if (ki === fromIdx || ki === excludeIdx) continue;
+                    const d = origin.distanceToSquared(particlePos(ki));
+                    if (d < threshSq && d < bestDist) { bestDist = d; bestIdx = ki; }
+                }
+                // fallback: pick random if no neighbour in range
+                return bestIdx === -1 ? Math.floor(Math.random() * trackedParticles.length) : bestIdx;
+            }
+
+            let segIdx = 0;
+
+            for (let i = 0; i < crawlers.length; i++) {
+                const c = crawlers[i];
+
+                // Speed reacts to highMid (attack energy) and beat
+                const spd = c.speed * (1.0 + highMid * 3.0 + beatEnergy * 2.0);
+                c.t += spd;
+
+                // Reached target — advance to next node
+                if (c.t >= 1.0) {
+                    c.t -= 1.0;
+                    c.fromIdx = c.toIdx;
+                    c.toIdx   = nearestNeighbour(c.fromIdx, c.fromIdx);
+                    // Occasionally teleport to keep crawlers spread across the field
+                    if (Math.random() < 0.04) {
+                        c.fromIdx = Math.floor(Math.random() * trackedParticles.length);
+                        c.toIdx   = nearestNeighbour(c.fromIdx, c.fromIdx);
+                        c.tail    = [];
+                    }
+                }
+
+                // Current head position
+                const from = particlePos(c.fromIdx);
+                const to   = particlePos(c.toIdx);
+                const head = new THREE.Vector3().lerpVectors(from, to, c.t);
+
+                // Push to tail, trim to CRAWLER_TAIL length
+                c.tail.push(head.clone());
+                if (c.tail.length > CRAWLER_TAIL) c.tail.shift();
+
+                // Write tail segments
+                const tailLen = c.tail.length;
+                for (let s = 0; s < tailLen - 1 && segIdx < crawlerMaxSegs; s++) {
+                    const p0 = c.tail[s];
+                    const p1 = c.tail[s + 1];
+                    // Alpha: head is brightest, tail fades
+                    const baseAlpha = ((s + 1) / (tailLen - 1));
+                    const alpha = baseAlpha * (0.5 + spectralCentroid * 0.4 + beatEnergy * 0.3);
+
+                    crawlerPos[segIdx * 6 + 0] = p0.x; crawlerPos[segIdx * 6 + 1] = p0.y; crawlerPos[segIdx * 6 + 2] = p0.z;
+                    crawlerPos[segIdx * 6 + 3] = p1.x; crawlerPos[segIdx * 6 + 4] = p1.y; crawlerPos[segIdx * 6 + 5] = p1.z;
+                    crawlerAlp[segIdx * 2 + 0] = alpha;
+                    crawlerAlp[segIdx * 2 + 1] = alpha;
+                    segIdx++;
+                }
+            }
+
+            crawlerGeo.attributes.position.needsUpdate = true;
+            crawlerGeo.attributes.alpha.needsUpdate    = true;
+            crawlerGeo.setDrawRange(0, segIdx * 2);
+        }
+
+        STATE.crawlersEnabled = true;
+
         // ═══════ NEBULA BACKGROUND ═══════
         const nebulaVertexShader = `
 varying vec3 vWorldPosition;
@@ -2221,6 +2358,7 @@ void main() {
         f_env.add(STATE, 'connectionsEnabled').name('Force Network');
         f_env.add(STATE, 'connectionThreshold', 5.0, 25.0).name('Network Range');
         f_env.add(STATE, 'connectionOpacity', 0.1, 1.0).name('Network Opacity');
+        f_env.add(STATE, 'crawlersEnabled').name('Network Crawlers');
         f_env.add(STATE, 'particleTrailsEnabled').name('Particle Trails');
         f_env.add(STATE, 'particleTrailOpacity', 0.0, 1.0).name('Trail Opacity');
         f_env.close();
@@ -2442,6 +2580,25 @@ void main() {
                 connectionMaterial.uniforms.uHighMid.value = material.uniforms.uHighMid.value;
                 connectionMaterial.uniforms.uSpectralCentroid.value = material.uniforms.uSpectralCentroid.value;
                 connectionMaterial.uniforms.uOpacity.value = STATE.connectionOpacity;
+            }
+
+            // Update crawlers
+            crawlerMesh.visible = STATE.crawlersEnabled && STATE.connectionsEnabled;
+            if (crawlerMesh.visible) {
+                updateCrawlers(
+                    dt,
+                    material.uniforms.uHighMid.value,
+                    material.uniforms.uBeatEnergy.value,
+                    material.uniforms.uSpectralCentroid.value
+                );
+                crawlerMaterial.uniforms.uColor.value.lerp(
+                    new THREE.Color().lerpColors(
+                        new THREE.Color(FIELD_TYPES[STATE.field]?.c1 || '#ffffff'),
+                        new THREE.Color(FIELD_TYPES[STATE.field]?.c3 || '#ffffff'),
+                        material.uniforms.uSpectralCentroid.value
+                    ), 0.05
+                );
+                crawlerMaterial.uniforms.uBeatEnergy.value = material.uniforms.uBeatEnergy.value;
             }
 
             // Update post-processing
