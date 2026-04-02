@@ -389,32 +389,6 @@
             color: #fff;
         }
 
-        #dashboard-btn {
-            position: fixed;
-            top: 24px;
-            left: 24px;
-            z-index: 1001;
-            background: linear-gradient(135deg, rgba(167, 139, 250, 0.15) 0%, rgba(129, 140, 248, 0.1) 100%);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(167, 139, 250, 0.3);
-            color: #d8b4fe;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 0.8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            text-transform: uppercase;
-        }
-
-        #dashboard-btn:hover {
-            background: linear-gradient(135deg, rgba(167, 139, 250, 0.25) 0%, rgba(129, 140, 248, 0.2) 100%);
-            box-shadow: 0 6px 20px rgba(167, 139, 250, 0.25);
-            transform: translateY(-1px);
-            color: #fff;
-        }
 
         /* --- Center Panel Refinement --- */
         .hud-panel {
@@ -468,7 +442,6 @@
 <body>
     <div id="scanlines"></div>
     <div id="interaction-hint">space · play/pause scroll · zoom drag · rotate F · focus mode</div>
-    <button id="dashboard-btn">↩ Dashboard</button>
     <button id="gui-toggle" onclick="document.querySelector('.lil-gui').classList.toggle('hidden')">✦ Configure</button>
     <div id="overlay">
         <div class="hud-panel">
@@ -2133,12 +2106,6 @@ void main() {
         // ═══════ GUI ═══════
         const gui = new GUI({ title: '✦ Quantum Fields', width: 280 });
         gui.domElement.classList.add('hidden'); // Default closed
-
-        // Dashboard Button Logic
-        document.getElementById('dashboard-btn').addEventListener('click', () => {
-            window.parent.postMessage('show-ui', '*');
-            // document.getElementById('overlay').style.display = 'flex'; // Optional: Reset overlay?
-        });
 
         // === MAIN CONTROLS (always visible) ===
         gui.add(STATE, 'field', Object.keys(FIELD_TYPES)).name('⚡ Field Type').onChange(val => {
